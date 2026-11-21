@@ -23,7 +23,9 @@ public class StylesheetWatcherTests
 
         using var watcher = new StylesheetWatcher(file) { Delay = TimeSpan.FromMilliseconds(20) };
 
-        var sheet = await Next<Stylesheet>(a => watcher.Reloaded += a.Invoke, () => File.WriteAllText(file, """{ "rules": { "A": { "opacity": "1" }, "B": { "opacity": "0" } } }"""));
+        var edited = """{ "rules": { "A": { "opacity": "1" }, "B": { "opacity": "0" } } }""";
+
+        var sheet = await Next<Stylesheet>(a => watcher.Reloaded += a.Invoke, () => File.WriteAllText(file, edited));
 
         Assert.Equal(2, sheet.Rules.Count);
 
@@ -44,7 +46,9 @@ public class StylesheetWatcherTests
 
         Assert.IsType<StylesheetException>(error);
 
-        var sheet = await Next<Stylesheet>(a => watcher.Reloaded += a.Invoke, () => File.WriteAllText(file, """{ "rules": { "A": { "opacity": "1" } } }"""));
+        var fixedText = """{ "rules": { "A": { "opacity": "1" } } }""";
+
+        var sheet = await Next<Stylesheet>(a => watcher.Reloaded += a.Invoke, () => File.WriteAllText(file, fixedText));
 
         Assert.Single(sheet.Rules);
 
