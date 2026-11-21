@@ -232,7 +232,6 @@ public class Element : IStyleNode
             if (property is null)
             {
                 diagnostics.Add(new StyleDiagnostic(this, name, declared.Value, declared.Source.Span, $"{TypeName} has no Styled property '{name}'."));
-
                 continue;
             }
 
@@ -245,14 +244,12 @@ public class Element : IStyleNode
             catch (StylesheetException e)
             {
                 diagnostics.Add(new StyleDiagnostic(this, name, declared.Value, declared.Source.Span, e.Message));
-
                 continue;
             }
 
             if (!property.TryParseObject(computed, out var value))
             {
                 diagnostics.Add(new StyleDiagnostic(this, name, declared.Value, declared.Source.Span, $"'{computed}' is not a valid {property.ValueType.Name}."));
-
                 continue;
             }
 
