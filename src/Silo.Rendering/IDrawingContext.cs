@@ -48,6 +48,7 @@ public interface IDrawingContext
     /// <param name="rect">The rectangle, in the current coordinate system.</param>
     void ClipRect(Rect rect);
 
+
     /// <summary>Fills a rectangle, optionally with rounded corners.</summary>
     /// <param name="rect">The rectangle to fill.</param>
     /// <param name="color">The fill color.</param>
