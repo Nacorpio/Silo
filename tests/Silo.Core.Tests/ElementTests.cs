@@ -23,6 +23,26 @@ public class ElementTests
     }
 
     [Fact]
+    public void Clearing_the_children_leaves_each_without_a_parent_so_that_it_can_be_added_again()
+    {
+        var root = new Element();
+        var first = new Element();
+        var second = new Element();
+
+        root.Children.Add(first);
+        root.Children.Add(second);
+        root.Children.Clear();
+
+        Assert.Empty(root.Children);
+        Assert.Null(first.Parent);
+        Assert.Null(second.Parent);
+
+        root.Children.Add(first);
+
+        Assert.Same(root, first.Parent);
+    }
+
+    [Fact]
     public void A_child_cannot_have_two_parents_or_become_its_own_ancestor()
     {
         var root = new Element();

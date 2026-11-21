@@ -13,6 +13,23 @@ namespace Silo.Styling.Values;
 /// </remarks>
 public readonly record struct Thickness(Length Top, Length Right, Length Bottom, Length Left)
 {
+    /// <summary>Writes the four sides in the shortest CSS shorthand that means the same, such as <c>8px</c>, <c>8px 16px</c> or <c>1px 2px 3px 4px</c>.</summary>
+    /// <returns>The shorthand text.</returns>
+    public override string ToString()
+    {
+        if (Top == Right && Top == Bottom && Top == Left)
+        {
+            return Top.ToString();
+        }
+
+        if (Top == Bottom && Left == Right)
+        {
+            return $"{Top} {Right}";
+        }
+
+        return $"{Top} {Right} {Bottom} {Left}";
+    }
+
     /// <summary>
     /// Tries to read the CSS shorthand for four sides, such as <c>8</c>, <c>8 16</c>, <c>1 2 3</c> or <c>1 2 3 4</c>.
     /// Nothing is thrown for bad input.

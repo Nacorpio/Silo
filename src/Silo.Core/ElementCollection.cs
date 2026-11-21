@@ -75,6 +75,17 @@ public sealed class ElementCollection : IReadOnlyList<Element>
         return true;
     }
 
+    /// <summary>Removes every child, which leaves each of them without a parent.</summary>
+    public void Clear()
+    {
+        foreach (var child in items)
+        {
+            child.SetParent(null);
+        }
+
+        items.Clear();
+    }
+
     /// <inheritdoc/>
     public IEnumerator<Element> GetEnumerator() => items.GetEnumerator();
 

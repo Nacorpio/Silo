@@ -37,6 +37,23 @@ public enum LengthUnit
 /// </remarks>
 public readonly record struct Length(double Value, LengthUnit Unit)
 {
+    /// <summary>Writes the length the way a Stylesheet would, such as <c>12px</c>, <c>50%</c> or <c>1.5em</c>.</summary>
+    /// <returns>The number in the invariant culture followed by the unit suffix.</returns>
+    public override string ToString()
+    {
+        var suffix = Unit switch
+        {
+            LengthUnit.Percent => "%",
+            LengthUnit.Em => "em",
+            LengthUnit.Rem => "rem",
+            LengthUnit.Fr => "fr",
+
+            _ => "px",
+        };
+
+        return Value.ToString(System.Globalization.CultureInfo.InvariantCulture) + suffix;
+    }
+
     /// <summary>
     /// Tries to read a length such as <c>12</c>, <c>12px</c>, <c>50%</c>, <c>1.5em</c>, <c>2rem</c> or <c>1fr</c>.
     /// Nothing is thrown for bad input.

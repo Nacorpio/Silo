@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
+    <IsAotCompatible>false</IsAotCompatible>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Silo.Inspector/Silo.Inspector.csproj" />
+    <ProjectReference Include="../../src/Silo.Rendering.Skia/Silo.Rendering.Skia.csproj" />
+  </ItemGroup>
+</Project>

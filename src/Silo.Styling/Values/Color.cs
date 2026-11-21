@@ -16,6 +16,10 @@ namespace Silo.Styling.Values;
 /// </remarks>
 public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
 {
+    /// <summary>Writes the color as hex, such as <c>#3b82f6</c>, or <c>#3b82f680</c> when it is not fully opaque.</summary>
+    /// <returns>The hex text in lower case.</returns>
+    public override string ToString() => A == 255 ? $"#{R:x2}{G:x2}{B:x2}" : $"#{R:x2}{G:x2}{B:x2}{A:x2}";
+
     /// <summary>The supported color names, matched without regard to case.</summary>
     static readonly Dictionary<string, Color> Named = new(StringComparer.OrdinalIgnoreCase)
     {
