@@ -12,6 +12,7 @@ public class DisplayListTests
 
         public void Save() => Calls.Add("save");
         public void Restore() => Calls.Add("restore");
+
         public void Translate(double dx, double dy) => Calls.Add($"translate {dx} {dy}");
         public void ClipRect(Rect rect) => Calls.Add($"clip {rect.X} {rect.Y} {rect.Width} {rect.Height}");
         public void FillRect(Rect rect, Color color, double cornerRadius = 0) => Calls.Add($"fill {rect.Width}x{rect.Height} {color.R} r{cornerRadius}");
