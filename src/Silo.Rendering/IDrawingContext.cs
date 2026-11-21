@@ -38,6 +38,7 @@ public interface IDrawingContext
     /// <exception cref="InvalidOperationException">There is no matching <see cref="Save"/>.</exception>
     void Restore();
 
+
     /// <summary>Moves the origin of all later drawing.</summary>
     /// <param name="dx">The horizontal offset.</param>
     /// <param name="dy">The vertical offset.</param>
