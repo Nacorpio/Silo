@@ -1,0 +1,10 @@
+{
+  // Save this file while the gallery is running and the window restyles itself.
+  // Try changing the accent color, or uncomment the radius.
+  "tokens": {
+    "--accent": "#10b981",
+    "--accent-hover": "#059669",
+    "--accent-active": "#047857",
+    // "--radius": "12px",
+  },
+}

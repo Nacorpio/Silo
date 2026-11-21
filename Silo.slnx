@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/Samples.Gallery/Samples.Gallery.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Silo.Controls/Silo.Controls.csproj" />
     <Project Path="src/Silo.Core/Silo.Core.csproj" />
