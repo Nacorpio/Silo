@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
+  </ItemGroup>
+</Project>

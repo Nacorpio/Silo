@@ -136,6 +136,26 @@ public class Element : IStyleNode
         return (T)GetObject(property)!;
     }
 
+    /// <summary>Gets the effective value of a Styled property without knowing its type, for tools such as the Inspector.</summary>
+    /// <param name="property">The property to read.</param>
+    /// <returns>The same value that <see cref="GetValue{T}"/> returns, boxed.</returns>
+    public object? GetValueObject(StyledProperty property)
+    {
+        ArgumentNullException.ThrowIfNull(property);
+
+        return GetObject(property);
+    }
+
+    /// <summary>Tells whether a Styled property has a Local value, which is the highest source in the Cascade.</summary>
+    /// <param name="property">The property to check.</param>
+    /// <returns><see langword="true"/> when <see cref="SetValue{T}"/> was called for it and not cleared since.</returns>
+    public bool HasLocalValue(StyledProperty property)
+    {
+        ArgumentNullException.ThrowIfNull(property);
+
+        return localValues.ContainsKey(property);
+    }
+
     /// <summary>
     /// Sets the Local value of a Styled property, which beats every Stylesheet.
     /// </summary>
