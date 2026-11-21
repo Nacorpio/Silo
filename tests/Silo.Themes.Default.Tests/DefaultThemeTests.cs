@@ -49,4 +49,23 @@ public class DefaultThemeTests
         Assert.Equal(new Color(0x1f, 0x29, 0x37), text.GetValue(Control.ColorProperty));
         Assert.Equal(14, text.GetValue(Control.FontSizeProperty));
     }
+
+    [Fact]
+    public void Toggles_show_the_accent_when_checked_and_the_progress_bar_uses_the_track_tokens()
+    {
+        var check = new CheckBox { Text = "Ok" };
+        var toggle = new ToggleSwitch { Text = "Ok" };
+        var bar = new ProgressBar();
+
+        check.IsChecked = true;
+        toggle.IsChecked = true;
+
+        Assert.Empty(check.ApplyStyles(Resolver()));
+        Assert.Empty(toggle.ApplyStyles(Resolver()));
+        Assert.Empty(bar.ApplyStyles(Resolver()));
+
+        Assert.Equal(new Color(0x3b, 0x82, 0xf6), check.GetValue(ToggleButton.IndicatorBackgroundProperty));
+        Assert.Equal(new Color(0x3b, 0x82, 0xf6), toggle.GetValue(ToggleButton.IndicatorBackgroundProperty));
+        Assert.Equal(new Color(0xe5, 0xe7, 0xeb), bar.GetValue(Control.BackgroundProperty));
+    }
 }

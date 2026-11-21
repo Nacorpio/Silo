@@ -12,6 +12,8 @@ static class Gallery
             ".title": { "font-size": "24px", "font-weight": "bold" },
             ".muted": { "color": "#6b7280" },
             "#row": { "gap": "8px", "flex-direction": "row" },
+            "#options": { "gap": "6px", "flex-direction": "column", "align-items": "start" },
+            "ProgressBar": { "width": "240px" },
             "Button.secondary": {
               "background": "#e5e7eb", "color": "#1f2937",
               "&:hover": { "background": "#d1d5db" },
@@ -59,10 +61,24 @@ static class Gallery
         row.Children.Add(secondary);
         row.Children.Add(danger);
 
+        var options = new Box { Name = "options" };
+        var progress = new ProgressBar { Value = 0.6 };
+        var small = new RadioButton { Text = "Small", Group = "size", IsChecked = true };
+        var large = new RadioButton { Text = "Large", Group = "size" };
+
+        options.Children.Add(new CheckBox { Text = "Remember me", IsChecked = true });
+        options.Children.Add(small);
+        options.Children.Add(large);
+        options.Children.Add(new ToggleSwitch { Text = "Dark mode" });
+        options.Children.Add(progress);
+
+        primary.Click += (_, _) => progress.Value = clicks % 10 / 10.0;
+
         root.Children.Add(title);
         root.Children.Add(hint);
         root.Children.Add(row);
         root.Children.Add(count);
+        root.Children.Add(options);
 
         return root;
     }

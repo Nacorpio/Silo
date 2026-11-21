@@ -11,6 +11,8 @@
     "--accent-active": "#1d4ed8",
     "--accent-text": "#ffffff",
     "--radius": "4px",
+    "--border": "#9ca3af",
+    "--track": "#e5e7eb",
   },
   "rules": {
     "Box": {
@@ -27,6 +29,38 @@
       "text-align": "center",
       "&:hover": { "background": "var(--accent-hover)" },
       "&:active": { "background": "var(--accent-active)" },
+    },
+    "CheckBox": {
+      "color": "var(--text)",
+      "padding": "2px 2px 2px 26px",
+      "indicator-background": "var(--surface)",
+      "indicator-border-color": "var(--border)",
+      "indicator-mark-color": "var(--accent-text)",
+      "&:checked": { "indicator-background": "var(--accent)", "indicator-border-color": "var(--accent)" },
+      "&:hover": { "indicator-border-color": "var(--accent-hover)" },
+    },
+    "RadioButton": {
+      "color": "var(--text)",
+      "padding": "2px 2px 2px 26px",
+      "indicator-background": "var(--surface)",
+      "indicator-border-color": "var(--border)",
+      "indicator-mark-color": "var(--accent-text)",
+      "&:checked": { "indicator-background": "var(--accent)", "indicator-border-color": "var(--accent)" },
+      "&:hover": { "indicator-border-color": "var(--accent-hover)" },
+    },
+    "ToggleSwitch": {
+      "color": "var(--text)",
+      "padding": "2px 2px 2px 40px",
+      "indicator-background": "var(--track)",
+      "indicator-border-color": "var(--border)",
+      "indicator-mark-color": "var(--accent-text)",
+      "&:checked": { "indicator-background": "var(--accent)", "indicator-border-color": "var(--accent)" },
+    },
+    "ProgressBar": {
+      "height": "8px",
+      "background": "var(--track)",
+      "border-radius": "4px",
+      "bar-color": "var(--accent)",
     },
   },
 }
