@@ -7,3 +7,5 @@ We rejected letting JSON redefine a Control's Part tree: Themes rely on Parts be
 ## Consequences
 
 A View declares its data type and bindings are compiled against it (`"text": "{bind Name}"`), emitting the same lambda bindings C# uses; an optional class name generates a `partial class` with fields for named Elements. There is no inline code or expression language in Views. C# and Views are equals: a View can use any registered Element, including custom C# Controls, and C# can create a View like any other type.
+
+The view model, View format readers and the generator live in a new `Silo.Views` assembly, the counterpart of `Silo.Styling`; it depends on `Silo.Core` and, like Styling, has no rendering dependency.
