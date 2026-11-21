@@ -30,7 +30,6 @@ public static class SkiaRenderer
         using var canvas = new SKCanvas(bitmap);
 
         canvas.Clear(new SKColor(background.R, background.G, background.B, background.A));
-
         list.Replay(new SkiaDrawingContext(canvas));
 
         return bitmap;
