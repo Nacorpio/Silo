@@ -36,8 +36,10 @@ public sealed class InspectorView : Box
         {
           "rules": {
             "#inspector": { "background": "#111827", "color": "#e5e7eb", "padding": "8px", "gap": "16px", "font-size": "13px", "flex-direction": "row" },
-            "#tree": { "flex-direction": "column", "gap": "2px", "width": "360px" },
-            "#details": { "flex-direction": "column", "gap": "3px", "flex-grow": "1" },
+            "#tree-pane": { "width": "360px", "flex-direction": "column" },
+            "#details-pane": { "flex-grow": "1", "flex-direction": "column" },
+            "#tree": { "flex-direction": "column", "gap": "2px" },
+            "#details": { "flex-direction": "column", "gap": "3px" },
             "Button.row": {
               "background": "#111827", "color": "#d1d5db", "padding": "3px 6px", "text-align": "left", "border-radius": "3px",
               "&:hover": { "background": "#1f2937" },
@@ -62,6 +64,12 @@ public sealed class InspectorView : Box
     /// <summary>The column that lists the properties of the selected Element.</summary>
     readonly Box details = new() { Name = "details" };
 
+    /// <summary>The viewer that scrolls the tree list.</summary>
+    readonly ScrollViewer treePane = new() { Name = "tree-pane" };
+
+    /// <summary>The viewer that scrolls the property list.</summary>
+    readonly ScrollViewer detailsPane = new() { Name = "details-pane" };
+
     /// <summary>The row of each Element, by the Element's id.</summary>
     readonly Dictionary<int, Button> rows = [];
 
@@ -70,8 +78,11 @@ public sealed class InspectorView : Box
     {
         Name = "inspector";
 
-        Children.Add(tree);
-        Children.Add(details);
+        treePane.Content = tree;
+        detailsPane.Content = details;
+
+        Children.Add(treePane);
+        Children.Add(detailsPane);
 
         Restyle();
     }

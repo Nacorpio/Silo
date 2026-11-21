@@ -167,8 +167,7 @@ public abstract class Control : Element, ILayoutNode
 
         OnRender(context, new Rect(0, 0, Bounds.Width, Bounds.Height));
 
-        foreach (var child in Children)
-            ((Control)child).Render(context);
+        RenderChildren(context);
 
         context.Restore();
     }
@@ -182,11 +181,16 @@ public abstract class Control : Element, ILayoutNode
         if (x < 0 || y < 0 || x >= Bounds.Width || y >= Bounds.Height)
             return null;
 
+        if (ChildClip is { } clip && (x < clip.X || y < clip.Y || x >= clip.Right || y >= clip.Bottom))
+            return this;
+
+        var (offsetX, offsetY) = ChildOffset;
+
         for (var i = Children.Count - 1; i >= 0; i--)
         {
             var child = (Control)Children[i];
 
-            var hit = child.HitTest(x - child.Bounds.X, y - child.Bounds.Y);
+            var hit = child.HitTest(x - offsetX - child.Bounds.X, y - offsetY - child.Bounds.Y);
 
             if (hit is not null)
                 return hit;
@@ -216,6 +220,16 @@ public abstract class Control : Element, ILayoutNode
         context.StrokeRect(new Rect(inset, inset, bounds.Width - border.Top, bounds.Height - border.Top), borderColor, border.Top, GetValue(BorderRadiusProperty));
     }
 
+    /// <summary>Gets how far the children are moved from their laid-out position when they are painted and hit-tested.</summary>
+    /// <remarks>A scrolling Control overrides it. The default is no offset.</remarks>
+    protected virtual (double X, double Y) ChildOffset => default;
+
+    /// <summary>Gets the area, in the Control's own coordinates, that the children are clipped to, or <see langword="null"/> for no clip.</summary>
+    protected virtual Rect? ChildClip => null;
+
+    /// <summary>Gets the main axis that the children are laid out on. A Control can override it to ignore <c>flex-direction</c>.</summary>
+    protected virtual FlexDirection LayoutDirection => GetValue(FlexDirectionProperty);
+
     /// <summary>Measures the content of a Control that has no children, such as its text.</summary>
     /// <param name="availableWidth">The width the content may use, or <see langword="null"/> for its natural width.</param>
     /// <returns>The size of the content, without padding and border. The default is an empty size.</returns>
@@ -238,6 +252,28 @@ public abstract class Control : Element, ILayoutNode
     /// <inheritdoc/>
     protected override void OnPropertyChanged(StyledProperty property) => layoutStyle = null;
 
+    /// <summary>Paints the children, moved by <see cref="ChildOffset"/> and clipped to <see cref="ChildClip"/>.</summary>
+    /// <param name="context">The context to draw on, with its origin at this Control's border box.</param>
+    void RenderChildren(IDrawingContext context)
+    {
+        if (Children.Count == 0)
+            return;
+
+        var (offsetX, offsetY) = ChildOffset;
+
+        context.Save();
+
+        if (ChildClip is { } clip)
+            context.ClipRect(clip);
+
+        context.Translate(offsetX, offsetY);
+
+        foreach (var child in Children)
+            ((Control)child).Render(context);
+
+        context.Restore();
+    }
+
     /// <inheritdoc/>
     Size ILayoutNode.Measure(double? availableWidth) => MeasureContent(availableWidth);
 
@@ -248,7 +284,7 @@ public abstract class Control : Element, ILayoutNode
     /// <returns>A new style, which the caller caches.</returns>
     LayoutStyle BuildLayoutStyle() => new()
     {
-        Direction = GetValue(FlexDirectionProperty),
+        Direction = LayoutDirection,
         JustifyContent = GetValue(JustifyContentProperty),
         AlignItems = GetValue(AlignItemsProperty),
         AlignSelf = GetValue(AlignSelfProperty),

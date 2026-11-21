@@ -71,6 +71,20 @@ public sealed class PointerRouter(Control root)
         return (button?.PointerUp(FindButton(hovered) == button) ?? false) | changed;
     }
 
+    /// <summary>Turns the mouse wheel over a point.</summary>
+    /// <param name="x">The horizontal position, relative to the root Control.</param>
+    /// <param name="y">The vertical position, relative to the root Control.</param>
+    /// <param name="delta">The distance to scroll in pixels. Positive scrolls down.</param>
+    /// <returns><see langword="true"/> when a <see cref="ScrollViewer"/> scrolled, so a new frame is needed.</returns>
+    public bool Scroll(double x, double y, double delta)
+    {
+        for (var c = root.HitTest(x, y); c is not null; c = c.Parent as Control)
+            if (c is ScrollViewer viewer && viewer.ScrollBy(delta))
+                return true;
+
+        return false;
+    }
+
     /// <summary>Moves <c>hover</c> to a Control and its ancestors.</summary>
     /// <param name="target">The new Control under the pointer, or <see langword="null"/>.</param>
     /// <returns><see langword="true"/> when any Control changed.</returns>
