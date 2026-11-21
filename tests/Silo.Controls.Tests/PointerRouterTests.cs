@@ -49,7 +49,6 @@ public class PointerRouterTests
     public void Press_and_release_over_a_button_clicks_it()
     {
         var (_, button, router) = Setup();
-
         var clicks = 0;
 
         button.Click += (_, _) => clicks++;
@@ -68,7 +67,6 @@ public class PointerRouterTests
     public void Releasing_outside_the_button_releases_it_without_a_click()
     {
         var (_, button, router) = Setup();
-
         var clicks = 0;
 
         button.Click += (_, _) => clicks++;
@@ -84,7 +82,6 @@ public class PointerRouterTests
     public void Pressing_somewhere_else_does_not_click_a_button_on_release()
     {
         var (_, button, router) = Setup();
-
         var clicks = 0;
 
         button.Click += (_, _) => clicks++;
