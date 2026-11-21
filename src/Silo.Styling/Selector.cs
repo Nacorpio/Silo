@@ -71,6 +71,7 @@ public sealed class Selector
     {
         if (!_compounds[index].Matches(node)) return false;
         if (index == 0) return true;
+
         switch (_combinators[index])
         {
             case Combinator.Child:
@@ -78,6 +79,7 @@ public sealed class Selector
             default:
                 for (var a = node.Parent; a is not null; a = a.Parent)
                     if (MatchFrom(index - 1, a)) return true;
+
                 return false;
         }
     }
