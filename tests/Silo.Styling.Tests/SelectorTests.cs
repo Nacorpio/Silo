@@ -10,6 +10,7 @@ public class SelectorTests
 
         public IReadOnlyCollection<string> Classes => classes ?? [];
         public IReadOnlyCollection<string> PseudoStates => states ?? [];
+
         public IStyleNode? Parent => parent;
     }
 
@@ -30,6 +31,7 @@ public class SelectorTests
     public void Matches_type_class_and_state()
     {
         var n = new Node("Button", classes: ["primary"], states: ["hover"]);
+
         Assert.True(Selector.Parse("Button.primary:hover").Matches(n));
         Assert.False(Selector.Parse("Button.primary:pressed").Matches(n));
         Assert.False(Selector.Parse("Box").Matches(n));
@@ -42,6 +44,7 @@ public class SelectorTests
         var mid = new Node("Box", parent: box);
         var btn = new Node("Button", parent: mid);
         Assert.True(Selector.Parse(".card Button").Matches(btn));
+
         Assert.False(Selector.Parse(".card > Button").Matches(btn));
         Assert.True(Selector.Parse("Box > Button").Matches(btn));
     }
@@ -50,6 +53,7 @@ public class SelectorTests
     public void Part_selector_exposes_part_name_and_matches_the_owner_compound()
     {
         var s = Selector.Parse("Button.primary::part(icon)");
+
         Assert.Equal("icon", s.Part);
         Assert.True(s.Matches(new Node("Button", classes: ["primary"])));
     }
