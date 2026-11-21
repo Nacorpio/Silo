@@ -67,6 +67,9 @@ public sealed class PointerRouter(Control root)
         if (Find<TextBox>(hovered) is { } box)
             changed |= box.PointerDown(box.ToLocal(x, y).X);
 
+        if (Find<ListView>(hovered) is { } list)
+            changed |= list.PointerDown(list.ToLocal(x, y).Y);
+
         return (pressed?.PointerDown() ?? false) | changed;
     }
 
@@ -93,11 +96,11 @@ public sealed class PointerRouter(Control root)
     /// <param name="x">The horizontal position, relative to the root Control.</param>
     /// <param name="y">The vertical position, relative to the root Control.</param>
     /// <param name="delta">The distance to scroll in pixels. Positive scrolls down.</param>
-    /// <returns><see langword="true"/> when a <see cref="ScrollViewer"/> scrolled, so a new frame is needed.</returns>
+    /// <returns><see langword="true"/> when a <see cref="IScrollable"/> scrolled, so a new frame is needed.</returns>
     public bool Scroll(double x, double y, double delta)
     {
         for (var c = root.HitTest(x, y); c is not null; c = c.Parent as Control)
-            if (c is ScrollViewer viewer && viewer.ScrollBy(delta))
+            if (c is IScrollable scrollable && scrollable.ScrollBy(delta))
                 return true;
 
         return false;

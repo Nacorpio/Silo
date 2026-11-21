@@ -254,6 +254,8 @@ public sealed unsafe class SdlWindow : IDisposable
         SDL_Keycode.SDLK_HOME => Key.Home,
         SDL_Keycode.SDLK_END => Key.End,
         SDL_Keycode.SDLK_RETURN => Key.Enter,
+        SDL_Keycode.SDLK_UP => Key.Up,
+        SDL_Keycode.SDLK_DOWN => Key.Down,
 
         _ => Key.Unknown,
     };

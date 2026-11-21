@@ -19,6 +19,7 @@ static class Gallery
             "ProgressBar": { "width": "240px" },
             "Slider": { "width": "240px" },
             "TextBox": { "width": "240px" },
+            "ListView": { "width": "240px", "height": "100px" },
             "Button.secondary": {
               "background": "#e5e7eb", "color": "#1f2937",
               "&:hover": { "background": "#d1d5db" },
@@ -83,6 +84,11 @@ static class Gallery
         name.TextChanged += (_, _) => greeting.Text = $"Hello, {(name.Text.Length == 0 ? "stranger" : name.Text)}!";
         options.Children.Add(name);
         options.Children.Add(greeting);
+
+        var list = new ListView { Items = Enumerable.Range(1, 200).Select(n => $"Row {n}").ToList() };
+
+        list.SelectedIndex = 1;
+        options.Children.Add(list);
 
         var slider = new Slider { Value = 0.6 };
 
