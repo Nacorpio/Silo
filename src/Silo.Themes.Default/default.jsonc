@@ -1,0 +1,32 @@
+{
+  // The default Silo theme. Everything a Control looks like comes from the Tokens below, so a derived theme can
+  // restyle the whole library by overriding them.
+  "tokens": {
+    "--font-family": "sans-serif",
+    "--font-size": "14px",
+    "--surface": "#ffffff",
+    "--text": "#1f2937",
+    "--accent": "#3b82f6",
+    "--accent-hover": "#2563eb",
+    "--accent-active": "#1d4ed8",
+    "--accent-text": "#ffffff",
+    "--radius": "4px",
+  },
+  "rules": {
+    "Box": {
+      "color": "var(--text)",
+      "font-family": "var(--font-family)",
+      "font-size": "var(--font-size)",
+    },
+    "TextBlock": { "color": "var(--text)" },
+    "Button": {
+      "background": "var(--accent)",
+      "color": "var(--accent-text)",
+      "padding": "6px 12px",
+      "border-radius": "var(--radius)",
+      "text-align": "center",
+      "&:hover": { "background": "var(--accent-hover)" },
+      "&:active": { "background": "var(--accent-active)" },
+    },
+  },
+}
