@@ -46,6 +46,7 @@ string? ArgumentAfter(string name)
 void SaveScreenshot(string path, StyleResolver styles)
 {
     root.TextMeasurer = new SkiaTextMeasurer();
+
     root.ApplyStyles(styles);
     root.Arrange(new Size(640, 360));
 
