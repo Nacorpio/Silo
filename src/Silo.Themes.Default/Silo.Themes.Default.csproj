@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Silo.Styling/Silo.Styling.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="default.jsonc" LogicalName="Silo.Themes.Default.default.jsonc" />
+  </ItemGroup>
+</Project>
