@@ -19,13 +19,13 @@ namespace Silo;
 public abstract class ToggleButton : Button
 {
     /// <summary>The fill of the indicator.</summary>
-    public static readonly StyledProperty<Color> IndicatorBackgroundProperty = StyledProperty.Register<ToggleButton, Color>("indicator-background", new Color(255, 255, 255), Color.TryParse);
+    public static readonly StyledProperty<Color> IndicatorBackgroundProperty = StyledProperty.Register<ToggleButton, Color>("indicator-background", new(255, 255, 255), Color.TryParse);
 
     /// <summary>The outline of the indicator.</summary>
-    public static readonly StyledProperty<Color> IndicatorBorderColorProperty = StyledProperty.Register<ToggleButton, Color>("indicator-border-color", new Color(156, 163, 175), Color.TryParse);
+    public static readonly StyledProperty<Color> IndicatorBorderColorProperty = StyledProperty.Register<ToggleButton, Color>("indicator-border-color", new(156, 163, 175), Color.TryParse);
 
     /// <summary>The color of the mark that shows the Control is on.</summary>
-    public static readonly StyledProperty<Color> IndicatorMarkColorProperty = StyledProperty.Register<ToggleButton, Color>("indicator-mark-color", new Color(255, 255, 255), Color.TryParse);
+    public static readonly StyledProperty<Color> IndicatorMarkColorProperty = StyledProperty.Register<ToggleButton, Color>("indicator-mark-color", new(255, 255, 255), Color.TryParse);
 
     /// <summary>Whether the Control is on.</summary>
     bool isChecked;

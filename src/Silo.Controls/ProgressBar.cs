@@ -21,7 +21,7 @@ namespace Silo;
 public class ProgressBar : Control
 {
     /// <summary>The color of the filled part.</summary>
-    public static readonly StyledProperty<Color> BarColorProperty = StyledProperty.Register<ProgressBar, Color>("bar-color", new Color(59, 130, 246), Color.TryParse);
+    public static readonly StyledProperty<Color> BarColorProperty = StyledProperty.Register<ProgressBar, Color>("bar-color", new(59, 130, 246), Color.TryParse);
 
     /// <summary>The progress, from 0 to 1.</summary>
     double value;
