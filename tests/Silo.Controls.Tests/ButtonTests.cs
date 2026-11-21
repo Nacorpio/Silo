@@ -116,9 +116,11 @@ public class ButtonTests
 
         root.Name = "root";
         root.Children.Add(button);
+
         root.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read("""
             { "rules": { "#root": { "align-items": "start" }, "Button": { "background": "#3b82f6", "padding": "10px 20px", "color": "#ffffff" } } }
             """, "t.jsonc")]));
+
         root.Arrange(new Size(200, 80));
 
         var builder = new DisplayListBuilder();
