@@ -85,3 +85,29 @@ The Cascaded value with Tokens resolved and font-relative units converted.
 
 **Used value**:
 The Computed value after layout, with container-relative units resolved.
+
+### Tooling
+
+**Diagnostics agent**:
+The opt-in in-process component that exposes a running app's Element tree and Cascade to tools over a protocol.
+_Avoid_: DevTools server, debugger, backend
+
+**Inspector**:
+The tool for navigating and editing a running app's Element tree live; one client of the Diagnostics agent.
+_Avoid_: DevTools, tree viewer, debugger
+
+**Cascade trace**:
+The explanation of how a Styled property got its Cascaded value: the winning Rule and its source location, and the values it beat.
+_Avoid_: Style trace, computed styles
+
+**Inspector override**:
+A temporary value set from the Inspector that sits above Local values and is discarded when the app restarts.
+_Avoid_: Live edit, patch
+
+**Silo Studio**:
+The standalone tool for previewing and editing Themes, Stylesheets and Previews.
+_Avoid_: Designer, previewer, IDE
+
+**Preview**:
+A method in app code marked for display in Silo Studio that returns an Element.
+_Avoid_: Design-time view, sample
