@@ -1,0 +1,76 @@
+using Silo.Layout;
+using Silo.Rendering;
+using Silo.Styling.Values;
+using Xunit;
+
+public class DisplayListTests
+{
+    /// <summary>Records every call as text.</summary>
+    class Log : IDrawingContext
+    {
+        public List<string> Calls { get; } = [];
+
+        public void Save() => Calls.Add("save");
+        public void Restore() => Calls.Add("restore");
+
+        public void Translate(double dx, double dy) => Calls.Add($"translate {dx} {dy}");
+        public void ClipRect(Rect rect) => Calls.Add($"clip {rect.X} {rect.Y} {rect.Width} {rect.Height}");
+        public void FillRect(Rect rect, Color color, double cornerRadius = 0) => Calls.Add($"fill {rect.Width}x{rect.Height} {color.R} r{cornerRadius}");
+        public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0) => Calls.Add($"stroke {width}");
+        public void DrawText(string text, double x, double y, TextStyle style, Color color) => Calls.Add($"text {text} {x} {y} {style.Size}");
+    }
+
+    [Fact]
+    public void Replay_calls_the_context_in_recorded_order()
+    {
+        var builder = new DisplayListBuilder();
+
+        builder.Save();
+        builder.Translate(5, 6);
+        builder.ClipRect(new Rect(0, 0, 10, 10));
+        builder.FillRect(new Rect(0, 0, 10, 4), new Color(9, 0, 0), 2);
+        builder.StrokeRect(new Rect(0, 0, 10, 4), new Color(0, 0, 0), 1);
+        builder.DrawText("Hi", 1, 2, new TextStyle("Inter", 14), new Color(0, 0, 0));
+        builder.Restore();
+
+        var log = new Log();
+
+        builder.Build().Replay(log);
+
+        Assert.Equal(["save", "translate 5 6", "clip 0 0 10 10", "fill 10x4 9 r2", "stroke 1", "text Hi 1 2 14", "restore"], log.Calls);
+    }
+
+    [Fact]
+    public void A_built_list_is_not_changed_by_later_calls_on_the_builder()
+    {
+        var builder = new DisplayListBuilder();
+
+        builder.FillRect(new Rect(0, 0, 1, 1), new Color(0, 0, 0));
+
+        var list = builder.Build();
+
+        builder.FillRect(new Rect(0, 0, 2, 2), new Color(0, 0, 0));
+
+        Assert.Single(list.Commands);
+        Assert.Equal(2, builder.Count);
+    }
+
+    [Fact]
+    public void Unbalanced_save_and_restore_are_rejected()
+    {
+        var unmatchedRestore = new DisplayListBuilder();
+        var unmatchedSave = new DisplayListBuilder();
+
+        unmatchedSave.Save();
+
+        Assert.Throws<InvalidOperationException>(unmatchedRestore.Restore);
+        Assert.Throws<InvalidOperationException>(unmatchedSave.Build);
+    }
+
+    [Fact]
+    public void Commands_are_value_equal()
+    {
+        Assert.Equal(new TranslateCommand(1, 2), new TranslateCommand(1, 2));
+        Assert.NotEqual(new TranslateCommand(1, 2), new TranslateCommand(1, 3));
+    }
+}
