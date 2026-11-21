@@ -65,4 +65,35 @@ public class ValueParserTests
     [InlineData("nope")]
     [InlineData("lab(1 2 3)")]
     public void Rejects_bad_colors(string text) => Assert.False(Color.TryParse(text, out _));
+
+    [Theory]
+    [InlineData("12px", "12px")]
+    [InlineData("50%", "50%")]
+    [InlineData("1.5em", "1.5em")]
+    [InlineData("2rem", "2rem")]
+    [InlineData("1fr", "1fr")]
+    [InlineData("12", "12px")]
+    public void Lengths_are_written_back_as_stylesheet_text(string text, string expected)
+    {
+        Assert.True(Length.TryParse(text, out var length));
+        Assert.Equal(expected, length.ToString());
+    }
+
+    [Theory]
+    [InlineData("8", "8px")]
+    [InlineData("8 16", "8px 16px")]
+    [InlineData("1 2 3", "1px 2px 3px 2px")]
+    [InlineData("1 2 3 4", "1px 2px 3px 4px")]
+    public void Thickness_is_written_back_as_the_shortest_shorthand(string text, string expected)
+    {
+        Assert.True(Thickness.TryParse(text, out var thickness));
+        Assert.Equal(expected, thickness.ToString());
+    }
+
+    [Fact]
+    public void Colors_are_written_as_hex_with_alpha_only_when_not_opaque()
+    {
+        Assert.Equal("#3b82f6", new Color(0x3b, 0x82, 0xf6).ToString());
+        Assert.Equal("#3b82f680", new Color(0x3b, 0x82, 0xf6, 0x80).ToString());
+    }
 }

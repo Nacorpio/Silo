@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
+    <ProjectReference Include="../Silo.Diagnostics/Silo.Diagnostics.csproj" />
+  </ItemGroup>
+</Project>

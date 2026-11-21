@@ -6,6 +6,7 @@
     <Project Path="src/Silo.Controls/Silo.Controls.csproj" />
     <Project Path="src/Silo.Core/Silo.Core.csproj" />
     <Project Path="src/Silo.Diagnostics/Silo.Diagnostics.csproj" />
+    <Project Path="src/Silo.Inspector/Silo.Inspector.csproj" />
     <Project Path="src/Silo.Layout/Silo.Layout.csproj" />
     <Project Path="src/Silo.Platform.Sdl/Silo.Platform.Sdl.csproj" />
     <Project Path="src/Silo.Rendering/Silo.Rendering.csproj" />
@@ -17,6 +18,7 @@
     <Project Path="tests/Silo.Controls.Tests/Silo.Controls.Tests.csproj" />
     <Project Path="tests/Silo.Core.Tests/Silo.Core.Tests.csproj" />
     <Project Path="tests/Silo.Diagnostics.Tests/Silo.Diagnostics.Tests.csproj" />
+    <Project Path="tests/Silo.Inspector.Tests/Silo.Inspector.Tests.csproj" />
     <Project Path="tests/Silo.Layout.Tests/Silo.Layout.Tests.csproj" />
     <Project Path="tests/Silo.Platform.Sdl.Tests/Silo.Platform.Sdl.Tests.csproj" />
     <Project Path="tests/Silo.Rendering.Tests/Silo.Rendering.Tests.csproj" />
