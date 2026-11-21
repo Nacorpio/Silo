@@ -92,6 +92,7 @@ public static class FlexLayout
         /// <summary>Whether <see cref="Target"/> is final.</summary>
         public bool Frozen;
 
+
         /// <summary>Gets the sum of both main margins.</summary>
         public double MainMargins => MainMarginStart + MainMarginEnd;
 
