@@ -30,7 +30,7 @@ namespace Silo;
 public class ListView : Control, IScrollable
 {
     /// <summary>The space left of each row's text in pixels.</summary>
-    const double TextInset = 8;
+    internal const double TextInset = 8;
 
 
     /// <summary>The height of each row in pixels.</summary>
@@ -90,20 +90,14 @@ public class ListView : Control, IScrollable
     public int SelectedIndex
     {
         get => selectedIndex;
-        set
-        {
-            var next = value >= 0 && value < items.Count ? value : -1;
-
-            if (next == selectedIndex)
-                return;
-
-            selectedIndex = next;
-
-            Reveal(next);
-
-            SelectionChanged?.Invoke(this, EventArgs.Empty);
-        }
+        set => Select(value, true);
     }
+
+    /// <summary>
+    /// Gets or sets whether the row under the pointer is selected as the pointer moves over it, the way menus work. The
+    /// default is <see langword="false"/>.
+    /// </summary>
+    public bool HoverSelects { get; set; }
 
     /// <summary>Gets how far the rows are scrolled, in pixels. It is between 0 and <see cref="MaxOffset"/>.</summary>
     public double Offset => Math.Clamp(offset, 0, MaxOffset);
@@ -129,6 +123,19 @@ public class ListView : Control, IScrollable
         offset = Math.Clamp(before + delta, 0, MaxOffset);
 
         return offset != before;
+    }
+
+    /// <summary>Selects the row under a moving pointer when <see cref="HoverSelects"/> is set. The list does not scroll.</summary>
+    /// <param name="y">The vertical position relative to the ListView's border box.</param>
+    /// <returns><see langword="true"/> when the selection changed, so a new frame is needed.</returns>
+    public bool PointerMove(double y)
+    {
+        var before = selectedIndex;
+
+        if (HoverSelects)
+            Select((int)Math.Floor((y - Viewport.Y + Offset) / RowHeight), false);
+
+        return before != selectedIndex;
     }
 
     /// <summary>Selects the row at a pointer position.</summary>
@@ -215,6 +222,24 @@ public class ListView : Control, IScrollable
         var y = top + Math.Max(0, RowHeight - line.Height) / 2;
 
         context.DrawText(items[index], content.X + TextInset, y, style, color);
+    }
+
+    /// <summary>Changes the selection.</summary>
+    /// <param name="value">The row's index. Values outside the list select nothing.</param>
+    /// <param name="reveal">Whether to scroll the row into view.</param>
+    void Select(int value, bool reveal)
+    {
+        var next = value >= 0 && value < items.Count ? value : -1;
+
+        if (next == selectedIndex)
+            return;
+
+        selectedIndex = next;
+
+        if (reveal)
+            Reveal(next);
+
+        SelectionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Scrolls just enough to show a row.</summary>

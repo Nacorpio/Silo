@@ -41,6 +41,23 @@ public class OverlayLayerTests
     }
 
     [Fact]
+    public void A_Control_that_sticks_out_is_moved_into_the_window_as_far_as_it_fits()
+    {
+        var (layer, _, _, resolver) = Setup();
+        var menu = new Box();
+        var huge = new Box();
+
+        huge.SetValue(Control.WidthProperty, new Silo.Styling.Values.Length(500, Silo.Styling.Values.LengthUnit.Px));
+
+        layer.Show(menu, 390, 290);
+        layer.Show(huge, 50, 50);
+        Layout(layer, resolver);
+
+        Assert.Equal(new Rect(320, 260, 80, 40), menu.Bounds);
+        Assert.Equal(0, huge.Bounds.X);
+    }
+
+    [Fact]
     public void Showing_and_closing_raise_Changed_and_closing_frees_the_Control()
     {
         var (layer, _, _, _) = Setup();

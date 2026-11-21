@@ -121,4 +121,14 @@ public class DefaultThemeTests
 
         Assert.Equal(new Color(0x3b, 0x82, 0xf6), combo.GetValue(Control.BorderColorProperty));
     }
+
+    [Fact]
+    public void Context_menus_get_a_surface_a_border_and_the_accent_for_the_highlighted_row()
+    {
+        var menu = new ContextMenu();
+
+        Assert.Empty(menu.ApplyStyles(Resolver()));
+        Assert.Equal(new Color(0x9c, 0xa3, 0xaf), menu.GetValue(Control.BorderColorProperty));
+        Assert.Equal(new Color(0x3b, 0x82, 0xf6), menu.GetValue(ListView.SelectionColorProperty));
+    }
 }

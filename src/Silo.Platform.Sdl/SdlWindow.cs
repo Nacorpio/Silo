@@ -301,6 +301,7 @@ public sealed unsafe class SdlWindow : IDisposable
 
             SDL_EventType.SDL_EVENT_MOUSE_MOTION => router.Move(e.motion.x, e.motion.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 1 => PressPointer(e.button.x, e.button.y),
+            SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 3 => router.SecondaryDown(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP when e.button.button == 1 => router.Up(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => router.Leave(),
             SDL_EventType.SDL_EVENT_MOUSE_WHEEL

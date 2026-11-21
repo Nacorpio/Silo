@@ -99,6 +99,15 @@ static class Gallery
         slider.ValueChanged += (_, _) => progress.Value = slider.Value;
         options.Children.Add(slider);
 
+        root.ContextMenu = new ContextMenu
+        {
+            Entries =
+            [
+                new MenuItem("Reset clicks", () => count.Text = $"Clicks: {clicks = 0}"),
+                new MenuItem("Clear name", () => name.Text = string.Empty),
+            ],
+        };
+
         root.Children.Add(title);
         root.Children.Add(hint);
         root.Children.Add(row);

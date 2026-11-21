@@ -174,6 +174,12 @@ public abstract class Control : Element, ILayoutNode
         set => overlays = value;
     }
 
+    /// <summary>
+    /// Gets or sets the menu that opens when the secondary pointer button is pressed on this Control or on one of its
+    /// descendants that has none. The default is <see langword="null"/>.
+    /// </summary>
+    public ContextMenu? ContextMenu { get; set; }
+
     /// <inheritdoc/>
     LayoutStyle ILayoutNode.Style => layoutStyle ??= BuildLayoutStyle();
 

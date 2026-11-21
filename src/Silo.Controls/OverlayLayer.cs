@@ -1,7 +1,6 @@
 using Silo.Layout;
 using Silo.Rendering;
 using Silo.Styling;
-using Silo.Styling.Values;
 
 namespace Silo;
 
@@ -11,7 +10,8 @@ namespace Silo;
 /// <remarks>
 /// <para>
 /// <see cref="Show"/> puts a Control at a position in the window, on top of everything shown before it. The Control keeps its
-/// natural size unless it has a <c>width</c> or <c>height</c>. It is styled with the same Stylesheets as the window content.
+/// natural size unless it has a <c>width</c> or <c>height</c>, and is moved as far as needed to lie inside the window. It is
+/// styled with the same Stylesheets as the window content.
 /// </para>
 /// <para>
 /// Every overlay is backed by an invisible layer the size of the window. A pointer press on that layer, outside the
@@ -21,7 +21,7 @@ namespace Silo;
 /// <para>
 /// A platform window owns one layer (<c>SdlWindow.Overlays</c>) and calls <see cref="ApplyStyles"/>, <see cref="Arrange"/>
 /// and <see cref="Render"/> after it handled the window content. <see cref="Show"/> overwrites the Control's
-/// <c>margin</c>, which is how it is positioned.
+/// <c>margin</c> and <c>flex-shrink</c>, which is how it is positioned.
 /// </para>
 /// </remarks>
 /// <example>
@@ -58,8 +58,8 @@ public sealed class OverlayLayer
 
     /// <summary>Shows a Control above everything else.</summary>
     /// <param name="content">The Control to show. It must not be part of another tree.</param>
-    /// <param name="x">The horizontal position of its left edge, relative to the window.</param>
-    /// <param name="y">The vertical position of its top edge, relative to the window.</param>
+    /// <param name="x">The horizontal position of its left edge, relative to the window. It is moved left when it would stick out.</param>
+    /// <param name="y">The vertical position of its top edge, relative to the window. It is moved up when it would stick out.</param>
     /// <exception cref="InvalidOperationException">The Control is already shown, or has a parent.</exception>
     public void Show(Control content, double x, double y)
     {
@@ -68,11 +68,7 @@ public sealed class OverlayLayer
         if (Contains(content) || content.Parent is not null)
             throw new InvalidOperationException("The Control is already part of a tree.");
 
-        var host = new OverlayHost(content) { TextMeasurer = TextMeasurer };
-
-        content.SetValue(Control.MarginProperty, new Thickness(Px(y), Px(0), Px(0), Px(x)));
-
-        hosts.Add(host);
+        hosts.Add(new OverlayHost(content, x, y) { TextMeasurer = TextMeasurer });
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -123,7 +119,12 @@ public sealed class OverlayLayer
     public void Arrange(Size available)
     {
         foreach (var host in hosts)
+        {
             host.Arrange(available);
+
+            if (host.Fit(available))
+                host.Arrange(available);
+        }
     }
 
     /// <summary>Paints every overlay, the first one shown at the bottom.</summary>
@@ -149,9 +150,4 @@ public sealed class OverlayLayer
     /// <param name="hit">A Control returned by <see cref="HitTest"/>.</param>
     /// <returns><see langword="true"/> when the point was outside the overlay itself.</returns>
     public bool IsBackdrop(Control? hit) => hit is OverlayHost;
-
-    /// <summary>Makes a length in pixels.</summary>
-    /// <param name="value">The number of pixels.</param>
-    /// <returns>The length.</returns>
-    static Length Px(double value) => new(value, LengthUnit.Px);
 }
