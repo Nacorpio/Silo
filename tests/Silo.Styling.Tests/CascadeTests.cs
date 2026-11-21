@@ -9,7 +9,6 @@ public class CascadeTests
     public void Higher_specificity_beats_later_source_order()
     {
         var resolver = new StyleResolver([Sheet("""{ "rules": { "Button.primary": { "color": "red" }, "Button": { "color": "blue" } } }""")]);
-
         var cascaded = resolver.Cascade(new TestNode("Button", classes: ["primary"]));
 
         Assert.Equal("red", cascaded["color"].Value);
@@ -35,7 +34,6 @@ public class CascadeTests
         var resolver = new StyleResolver([Sheet("""{ "rules": { "Button": { "color": "red", "&:hover": { "color": "blue" } } } }""")]);
 
         Assert.Equal("red", resolver.Cascade(new TestNode("Button"))["color"].Value);
-
         Assert.Equal("blue", resolver.Cascade(new TestNode("Button", states: ["hover"]))["color"].Value);
     }
 
@@ -43,11 +41,9 @@ public class CascadeTests
     public void Part_declarations_are_separate_from_the_element_declarations()
     {
         var resolver = new StyleResolver([Sheet("""{ "rules": { "Button": { "color": "red", "&::part(icon)": { "margin-right": "6px" } } } }""")]);
-
         var node = new TestNode("Button");
 
         Assert.False(resolver.Cascade(node).ContainsKey("margin-right"));
-
         Assert.Equal("6px", resolver.Cascade(node, "icon")["margin-right"].Value);
     }
 
@@ -55,7 +51,6 @@ public class CascadeTests
     public void Cascaded_value_remembers_its_source_location()
     {
         var resolver = new StyleResolver([Sheet("{\n \"rules\": {\n \"Button\": { \"color\": \"red\" } } }")]);
-
         var cascaded = resolver.Cascade(new TestNode("Button"));
 
         Assert.Equal(3, cascaded["color"].Source.Span.Line);
@@ -65,12 +60,10 @@ public class CascadeTests
     public void Tokens_inherit_down_the_tree_and_rules_can_redeclare_them()
     {
         var resolver = new StyleResolver([Sheet("""{ "tokens": { "--accent": "blue" }, "rules": { ".danger": { "--accent": "red" } } }""")]);
-
         var parent = new TestNode("Box", classes: ["danger"]);
         var child = new TestNode("Button", parent: parent);
 
         Assert.Equal("blue", resolver.ResolveTokens(new TestNode("Button"))["--accent"]);
-
         Assert.Equal("red", resolver.ResolveTokens(child)["--accent"]);
     }
 
@@ -88,7 +81,6 @@ public class CascadeTests
         var cycle = new Dictionary<string, string> { ["--a"] = "var(--b)", ["--b"] = "var(--a)" };
 
         Assert.Throws<StylesheetException>(() => StyleResolver.Compute("var(--missing)", cycle));
-
         Assert.Throws<StylesheetException>(() => StyleResolver.Compute("var(--a)", cycle));
     }
 }

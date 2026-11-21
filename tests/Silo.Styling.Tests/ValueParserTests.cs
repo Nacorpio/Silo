@@ -13,7 +13,6 @@ public class ValueParserTests
     public void Parses_lengths(string text, double value, LengthUnit unit)
     {
         Assert.True(Length.TryParse(text, out var length));
-
         Assert.Equal(new Length(value, unit), length);
     }
 
@@ -28,15 +27,10 @@ public class ValueParserTests
     public void Expands_thickness_shorthand_like_css()
     {
         Assert.True(Thickness.TryParse("8 16", out var two));
-
         Assert.Equal(new Length(8, LengthUnit.Px), two.Top);
-
         Assert.Equal(new Length(16, LengthUnit.Px), two.Left);
-
         Assert.True(Thickness.TryParse("1 2 3", out var three));
-
         Assert.Equal(new Length(2, LengthUnit.Px), three.Left);
-
         Assert.False(Thickness.TryParse("1 2 3 4 5", out _));
     }
 
@@ -53,7 +47,6 @@ public class ValueParserTests
     public void Parses_colors(string text, int r, int g, int b, int a)
     {
         Assert.True(Color.TryParse(text, out var color));
-
         Assert.Equal(new Color((byte)r, (byte)g, (byte)b, (byte)a), color);
     }
 
@@ -61,11 +54,8 @@ public class ValueParserTests
     public void Parses_oklch_close_to_the_known_srgb_value()
     {
         Assert.True(Color.TryParse("oklch(0.628 0.2577 29.23)", out var color));
-
         Assert.InRange(color.R, 250, 255);
-
         Assert.InRange(color.G, 0, 8);
-
         Assert.InRange(color.B, 0, 8);
     }
 

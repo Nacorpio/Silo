@@ -32,8 +32,8 @@ public class SelectorTests
         var box = new TestNode("Box", classes: ["card"]);
         var mid = new TestNode("Box", parent: box);
         var btn = new TestNode("Button", parent: mid);
-        Assert.True(Selector.Parse(".card Button").Matches(btn));
 
+        Assert.True(Selector.Parse(".card Button").Matches(btn));
         Assert.False(Selector.Parse(".card > Button").Matches(btn));
         Assert.True(Selector.Parse("Box > Button").Matches(btn));
     }

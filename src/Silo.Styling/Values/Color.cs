@@ -44,6 +44,7 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
         }
 
         var function = text[..open].Trim().ToLowerInvariant();
+
         var arguments = text[(open + 1)..^1]
             .Split([',', ' ', '/'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
@@ -62,6 +63,7 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
         switch (function)
         {
             case "rgb" or "rgba":
+            {
                 if (Channel(arguments[0]) is { } r && Channel(arguments[1]) is { } g && Channel(arguments[2]) is { } b)
                 {
                     color = new Color(r, g, b, ToByte(alpha.Value));
@@ -70,8 +72,10 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
                 }
 
                 return false;
+            }
 
             case "hsl" or "hsla":
+            {
                 if (Number(arguments[0].TrimEnd('d', 'e', 'g')) is { } h && Fraction(arguments[1]) is { } s && Fraction(arguments[2]) is { } l)
                 {
                     color = FromHsl(h, s, l, alpha.Value);
@@ -80,8 +84,10 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
                 }
 
                 return false;
+            }
 
             case "oklch":
+            {
                 if (Fraction(arguments[0]) is { } lightness && Number(arguments[1]) is { } chroma && Number(arguments[2].TrimEnd('d', 'e', 'g')) is { } hue)
                 {
                     color = FromOklch(lightness, chroma, hue, alpha.Value);
@@ -90,9 +96,12 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
                 }
 
                 return false;
+            }
 
             default:
+            {
                 return false;
+            }
         }
     }
 
