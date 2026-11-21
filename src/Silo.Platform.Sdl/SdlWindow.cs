@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using SDL;
 using SkiaSharp;
 using Silo.Layout;
@@ -58,6 +59,9 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Routes the pointer into the tree.</summary>
     readonly PointerRouter router;
 
+    /// <summary>Keeps the keyboard focus.</summary>
+    readonly FocusManager focus = new();
+
     /// <summary>Work that other threads asked the window thread to do.</summary>
     readonly ConcurrentQueue<Action> posted = new();
 
@@ -105,6 +109,8 @@ public sealed unsafe class SdlWindow : IDisposable
         id = (uint)SDL3.SDL_GetWindowID(window);
         root.TextMeasurer ??= new SkiaTextMeasurer();
         router = new PointerRouter(root);
+
+        SDL3.SDL_StartTextInput(window);
 
         Open.Add(this);
     }
@@ -223,6 +229,7 @@ public sealed unsafe class SdlWindow : IDisposable
         SDL_EventType.SDL_EVENT_MOUSE_MOTION => (uint)e.motion.windowID,
         SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN or SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP => (uint)e.button.windowID,
         SDL_EventType.SDL_EVENT_KEY_DOWN => (uint)e.key.windowID,
+        SDL_EventType.SDL_EVENT_TEXT_INPUT => (uint)e.text.windowID,
         SDL_EventType.SDL_EVENT_MOUSE_WHEEL => (uint)e.wheel.windowID,
         SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED
             or SDL_EventType.SDL_EVENT_WINDOW_EXPOSED
@@ -240,6 +247,13 @@ public sealed unsafe class SdlWindow : IDisposable
         SDL_Keycode.SDLK_ESCAPE => Key.Escape,
         SDL_Keycode.SDLK_F5 => Key.F5,
         SDL_Keycode.SDLK_F12 => Key.F12,
+        SDL_Keycode.SDLK_BACKSPACE => Key.Backspace,
+        SDL_Keycode.SDLK_DELETE => Key.Delete,
+        SDL_Keycode.SDLK_LEFT => Key.Left,
+        SDL_Keycode.SDLK_RIGHT => Key.Right,
+        SDL_Keycode.SDLK_HOME => Key.Home,
+        SDL_Keycode.SDLK_END => Key.End,
+        SDL_Keycode.SDLK_RETURN => Key.Enter,
 
         _ => Key.Unknown,
     };
@@ -272,13 +286,14 @@ public sealed unsafe class SdlWindow : IDisposable
             SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED => Close(),
 
             SDL_EventType.SDL_EVENT_MOUSE_MOTION => router.Move(e.motion.x, e.motion.y),
-            SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 1 => router.Down(e.button.x, e.button.y),
+            SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 1 => PressPointer(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP when e.button.button == 1 => router.Up(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => router.Leave(),
             SDL_EventType.SDL_EVENT_MOUSE_WHEEL
                 => router.Scroll(e.wheel.mouse_x, e.wheel.mouse_y, -e.wheel.y * WheelStep),
 
             SDL_EventType.SDL_EVENT_KEY_DOWN => PressKey(e.key),
+            SDL_EventType.SDL_EVENT_TEXT_INPUT => focus.TextInput(Marshal.PtrToStringUTF8((IntPtr)e.text.text) ?? ""),
 
             SDL_EventType.SDL_EVENT_WINDOW_EXPOSED or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED => true,
 
@@ -294,10 +309,23 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <returns>Always <see langword="false"/>, since a key press changes nothing by itself.</returns>
     bool PressKey(SDL_KeyboardEvent key)
     {
-        if (!key.repeat)
-            KeyPressed?.Invoke(ToKey(key.key));
+        var pressed = ToKey(key.key);
 
-        return false;
+        if (!key.repeat)
+            KeyPressed?.Invoke(pressed);
+
+        return focus.KeyDown(pressed);
+    }
+
+    /// <summary>Presses the pointer button and moves the keyboard focus to what was pressed.</summary>
+    /// <param name="x">The horizontal position in logical units.</param>
+    /// <param name="y">The vertical position in logical units.</param>
+    /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
+    bool PressPointer(float x, float y)
+    {
+        var changed = router.Down(x, y);
+
+        return focus.FocusFrom(router.Hovered) | changed;
     }
 
     /// <summary>Marks the window as closed, takes it out of the event loop and raises <see cref="Closed"/>.</summary>

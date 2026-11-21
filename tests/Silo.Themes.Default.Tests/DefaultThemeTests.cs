@@ -83,4 +83,18 @@ public class DefaultThemeTests
         Assert.Empty(slider.ApplyStyles(Resolver()));
         Assert.Equal(new Color(0x1d, 0x4e, 0xd8), slider.GetValue(Slider.FillColorProperty));
     }
+
+    [Fact]
+    public void Text_boxes_get_an_accent_border_while_focused()
+    {
+        var box = new TextBox();
+
+        Assert.Empty(box.ApplyStyles(Resolver()));
+        Assert.Equal(new Color(0x9c, 0xa3, 0xaf), box.GetValue(Control.BorderColorProperty));
+
+        box.SetFocused(true);
+        box.ApplyStyles(Resolver());
+
+        Assert.Equal(new Color(0x3b, 0x82, 0xf6), box.GetValue(Control.BorderColorProperty));
+    }
 }

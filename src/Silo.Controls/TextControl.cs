@@ -71,15 +71,4 @@ public abstract class TextControl : Control
 
         context.DrawText(Text, x, y, CurrentTextStyle(), GetValue(ColorProperty));
     }
-
-    /// <summary>Builds the font description from the current property values.</summary>
-    /// <returns>The text style used for both measuring and drawing.</returns>
-    TextStyle CurrentTextStyle()
-        => new(GetValue(FontFamilyProperty), GetValue(FontSizeProperty), GetValue(BoldProperty));
-
-    /// <summary>Gets the text measurer, which must have been set on this Control or an ancestor.</summary>
-    /// <returns>The measurer.</returns>
-    /// <exception cref="InvalidOperationException">No measurer is set on this Control or any ancestor.</exception>
-    ITextMeasurer Measurer() => TextMeasurer ?? throw new InvalidOperationException(
-        $"{TypeName} needs a text measurer. Set Control.TextMeasurer on the root.");
 }

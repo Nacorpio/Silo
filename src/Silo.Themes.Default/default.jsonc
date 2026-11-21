@@ -13,6 +13,7 @@
     "--radius": "4px",
     "--border": "#9ca3af",
     "--track": "#e5e7eb",
+    "--muted": "#9ca3af",
   },
   "rules": {
     "Box": {
@@ -55,6 +56,18 @@
       "indicator-border-color": "var(--border)",
       "indicator-mark-color": "var(--accent-text)",
       "&:checked": { "indicator-background": "var(--accent)", "indicator-border-color": "var(--accent)" },
+    },
+    "TextBox": {
+      "background": "var(--surface)",
+      "color": "var(--text)",
+      "padding": "6px 8px",
+      "border-width": "1px",
+      "border-color": "var(--border)",
+      "border-radius": "var(--radius)",
+      "caret-color": "var(--text)",
+      "placeholder-color": "var(--muted)",
+      "&:hover": { "border-color": "var(--accent-hover)" },
+      "&:focus": { "border-color": "var(--accent)" },
     },
     "Slider": {
       "height": "24px",
