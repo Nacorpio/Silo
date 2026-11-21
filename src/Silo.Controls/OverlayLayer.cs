@@ -39,14 +39,17 @@ public sealed class OverlayLayer
     /// <summary>The overlays from the bottom to the top.</summary>
     readonly List<OverlayHost> hosts = [];
 
+
     /// <summary>Raised after an overlay was shown or closed, so the owner can style and draw a new frame.</summary>
     public event EventHandler? Changed;
+
 
     /// <summary>Gets how many overlays are shown.</summary>
     public int Count => hosts.Count;
 
     /// <summary>Gets or sets the object that measures text in the overlays.</summary>
     public ITextMeasurer? TextMeasurer { get; set; }
+
 
     /// <summary>Tells whether a Control is currently shown as an overlay.</summary>
     /// <param name="content">The Control to look for.</param>

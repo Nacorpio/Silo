@@ -17,6 +17,7 @@ sealed class OverlayHost : Control
         Children.Add(content);
     }
 
+
     /// <summary>Gets the overlay's Control.</summary>
     public Control Content { get; }
 
