@@ -431,10 +431,23 @@ public static class FlexLayout
     /// <returns>The combined insets in pixels.</returns>
     static double Insets(LayoutStyle style, bool horizontal, double basis)
     {
-        return horizontal
-            ? Inset(style.Padding.Left, basis) + Inset(style.Padding.Right, basis) + Inset(style.Border.Left, basis) + Inset(style.Border.Right, basis)
-            : Inset(style.Padding.Top, basis) + Inset(style.Padding.Bottom, basis) + Inset(style.Border.Top, basis) + Inset(style.Border.Bottom, basis);
+        if (horizontal)
+            return Horizontal(style.Padding, basis) + Horizontal(style.Border, basis);
+
+        return Vertical(style.Padding, basis) + Vertical(style.Border, basis);
     }
+
+    /// <summary>Sums the left and right sides of a thickness.</summary>
+    /// <param name="thickness">The thickness.</param>
+    /// <param name="basis">The width that percentages resolve against.</param>
+    /// <returns>The combined width in pixels.</returns>
+    static double Horizontal(Thickness thickness, double basis) => Inset(thickness.Left, basis) + Inset(thickness.Right, basis);
+
+    /// <summary>Sums the top and bottom sides of a thickness.</summary>
+    /// <param name="thickness">The thickness.</param>
+    /// <param name="basis">The width that percentages resolve against.</param>
+    /// <returns>The combined height in pixels.</returns>
+    static double Vertical(Thickness thickness, double basis) => Inset(thickness.Top, basis) + Inset(thickness.Bottom, basis);
 
     /// <summary>Resolves a length that cannot be auto, such as padding, to pixels. Negative results become 0.</summary>
     /// <param name="length">The length.</param>
