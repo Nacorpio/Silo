@@ -161,7 +161,8 @@ public class ElementTests
     [Fact]
     public void Registering_the_same_name_twice_on_one_owner_throws()
     {
-        Assert.Throws<ArgumentException>(() => StyledProperty.Register<Probe, double>("background", 0, double.TryParse));
+        Assert.Throws<ArgumentException>(
+            () => StyledProperty.Register<Probe, double>("background", 0, double.TryParse));
     }
 
     [Fact]

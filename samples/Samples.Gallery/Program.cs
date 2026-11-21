@@ -17,7 +17,8 @@ var screenshot = ArgumentAfter("--screenshot");
 var root = Gallery.Build();
 var overrides = theme is null ? null : JsoncStylesheetReader.Read(File.ReadAllText(theme), Path.GetFileName(theme));
 
-StyleResolver Resolve(Stylesheet? custom) => new(custom is null ? [DefaultTheme.Load(), Gallery.Styles()] : [DefaultTheme.Load(), Gallery.Styles(), custom]);
+StyleResolver Resolve(Stylesheet? custom)
+    => new(custom is null ? [DefaultTheme.Load(), Gallery.Styles()] : [DefaultTheme.Load(), Gallery.Styles(), custom]);
 
 if (screenshot is not null)
 {

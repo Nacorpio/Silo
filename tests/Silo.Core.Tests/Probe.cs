@@ -5,8 +5,10 @@ using Silo.Styling.Values;
 /// <summary>An Element with a few Styled properties and a Pseudo-state switch, for tests.</summary>
 public class Probe : Element
 {
-    public static readonly StyledProperty<Color> BackgroundProperty = StyledProperty.Register<Probe, Color>("background", default, Color.TryParse);
-    public static readonly StyledProperty<Color> ForegroundProperty = StyledProperty.Register<Probe, Color>("color", new Color(0, 0, 0), Color.TryParse, inherits: true);
+    public static readonly StyledProperty<Color> BackgroundProperty =
+        StyledProperty.Register<Probe, Color>("background", default, Color.TryParse);
+    public static readonly StyledProperty<Color> ForegroundProperty =
+        StyledProperty.Register<Probe, Color>("color", new Color(0, 0, 0), Color.TryParse, inherits: true);
 
     static Probe()
     {

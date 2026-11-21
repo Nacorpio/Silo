@@ -94,7 +94,9 @@ public sealed class DiagnosticsAgent(Element root, Func<StyleResolver?> styles)
 
         var notification = id.ValueKind == JsonValueKind.Undefined;
 
-        if (request.ValueKind != JsonValueKind.Object || !request.TryGetProperty("method", out var method) || method.ValueKind != JsonValueKind.String)
+        if (request.ValueKind != JsonValueKind.Object
+            || !request.TryGetProperty("method", out var method)
+            || method.ValueKind != JsonValueKind.String)
             return Error(id, InvalidRequest, "The request needs a string 'method'.");
 
         request.TryGetProperty("params", out var parameters);
@@ -285,7 +287,10 @@ public sealed class DiagnosticsAgent(Element root, Func<StyleResolver?> styles)
     /// <param name="w">The writer.</param>
     /// <param name="winner">The winning declaration.</param>
     /// <param name="tokens">The Tokens visible at the Element.</param>
-    static void WriteStylesheetOrigin(Utf8JsonWriter w, CascadedValue winner, IReadOnlyDictionary<string, string> tokens)
+    static void WriteStylesheetOrigin(
+        Utf8JsonWriter w,
+        CascadedValue winner,
+        IReadOnlyDictionary<string, string> tokens)
     {
         w.WriteString("origin", "stylesheet");
         w.WriteString("declared", winner.Value);
@@ -332,7 +337,8 @@ public sealed class DiagnosticsAgent(Element root, Func<StyleResolver?> styles)
     /// <param name="id">The request id.</param>
     /// <param name="result">The result as JSON text.</param>
     /// <returns>The response.</returns>
-    static string Result(JsonElement id, string result) => $$"""{"jsonrpc":"2.0","id":{{id.GetRawText()}},"result":{{result}}}""";
+    static string Result(JsonElement id, string result) =>
+        $$"""{"jsonrpc":"2.0","id":{{id.GetRawText()}},"result":{{result}}}""";
 
     /// <summary>Builds an error response.</summary>
     /// <param name="id">The request id, which is undefined when it could not be read.</param>

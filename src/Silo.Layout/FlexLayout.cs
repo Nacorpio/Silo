@@ -41,8 +41,11 @@ public static class FlexLayout
 
         var style = root.Style;
 
-        var width = Clamp(Resolve(style.Width, available.Width) ?? available.Width, style.MinWidth, style.MaxWidth, available.Width);
-        var height = Clamp(Resolve(style.Height, available.Height) ?? available.Height, style.MinHeight, style.MaxHeight, available.Height);
+        var preferredWidth = Resolve(style.Width, available.Width) ?? available.Width;
+        var preferredHeight = Resolve(style.Height, available.Height) ?? available.Height;
+
+        var width = Clamp(preferredWidth, style.MinWidth, style.MaxWidth, available.Width);
+        var height = Clamp(preferredHeight, style.MinHeight, style.MaxHeight, available.Height);
 
         Place(root, new Rect(0, 0, Math.Max(0, width), Math.Max(0, height)));
     }
@@ -268,7 +271,13 @@ public static class FlexLayout
     /// <param name="mainSize">The container's content size along the main axis.</param>
     /// <param name="crossSize">The container's content size along the cross axis.</param>
     /// <returns>The base size in pixels.</returns>
-    static double BaseSize(Item item, bool isRow, Length? basis, Length? crossProperty, double mainSize, double crossSize)
+    static double BaseSize(
+        Item item,
+        bool isRow,
+        Length? basis,
+        Length? crossProperty,
+        double mainSize,
+        double crossSize)
     {
         if (Resolve(basis, mainSize) is { } resolved)
             return Math.Max(item.MainInsets, resolved);
@@ -438,13 +447,15 @@ public static class FlexLayout
     /// <param name="thickness">The thickness.</param>
     /// <param name="basis">The width that percentages resolve against.</param>
     /// <returns>The combined width in pixels.</returns>
-    static double Horizontal(Thickness thickness, double basis) => Inset(thickness.Left, basis) + Inset(thickness.Right, basis);
+    static double Horizontal(Thickness thickness, double basis)
+        => Inset(thickness.Left, basis) + Inset(thickness.Right, basis);
 
     /// <summary>Sums the top and bottom sides of a thickness.</summary>
     /// <param name="thickness">The thickness.</param>
     /// <param name="basis">The width that percentages resolve against.</param>
     /// <returns>The combined height in pixels.</returns>
-    static double Vertical(Thickness thickness, double basis) => Inset(thickness.Top, basis) + Inset(thickness.Bottom, basis);
+    static double Vertical(Thickness thickness, double basis)
+        => Inset(thickness.Top, basis) + Inset(thickness.Bottom, basis);
 
     /// <summary>Resolves a length that cannot be auto, such as padding, to pixels. Negative results become 0.</summary>
     /// <param name="length">The length.</param>

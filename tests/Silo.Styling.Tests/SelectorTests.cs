@@ -50,7 +50,9 @@ public class SelectorTests
     [Fact]
     public void Round_trips_to_string()
     {
-        Assert.Equal("Box > Button.primary:hover::part(icon)", Selector.Parse("Box>Button.primary:hover::part(icon)").ToString());
+        var selector = Selector.Parse("Box>Button.primary:hover::part(icon)");
+
+        Assert.Equal("Box > Button.primary:hover::part(icon)", selector.ToString());
     }
 
     [Theory]

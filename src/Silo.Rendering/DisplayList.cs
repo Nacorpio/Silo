@@ -93,11 +93,14 @@ public sealed class DisplayListBuilder : IDrawingContext
     public void ClipRect(Rect rect) => commands.Add(new ClipRectCommand(rect));
 
     /// <inheritdoc/>
-    public void FillRect(Rect rect, Color color, double cornerRadius = 0) => commands.Add(new FillRectCommand(rect, color, cornerRadius));
+    public void FillRect(Rect rect, Color color, double cornerRadius = 0)
+        => commands.Add(new FillRectCommand(rect, color, cornerRadius));
 
     /// <inheritdoc/>
-    public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0) => commands.Add(new StrokeRectCommand(rect, color, width, cornerRadius));
+    public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0)
+        => commands.Add(new StrokeRectCommand(rect, color, width, cornerRadius));
 
     /// <inheritdoc/>
-    public void DrawText(string text, double x, double y, TextStyle style, Color color) => commands.Add(new DrawTextCommand(text, x, y, style, color));
+    public void DrawText(string text, double x, double y, TextStyle style, Color color)
+        => commands.Add(new DrawTextCommand(text, x, y, style, color));
 }

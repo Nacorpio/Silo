@@ -262,7 +262,8 @@ public sealed class Selector
             else if (ch == ':' && pos + 1 < text.Length && text[pos + 1] == ':')
             {
                 pos += 2;
-                if (ReadIdent(text, ref pos) != "part" || pos >= text.Length || text[pos] != '(') throw Bad(text, "only ::part() is supported");
+                if (ReadIdent(text, ref pos) != "part" || pos >= text.Length || text[pos] != '(')
+                    throw Bad(text, "only ::part() is supported");
                 pos++;
                 part = ReadIdent(text, ref pos);
                 if (pos >= text.Length || text[pos] != ')') throw Bad(text, "expected ')'");
@@ -286,7 +287,8 @@ public sealed class Selector
     static string ReadIdent(string text, ref int pos)
     {
         var start = pos;
-        if (pos >= text.Length || !(IsIdentStart(text[pos]) || text[pos] == '-')) throw Bad(text, "expected an identifier");
+        if (pos >= text.Length || !(IsIdentStart(text[pos]) || text[pos] == '-'))
+            throw Bad(text, "expected an identifier");
         while (pos < text.Length && IsIdentChar(text[pos])) pos++;
 
         return text[start..pos];

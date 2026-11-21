@@ -15,9 +15,12 @@ public class DisplayListTests
 
         public void Translate(double dx, double dy) => Calls.Add($"translate {dx} {dy}");
         public void ClipRect(Rect rect) => Calls.Add($"clip {rect.X} {rect.Y} {rect.Width} {rect.Height}");
-        public void FillRect(Rect rect, Color color, double cornerRadius = 0) => Calls.Add($"fill {rect.Width}x{rect.Height} {color.R} r{cornerRadius}");
-        public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0) => Calls.Add($"stroke {width}");
-        public void DrawText(string text, double x, double y, TextStyle style, Color color) => Calls.Add($"text {text} {x} {y} {style.Size}");
+        public void FillRect(Rect rect, Color color, double cornerRadius = 0)
+            => Calls.Add($"fill {rect.Width}x{rect.Height} {color.R} r{cornerRadius}");
+        public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0)
+            => Calls.Add($"stroke {width}");
+        public void DrawText(string text, double x, double y, TextStyle style, Color color)
+            => Calls.Add($"text {text} {x} {y} {style.Size}");
     }
 
     [Fact]
@@ -37,7 +40,12 @@ public class DisplayListTests
 
         builder.Build().Replay(log);
 
-        Assert.Equal(["save", "translate 5 6", "clip 0 0 10 10", "fill 10x4 9 r2", "stroke 1", "text Hi 1 2 14", "restore"], log.Calls);
+        string[] expected =
+        [
+            "save", "translate 5 6", "clip 0 0 10 10", "fill 10x4 9 r2", "stroke 1", "text Hi 1 2 14", "restore",
+        ];
+
+        Assert.Equal(expected, log.Calls);
     }
 
     [Fact]

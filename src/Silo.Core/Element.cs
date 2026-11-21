@@ -251,7 +251,9 @@ public class Element : IStyleNode
 
             if (property is null)
             {
-                diagnostics.Add(new StyleDiagnostic(this, name, declared.Value, declared.Source.Span, $"{TypeName} has no Styled property '{name}'."));
+                var message = $"{TypeName} has no Styled property '{name}'.";
+
+                diagnostics.Add(new StyleDiagnostic(this, name, declared.Value, declared.Source.Span, message));
                 continue;
             }
 
@@ -269,7 +271,9 @@ public class Element : IStyleNode
 
             if (!property.TryParseObject(computed, out var value))
             {
-                diagnostics.Add(new StyleDiagnostic(this, name, declared.Value, declared.Source.Span, $"'{computed}' is not a valid {property.ValueType.Name}."));
+                var message = $"'{computed}' is not a valid {property.ValueType.Name}.";
+
+                diagnostics.Add(new StyleDiagnostic(this, name, declared.Value, declared.Source.Span, message));
                 continue;
             }
 
@@ -348,7 +352,10 @@ public class Element : IStyleNode
 
         var percent = text.EndsWith('%');
 
-        if (double.TryParse(percent ? text[..^1] : text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var number)
+        var digits = percent ? text[..^1] : text;
+        var style = System.Globalization.NumberStyles.Float;
+
+        if (double.TryParse(digits, style, System.Globalization.CultureInfo.InvariantCulture, out var number)
             && double.IsFinite(number))
         {
             value = Math.Clamp(percent ? number / 100 : number, 0, 1);

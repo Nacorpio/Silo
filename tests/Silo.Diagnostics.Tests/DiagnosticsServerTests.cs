@@ -9,7 +9,8 @@ public class DiagnosticsServerTests
     {
         var root = new Box { Name = "root" };
         var agent = new DiagnosticsAgent(root, () => null);
-        var server = new DiagnosticsServer(agent, invoke ?? (work => Task.FromResult(work())), $"silo-test-{Guid.NewGuid():N}");
+        var server =
+            new DiagnosticsServer(agent, invoke ?? (work => Task.FromResult(work())), $"silo-test-{Guid.NewGuid():N}");
 
         root.Children.Add(new Button { Text = "OK" });
         server.Start();
