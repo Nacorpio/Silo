@@ -59,6 +59,9 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Routes the pointer into the tree.</summary>
     readonly PointerRouter router;
 
+    /// <summary>The Controls drawn above the root.</summary>
+    readonly OverlayLayer overlays;
+
     /// <summary>Keeps the keyboard focus.</summary>
     readonly FocusManager focus = new();
 
@@ -108,7 +111,9 @@ public sealed unsafe class SdlWindow : IDisposable
 
         id = (uint)SDL3.SDL_GetWindowID(window);
         root.TextMeasurer ??= new SkiaTextMeasurer();
-        router = new PointerRouter(root);
+        overlays = new OverlayLayer { TextMeasurer = root.TextMeasurer };
+        overlays.Changed += (_, _) => Restyle();
+        router = new PointerRouter(root, overlays);
 
         SDL3.SDL_StartTextInput(window);
 
@@ -123,6 +128,9 @@ public sealed unsafe class SdlWindow : IDisposable
 
     /// <summary>Gets the root Control of the window.</summary>
     public Control Root => root;
+
+    /// <summary>Gets the layer for menus, drop-down lists and tooltips, which are drawn above the root Control.</summary>
+    public OverlayLayer Overlays => overlays;
 
     /// <summary>Gets the id that SDL puts in the events of this window.</summary>
     public uint Id => id;
@@ -274,7 +282,10 @@ public sealed unsafe class SdlWindow : IDisposable
     void Restyle()
     {
         if (styles is not null)
+        {
             root.ApplyStyles(styles);
+            overlays.ApplyStyles(styles);
+        }
 
         dirty = true;
     }
@@ -315,6 +326,9 @@ public sealed unsafe class SdlWindow : IDisposable
 
         if (!key.repeat)
             KeyPressed?.Invoke(pressed);
+
+        if (pressed == Key.Escape && overlays.CloseTop())
+            return true;
 
         return focus.KeyDown(pressed);
     }
@@ -363,6 +377,9 @@ public sealed unsafe class SdlWindow : IDisposable
         var builder = new DisplayListBuilder();
 
         root.Render(builder);
+
+        overlays.Arrange(new Size(width, height));
+        overlays.Render(builder);
 
         using var bitmap =
             new SKBitmap(new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul));

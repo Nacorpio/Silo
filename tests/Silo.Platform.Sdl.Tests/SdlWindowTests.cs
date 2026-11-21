@@ -147,6 +147,35 @@ public class SdlWindowTests
     }
 
     [Fact]
+    public void An_overlay_is_drawn_and_closed_by_Escape_or_a_press_outside()
+    {
+        var (window, _) = Setup();
+
+        using (window)
+        {
+            var menu = new Box { Name = "menu" };
+
+            window.Pump(0);
+            window.Overlays.Show(menu, 100, 50);
+            window.Pump(0);
+
+            Assert.Equal((100, 50), (menu.Bounds.X, menu.Bounds.Y));
+
+            Events.PushKey(SDL_Keycode.SDLK_ESCAPE, window.Id, repeat: false);
+            window.Pump(0);
+
+            Assert.False(window.Overlays.Contains(menu));
+
+            window.Overlays.Show(menu, 100, 50);
+            window.Pump(0);
+            Mouse(SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN, 5, 90, window.Id);
+            window.Pump(0);
+
+            Assert.False(window.Overlays.Contains(menu));
+        }
+    }
+
+    [Fact]
     public void Closing_one_window_raises_Closed_and_leaves_the_others_running()
     {
         var (first, _) = Setup();

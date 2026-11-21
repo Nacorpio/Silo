@@ -22,7 +22,13 @@ namespace Silo;
 ///     root.ApplyStyles(resolver);
 /// </code>
 /// </example>
-public sealed class PointerRouter(Control root)
+/// <remarks>
+/// Given an <see cref="OverlayLayer"/>, the router tests the overlays before the tree. A press outside the top overlay closes
+/// it and goes no further, and the wheel does not scroll what is behind an overlay.
+/// </remarks>
+/// <param name="root">The root Control, whose origin is the pointer's origin.</param>
+/// <param name="overlays">The overlays that are drawn above the root, or <see langword="null"/> for none.</param>
+public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
 {
     /// <summary>The Control that the pointer is over, or <see langword="null"/> when it is outside the tree.</summary>
     Control? hovered;
@@ -43,8 +49,9 @@ public sealed class PointerRouter(Control root)
     public bool Move(double x, double y)
     {
         var moved = dragged?.PointerMove(dragged.ToLocal(x, y).X) ?? false;
+        var hit = Hit(x, y);
 
-        return SetHovered(root.HitTest(x, y)) | moved;
+        return SetHovered(overlays?.IsBackdrop(hit) == true ? null : hit) | moved;
     }
 
     /// <summary>Tells the router that the pointer left the window.</summary>
@@ -58,6 +65,9 @@ public sealed class PointerRouter(Control root)
     public bool Down(double x, double y)
     {
         var changed = Move(x, y);
+
+        if (overlays?.IsBackdrop(Hit(x, y)) == true)
+            return overlays.CloseTop() | changed;
 
         pressed = Find<Button>(hovered);
         dragged = Find<Slider>(hovered);
@@ -99,12 +109,18 @@ public sealed class PointerRouter(Control root)
     /// <returns><see langword="true"/> when a <see cref="IScrollable"/> scrolled, so a new frame is needed.</returns>
     public bool Scroll(double x, double y, double delta)
     {
-        for (var c = root.HitTest(x, y); c is not null; c = c.Parent as Control)
+        for (var c = Hit(x, y); c is not null; c = c.Parent as Control)
             if (c is IScrollable scrollable && scrollable.ScrollBy(delta))
                 return true;
 
         return false;
     }
+
+    /// <summary>Finds the Control at a point, looking at the overlays first.</summary>
+    /// <param name="x">The horizontal position, relative to the root Control.</param>
+    /// <param name="y">The vertical position, relative to the root Control.</param>
+    /// <returns>The Control, the overlays' backdrop, or <see langword="null"/>.</returns>
+    Control? Hit(double x, double y) => overlays?.HitTest(x, y) ?? root.HitTest(x, y);
 
     /// <summary>Moves <c>hover</c> to a Control and its ancestors.</summary>
     /// <param name="target">The new Control under the pointer, or <see langword="null"/>.</param>
