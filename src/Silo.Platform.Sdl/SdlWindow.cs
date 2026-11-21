@@ -112,6 +112,7 @@ public sealed unsafe class SdlWindow : IDisposable
         id = (uint)SDL3.SDL_GetWindowID(window);
         root.TextMeasurer ??= new SkiaTextMeasurer();
         overlays = new OverlayLayer { TextMeasurer = root.TextMeasurer };
+        root.Overlays = overlays;
         overlays.Changed += (_, _) => Restyle();
         router = new PointerRouter(root, overlays);
 
@@ -339,9 +340,10 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
     bool PressPointer(float x, float y)
     {
+        var overlaid = overlays.Count > 0;
         var changed = router.Down(x, y);
 
-        return focus.FocusFrom(router.Hovered) | changed;
+        return (!overlaid && focus.FocusFrom(router.Hovered)) | changed;
     }
 
     /// <summary>Marks the window as closed, takes it out of the event loop and raises <see cref="Closed"/>.</summary>
