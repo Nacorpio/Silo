@@ -36,9 +36,17 @@ public class Button : TextControl
 
         var changed = SetPressed(false);
 
-        if (wasPressed && inside)
-            Click?.Invoke(this, EventArgs.Empty);
+        if (!wasPressed || !inside)
+            return changed;
+
+        changed |= OnClick();
+
+        Click?.Invoke(this, EventArgs.Empty);
 
         return changed;
     }
+
+    /// <summary>Runs when the Button is clicked, before <see cref="Click"/> is raised. Override it to react to the click itself.</summary>
+    /// <returns><see langword="true"/> when the Button changed a Pseudo-state, so styles need to be applied again. The default is <see langword="false"/>.</returns>
+    protected virtual bool OnClick() => false;
 }
