@@ -2,8 +2,33 @@ using System.Text;
 
 namespace Silo.Styling;
 
+/// <summary>
+/// How specific a <see cref="Selector"/> is, as a triple that is compared like CSS specificity: ids first, then classes, then
+/// types.
+/// </summary>
+/// <param name="Ids">The number of <c>#name</c> parts.</param>
+/// <param name="Classes">The number of <c>.class</c> parts plus the number of Pseudo-states such as <c>:hover</c>.</param>
+/// <param name="Types">The number of type names, plus one for a <c>::part()</c>. The universal <c>*</c> adds nothing.</param>
+/// <remarks>
+/// A larger value in an earlier position always wins: <c>#save</c> beats any number of classes, and one class beats any
+/// number of types. Use <see cref="CompareTo"/> or the comparison on <see cref="IComparable{T}"/> to order Selectors.
+/// </remarks>
+/// <example>
+/// <code language="csharp">
+/// Selector.Parse("Button.primary:hover").Specificity;  // Specificity(Ids: 0, Classes: 2, Types: 1)
+/// Selector.Parse("#save").Specificity;                 // Specificity(Ids: 1, Classes: 0, Types: 0)
+///
+/// Selector.Parse("#save").Specificity.CompareTo(Selector.Parse(".a.b.c").Specificity);  // greater than 0
+/// </code>
+/// </example>
 public readonly record struct Specificity(int Ids, int Classes, int Types) : IComparable<Specificity>
 {
+    /// <summary>Compares this specificity with another, ids first, then classes, then types.</summary>
+    /// <param name="other">The specificity to compare with.</param>
+    /// <returns>
+    /// A negative number if this one is less specific, zero if they are equal, and a positive number if this one is more
+    /// specific.
+    /// </returns>
     public int CompareTo(Specificity other)
     {
         var c = Ids.CompareTo(other.Ids);
@@ -13,11 +38,37 @@ public readonly record struct Specificity(int Ids, int Classes, int Types) : ICo
     }
 }
 
-public enum Combinator { None, Descendant, Child }
+/// <summary>How two compound Selectors are joined.</summary>
+public enum Combinator
+{
+    /// <summary>No combinator. Only the first compound of a Selector has this, because nothing comes before it.</summary>
+    None,
 
+    /// <summary>White space, as in <c>.card Button</c>: the right side matches any descendant of an Element matching the left side.</summary>
+    Descendant,
+
+    /// <summary><c>&gt;</c>, as in <c>Box &gt; Button</c>: the right side matches only a direct child of an Element matching the left side.</summary>
+    Child,
+}
+
+/// <summary>
+/// One part of a <see cref="Selector"/> between combinators, such as <c>Button.primary:hover</c>. It tests a single Element
+/// and knows nothing about the Element's ancestors.
+/// </summary>
+/// <param name="Type">The type name, <c>*</c> for any type, or <see langword="null"/> when the compound has no type.</param>
+/// <param name="Id">The name that the Element must have, from <c>#name</c>, or <see langword="null"/>.</param>
+/// <param name="Classes">The Classes the Element must all have, from <c>.class</c> parts.</param>
+/// <param name="States">The Pseudo-states the Element must all be in, from <c>:state</c> parts, without the colon.</param>
+/// <param name="Part">The Part named by <c>::part(name)</c>, or <see langword="null"/>. It is only allowed on the last compound.</param>
 public sealed record CompoundSelector(
     string? Type, string? Id, IReadOnlyList<string> Classes, IReadOnlyList<string> States, string? Part)
 {
+    /// <summary>Tests whether an Element satisfies the type, name, Classes and Pseudo-states of this compound.</summary>
+    /// <param name="node">The Element to test.</param>
+    /// <returns>
+    /// <see langword="true"/> if every part matches. <see cref="Part"/> is not tested, because it names something inside the
+    /// matching Element and not the Element itself.
+    /// </returns>
     public bool Matches(IStyleNode node)
     {
         if (Type is not null && Type != "*" && node.TypeName != Type) return false;
@@ -27,6 +78,8 @@ public sealed record CompoundSelector(
         return true;
     }
 
+    /// <summary>Writes the compound back in Selector syntax.</summary>
+    /// <returns>For example <c>Button.primary:hover::part(icon)</c>.</returns>
     public override string ToString()
     {
         var sb = new StringBuilder(Type);
@@ -38,7 +91,31 @@ public sealed record CompoundSelector(
     }
 }
 
-/// <summary>A parsed Selector: compounds joined by combinators. Combinator[i] sits between compound i-1 and i.</summary>
+/// <summary>
+/// The pattern in a Rule that decides which Elements it applies to: one or more compound Selectors joined by descendant or
+/// child combinators, optionally ending in a Part. Create one with <see cref="Parse"/>.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The supported syntax is a type name or <c>*</c>, <c>.class</c>, <c>#name</c>, Pseudo-states such as <c>:hover</c>,
+/// <c>::part(name)</c> on the last compound, white space for the descendant combinator and <c>&gt;</c> for the child
+/// combinator. A compound may combine these, as in <c>Button.primary:hover</c>. Attribute Selectors, <c>+</c> and <c>~</c>,
+/// and selector lists are not supported.
+/// </para>
+/// <para>
+/// A Selector is immutable and safe to share between threads.
+/// </para>
+/// </remarks>
+/// <example>
+/// <code language="csharp">
+/// var selector = Selector.Parse("Box &gt; Button.primary:hover");
+///
+/// selector.Matches(button);                 // true when button is a hovered .primary Button directly inside a Box
+/// selector.Specificity;                     // Specificity(Ids: 0, Classes: 2, Types: 2)
+///
+/// Selector.Parse("Button::part(icon)").Part;  // "icon"
+/// </code>
+/// </example>
 public sealed class Selector
 {
     readonly CompoundSelector[] _compounds;
@@ -59,12 +136,23 @@ public sealed class Selector
         Specificity = new Specificity(ids, classes, types);
     }
 
+    /// <summary>The specificity of the whole Selector, added up over all of its compounds.</summary>
     public Specificity Specificity { get; }
 
-    /// <summary>The Part targeted by the rightmost compound, or null when the Selector targets the Element itself.</summary>
+    /// <summary>
+    /// The name of the Part that the Selector targets, from a trailing <c>::part(name)</c>, or <see langword="null"/> when it
+    /// targets the Element itself.
+    /// </summary>
     public string? Part => _compounds[^1].Part;
 
-    /// <summary>True when the Element (the owner, for a ::part() Selector) matches.</summary>
+    /// <summary>
+    /// Tests whether the Selector matches an Element, looking at the Element and, for combinators, at its ancestors.
+    /// </summary>
+    /// <param name="node">The Element to test. For a <c>::part()</c> Selector this is the Control that owns the Part.</param>
+    /// <returns>
+    /// <see langword="true"/> if the rightmost compound matches <paramref name="node"/> and every compound to its left is
+    /// matched by a fitting ancestor. A descendant combinator accepts any ancestor, and a child combinator only the parent.
+    /// </returns>
     public bool Matches(IStyleNode node) => MatchFrom(_compounds.Length - 1, node);
 
     bool MatchFrom(int index, IStyleNode node)
@@ -84,6 +172,11 @@ public sealed class Selector
         }
     }
 
+    /// <summary>Writes the Selector in a normalized form.</summary>
+    /// <returns>
+    /// The Selector with single spaces around combinators, for example <c>Box &gt; Button.primary</c>. Parsing the result gives
+    /// an equivalent Selector.
+    /// </returns>
     public override string ToString()
     {
         var sb = new StringBuilder();
@@ -96,6 +189,20 @@ public sealed class Selector
         return sb.ToString();
     }
 
+    /// <summary>Parses Selector text.</summary>
+    /// <param name="text">The Selector, for example <c>Button.primary:hover</c> or <c>.card &gt; Box</c>.</param>
+    /// <returns>The parsed Selector.</returns>
+    /// <exception cref="FormatException">
+    /// The text is empty, has a stray or trailing <c>&gt;</c>, has an empty or malformed name, uses an unsupported
+    /// pseudo-element, or puts <c>::part()</c> anywhere but the last compound. The message names the problem.
+    /// </exception>
+    /// <example>
+    /// <code language="csharp">
+    /// var ok = Selector.Parse("Box&gt;Button");   // same as "Box &gt; Button"
+    ///
+    /// Selector.Parse("Button..x");               // throws FormatException
+    /// </code>
+    /// </example>
     public static Selector Parse(string text)
     {
         var compounds = new List<CompoundSelector>();

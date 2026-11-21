@@ -2,7 +2,18 @@ using System.Globalization;
 
 namespace Silo.Styling.Values;
 
-/// <summary>An sRGB color with 8 bits per channel.</summary>
+/// <summary>
+/// An sRGB color with 8 bits per channel and a straight (not premultiplied) alpha channel.
+/// </summary>
+/// <param name="R">The red channel, from 0 to 255.</param>
+/// <param name="G">The green channel, from 0 to 255.</param>
+/// <param name="B">The blue channel, from 0 to 255.</param>
+/// <param name="A">The alpha channel, from 0 (fully transparent) to 255 (fully opaque, the default).</param>
+/// <remarks>
+/// Use <see cref="TryParse"/> to read the CSS-style color strings that Stylesheets use. Colors written in other color spaces
+/// are converted to sRGB and clamped to the 0 to 255 range per channel, so a color outside the sRGB gamut is clipped, not
+/// mapped to the nearest in-gamut color.
+/// </remarks>
 public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
 {
     static readonly Dictionary<string, Color> Named = new(StringComparer.OrdinalIgnoreCase)
@@ -20,6 +31,43 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
         ["purple"] = new(128, 0, 128),
     };
 
+    /// <summary>
+    /// Tries to read a CSS-style color string. Nothing is thrown for bad input.
+    /// </summary>
+    /// <param name="text">
+    /// The color text. Leading and trailing white space is ignored. The supported forms are:
+    /// <list type="bullet">
+    /// <item><description>Hex: <c>#rgb</c>, <c>#rgba</c>, <c>#rrggbb</c> and <c>#rrggbbaa</c>.</description></item>
+    /// <item><description>A named color, matched without regard to case: <c>transparent</c>, <c>black</c>, <c>white</c>, <c>red</c>, <c>green</c>, <c>blue</c>, <c>gray</c>, <c>grey</c>, <c>yellow</c>, <c>orange</c> and <c>purple</c>. This is a small subset of the CSS names.</description></item>
+    /// <item><description><c>rgb(r g b)</c> and <c>rgba(r, g, b, a)</c>: each channel is a number from 0 to 255 or a percentage.</description></item>
+    /// <item><description><c>hsl(h s l)</c> and <c>hsla(h, s, l, a)</c>: the hue is in degrees, with an optional <c>deg</c> suffix, and the saturation and lightness are percentages or fractions from 0 to 1.</description></item>
+    /// <item><description><c>oklch(l c h)</c>: lightness is a fraction or percentage, chroma is a number (about 0 to 0.4 for real colors) and the hue is in degrees.</description></item>
+    /// </list>
+    /// In the function forms the arguments may be separated by commas, spaces or a slash, and the alpha is an optional fourth
+    /// argument given as a fraction from 0 to 1 or as a percentage. Function names are matched without regard to case.
+    /// </param>
+    /// <param name="color">
+    /// When the method returns <see langword="true"/>, the parsed color; otherwise <see langword="default"/>, which is
+    /// transparent black.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if <paramref name="text"/> is a supported color; <see langword="false"/> for anything else,
+    /// including unknown functions, the wrong number of arguments and numbers that cannot be read.
+    /// </returns>
+    /// <remarks>
+    /// Out-of-range values are clamped instead of rejected, for example <c>rgb(300 0 0)</c> is the same as
+    /// <c>rgb(255 0 0)</c>. Numbers are read with the invariant culture.
+    /// </remarks>
+    /// <example>
+    /// <code language="csharp">
+    /// Color.TryParse("#3b82f6", out var blue);                  // true: Color(59, 130, 246, 255)
+    /// Color.TryParse("rgb(10 20 30 / 50%)", out var faded);     // true: Color(10, 20, 30, 128)
+    /// Color.TryParse("hsl(120, 100%, 25%)", out var green);     // true: Color(0, 128, 0, 255)
+    /// Color.TryParse("oklch(0.628 0.2577 29.23)", out var red); // true: close to Color(255, 0, 0, 255)
+    ///
+    /// Color.TryParse("not a color", out _);                     // false
+    /// </code>
+    /// </example>
     public static bool TryParse(string text, out Color color)
     {
         color = default;

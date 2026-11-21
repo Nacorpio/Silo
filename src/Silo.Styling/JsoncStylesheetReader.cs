@@ -3,11 +3,56 @@ using System.Text.Json;
 
 namespace Silo.Styling;
 
-/// <summary>Reads the JSONC Stylesheet format into the syntax-independent <see cref="Stylesheet"/> model.</summary>
+/// <summary>
+/// Reads the JSONC Stylesheet format, which is JSON that allows comments and trailing commas, into the syntax-independent
+/// <see cref="Stylesheet"/> model.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The format has two optional top-level keys. <c>tokens</c> is an object of Token names and values. <c>rules</c> is an
+/// object whose keys are Selectors and whose values are Rule bodies. In a body, a key that starts with <c>--</c> declares a
+/// Token, a key whose value is an object is a nested Rule, and every other key is a Styled property. A nested key that
+/// contains <c>&amp;</c> has the parent Selector put in its place; any other nested key becomes a descendant of the parent.
+/// </para>
+/// <para>
+/// The file is read in order and nothing is merged, so the same Selector written twice gives two Rules and the later one
+/// wins a tie. Property and Token values may be strings, numbers or booleans and are kept as text.
+/// </para>
+/// </remarks>
+/// <example>
+/// <code language="csharp">
+/// var sheet = JsoncStylesheetReader.Read("""
+///     {
+///       // Tokens inherit down the tree like CSS custom properties.
+///       "tokens": { "--accent": "#3b82f6", },
+///       "rules": {
+///         "Button.primary": {
+///           "background": "var(--accent)",
+///           "&amp;:hover": { "background": "oklch(0.6 0.15 250)" },   // becomes Button.primary:hover
+///           "&amp;::part(icon)": { "margin-right": "6px" },
+///         },
+///       },
+///     }
+///     """, "theme.jsonc");
+///
+/// sheet.Rules.Count;   // 3
+/// </code>
+/// </example>
 public static class JsoncStylesheetReader
 {
     static readonly JsonReaderOptions Options = new() { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
 
+    /// <summary>Reads a Stylesheet from JSONC text.</summary>
+    /// <param name="json">The Stylesheet text.</param>
+    /// <param name="fileName">
+    /// The name to record in every <see cref="SourceSpan"/> and to put in error messages. It is not opened or checked, so
+    /// it can be a path, a resource name or a label such as <c>"&lt;inline&gt;"</c>.
+    /// </param>
+    /// <returns>The Stylesheet, with Rules in source order and nested Rules flattened.</returns>
+    /// <exception cref="StylesheetException">
+    /// The text is not valid JSONC, has an unknown top-level key, has a value of the wrong kind, or has a Selector that
+    /// does not parse. The message starts with <c>fileName(line,column):</c>.
+    /// </exception>
     public static Stylesheet Read(string json, string fileName)
     {
         var bytes = new UTF8Encoding(false).GetBytes(json);
