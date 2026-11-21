@@ -194,6 +194,7 @@ public class FlexLayoutTests
         var inner = new TestNode(new LayoutStyle { Gap = Px(4), AlignItems = AlignItems.Start }, null,
             new TestNode(new LayoutStyle { Width = Px(30), Height = Px(10) }),
             new TestNode(new LayoutStyle { Width = Px(20), Height = Px(16) }));
+
         var root = new TestNode(new LayoutStyle { AlignItems = AlignItems.Start }, null, inner);
 
         FlexLayout.Arrange(root, new Size(300, 100));
