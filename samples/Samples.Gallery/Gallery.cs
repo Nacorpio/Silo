@@ -17,6 +17,7 @@ static class Gallery
             "#row": { "gap": "8px", "flex-direction": "row" },
             "#options": { "gap": "6px", "flex-direction": "column", "align-items": "start" },
             "ProgressBar": { "width": "240px" },
+            "Slider": { "width": "240px" },
             "Button.secondary": {
               "background": "#e5e7eb", "color": "#1f2937",
               "&:hover": { "background": "#d1d5db" },
@@ -75,7 +76,10 @@ static class Gallery
         options.Children.Add(new ToggleSwitch { Text = "Dark mode" });
         options.Children.Add(progress);
 
-        primary.Click += (_, _) => progress.Value = clicks % 10 / 10.0;
+        var slider = new Slider { Value = 0.6 };
+
+        slider.ValueChanged += (_, _) => progress.Value = slider.Value;
+        options.Children.Add(slider);
 
         root.Children.Add(title);
         root.Children.Add(hint);

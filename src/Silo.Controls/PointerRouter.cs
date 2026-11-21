@@ -30,6 +30,9 @@ public sealed class PointerRouter(Control root)
     /// <summary>The Button that the pointer went down on and has not come up from yet.</summary>
     Button? pressed;
 
+    /// <summary>The Slider that is being dragged.</summary>
+    Slider? dragged;
+
     /// <summary>Gets the Control that the pointer is currently over.</summary>
     public Control? Hovered => hovered;
 
@@ -37,7 +40,12 @@ public sealed class PointerRouter(Control root)
     /// <param name="x">The horizontal position, relative to the root Control.</param>
     /// <param name="y">The vertical position, relative to the root Control.</param>
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
-    public bool Move(double x, double y) => SetHovered(root.HitTest(x, y));
+    public bool Move(double x, double y)
+    {
+        var moved = dragged?.PointerMove(dragged.ToLocal(x, y).X) ?? false;
+
+        return SetHovered(root.HitTest(x, y)) | moved;
+    }
 
     /// <summary>Tells the router that the pointer left the window.</summary>
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
@@ -52,6 +60,9 @@ public sealed class PointerRouter(Control root)
         var changed = Move(x, y);
 
         pressed = FindButton(hovered);
+        dragged = FindSlider(hovered);
+
+        changed |= dragged?.PointerDown(dragged.ToLocal(x, y).X) ?? false;
 
         return (pressed?.PointerDown() ?? false) | changed;
     }
@@ -65,8 +76,12 @@ public sealed class PointerRouter(Control root)
         var changed = Move(x, y);
 
         var button = pressed;
+        var slider = dragged;
 
         pressed = null;
+        dragged = null;
+
+        changed |= slider?.PointerUp() ?? false;
 
         return (button?.PointerUp(FindButton(hovered) == button) ?? false) | changed;
     }
@@ -104,6 +119,18 @@ public sealed class PointerRouter(Control root)
         hovered = target;
 
         return changed;
+    }
+
+    /// <summary>Finds the Slider that is a Control or one of its ancestors.</summary>
+    /// <param name="control">The Control to start from.</param>
+    /// <returns>The nearest Slider, or <see langword="null"/>.</returns>
+    static Slider? FindSlider(Control? control)
+    {
+        for (var c = control; c is not null; c = c.Parent as Control)
+            if (c is Slider slider)
+                return slider;
+
+        return null;
     }
 
     /// <summary>Finds the Button that is a Control or one of its ancestors.</summary>
