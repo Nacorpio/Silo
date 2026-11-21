@@ -42,6 +42,7 @@ public class Slider : Control
     public static readonly StyledProperty<Color> ThumbColorProperty =
         StyledProperty.Register<Slider, Color>("slider-thumb-color", new(255, 255, 255), Color.TryParse);
 
+
     /// <summary>The smallest value.</summary>
     double minimum;
 
@@ -53,6 +54,7 @@ public class Slider : Control
 
     /// <summary>Whether the thumb is being dragged.</summary>
     bool dragging;
+
 
     /// <summary>
     /// Runs before the first Slider is created, so that the Styled properties above are registered in time.

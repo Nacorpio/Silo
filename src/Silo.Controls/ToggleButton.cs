@@ -30,8 +30,10 @@ public abstract class ToggleButton : Button
     public static readonly StyledProperty<Color> IndicatorMarkColorProperty =
         StyledProperty.Register<ToggleButton, Color>("indicator-mark-color", new(255, 255, 255), Color.TryParse);
 
+
     /// <summary>Whether the Control is on.</summary>
     bool isChecked;
+
 
     /// <summary>
     /// Runs before the first ToggleButton is created, so that the Styled properties above are registered in time.

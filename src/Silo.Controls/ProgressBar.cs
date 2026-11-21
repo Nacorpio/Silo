@@ -24,8 +24,10 @@ public class ProgressBar : Control
     public static readonly StyledProperty<Color> BarColorProperty =
         StyledProperty.Register<ProgressBar, Color>("bar-color", new(59, 130, 246), Color.TryParse);
 
+
     /// <summary>The progress, from 0 to 1.</summary>
     double value;
+
 
     /// <summary>
     /// Runs before the first ProgressBar is created, so that <see cref="BarColorProperty"/> is registered in time.

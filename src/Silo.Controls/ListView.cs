@@ -29,6 +29,10 @@ namespace Silo;
 /// </example>
 public class ListView : Control, IScrollable
 {
+    /// <summary>The space left of each row's text in pixels.</summary>
+    const double TextInset = 8;
+
+
     /// <summary>The height of each row in pixels.</summary>
     public static readonly StyledProperty<double> ItemHeightProperty =
         StyledProperty.Register<ListView, double>("item-height", 28, ValueParsers.Pixels);
@@ -41,8 +45,6 @@ public class ListView : Control, IScrollable
     public static readonly StyledProperty<Color> SelectionTextColorProperty =
         StyledProperty.Register<ListView, Color>("selection-text-color", new(255, 255, 255), Color.TryParse);
 
-    /// <summary>The space left of each row's text in pixels.</summary>
-    const double TextInset = 8;
 
     /// <summary>The rows.</summary>
     IReadOnlyList<string> items = [];
@@ -52,6 +54,7 @@ public class ListView : Control, IScrollable
 
     /// <summary>How far the rows are scrolled up, in pixels.</summary>
     double offset;
+
 
     /// <summary>
     /// Runs before the first ListView is created, so that the Styled properties above are registered in time.

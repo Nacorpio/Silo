@@ -18,8 +18,10 @@ public abstract class TextControl : Control
     public static readonly StyledProperty<TextAlign> TextAlignProperty =
         StyledProperty.Register<TextControl, TextAlign>("text-align", TextAlign.Left, ValueParsers.TextAlignment);
 
+
     /// <summary>The text to show.</summary>
     string text = string.Empty;
+
 
     /// <summary>
     /// Runs before the first text Control is created, so that <see cref="TextAlignProperty"/> is registered in time.

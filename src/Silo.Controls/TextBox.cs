@@ -38,6 +38,7 @@ public class TextBox : Control
     public static readonly StyledProperty<Color> PlaceholderColorProperty =
         StyledProperty.Register<TextBox, Color>("placeholder-color", new(156, 163, 175), Color.TryParse);
 
+
     /// <summary>The text.</summary>
     string text = string.Empty;
 
@@ -46,6 +47,7 @@ public class TextBox : Control
 
     /// <summary>How far the text is scrolled to the left when it was last drawn, in pixels.</summary>
     double scroll;
+
 
     /// <summary>
     /// Runs before the first TextBox is created, so that the Styled properties above are registered in time.
