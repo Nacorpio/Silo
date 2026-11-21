@@ -122,6 +122,7 @@ public sealed class Selector
 
         if (compounds.Count == 0) throw Bad(text, "empty selector");
         if (pending == Combinator.Child) throw Bad(text, "trailing '>'");
+
         for (var i = 0; i < compounds.Count - 1; i++)
             if (compounds[i].Part is not null) throw Bad(text, "::part() must be last");
         return new Selector(compounds.ToArray(), combinators.ToArray());
