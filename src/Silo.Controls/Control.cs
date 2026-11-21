@@ -175,6 +175,24 @@ public abstract class Control : Element, ILayoutNode
     /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
     public bool SetPressed(bool value) => SetPseudoState("active", value);
 
+    /// <summary>Gets whether the Control can have the keyboard focus. A click on it, or inside it, focuses it.</summary>
+    public virtual bool IsFocusable => false;
+
+    /// <summary>Sets or clears the <c>focus</c> Pseudo-state. The <see cref="FocusManager"/> calls this.</summary>
+    /// <param name="value"><see langword="true"/> while the Control has the keyboard focus.</param>
+    /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
+    public bool SetFocused(bool value) => SetPseudoState("focus", value);
+
+    /// <summary>Handles a key press while the Control has the keyboard focus.</summary>
+    /// <param name="key">The key.</param>
+    /// <returns><see langword="true"/> when the Control changed, so a new frame is needed. The default is <see langword="false"/>.</returns>
+    public virtual bool KeyDown(Key key) => false;
+
+    /// <summary>Handles typed text while the Control has the keyboard focus.</summary>
+    /// <param name="text">The text, which can be several characters.</param>
+    /// <returns><see langword="true"/> when the Control changed, so a new frame is needed. The default is <see langword="false"/>.</returns>
+    public virtual bool TextInput(string text) => false;
+
     /// <summary>Lays out this Control and all of its descendants, and stores the result in <see cref="Bounds"/>.</summary>
     /// <param name="available">The area this Control lives in, such as the client area of a window. A Control without a width or height fills it.</param>
     public void Arrange(Size available) => FlexLayout.Arrange(this, available);
@@ -270,6 +288,17 @@ public abstract class Control : Element, ILayoutNode
 
     /// <summary>Gets the main axis that the children are laid out on. A Control can override it to ignore <c>flex-direction</c>.</summary>
     protected virtual FlexDirection LayoutDirection => GetValue(FlexDirectionProperty);
+
+    /// <summary>Builds the font description from the current property values.</summary>
+    /// <returns>The text style used for both measuring and drawing.</returns>
+    protected TextStyle CurrentTextStyle()
+        => new(GetValue(FontFamilyProperty), GetValue(FontSizeProperty), GetValue(BoldProperty));
+
+    /// <summary>Gets the text measurer, which must have been set on this Control or an ancestor.</summary>
+    /// <returns>The measurer.</returns>
+    /// <exception cref="InvalidOperationException">No measurer is set on this Control or any ancestor.</exception>
+    protected ITextMeasurer Measurer() => TextMeasurer ?? throw new InvalidOperationException(
+        $"{TypeName} needs a text measurer. Set Control.TextMeasurer on the root.");
 
     /// <summary>Measures the content of a Control that has no children, such as its text.</summary>
     /// <param name="availableWidth">The width the content may use, or <see langword="null"/> for its natural width.</param>

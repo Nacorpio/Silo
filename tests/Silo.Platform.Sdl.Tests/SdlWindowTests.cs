@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using SDL;
 using Silo;
 using Silo.Platform.Sdl;
@@ -117,6 +118,35 @@ public class SdlWindowTests
     }
 
     [Fact]
+    public void Clicking_a_text_box_focuses_it_and_typed_text_and_keys_edit_it()
+    {
+        SDL3.SDL_SetHint("SDL_VIDEO_DRIVER", "dummy");
+
+        var box = new TextBox();
+        var root = new Box { Name = "root" };
+
+        root.Children.Add(box);
+
+        using var window = new SdlWindow("test", 200, 100, root) { Styles = new StyleResolver([DefaultTheme.Load()]) };
+
+        window.Pump(0);
+
+        var bounds = box.Bounds;
+        var x = (float)(bounds.X + 5);
+        var y = (float)(bounds.Y + 5);
+
+        Mouse(SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN, x, y, window.Id);
+        Mouse(SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP, x, y, window.Id);
+        Events.PushText("héllo", window.Id);
+        Events.PushKey(SDL_Keycode.SDLK_BACKSPACE, window.Id, repeat: false);
+        Events.PushKey(SDL_Keycode.SDLK_BACKSPACE, window.Id, repeat: true);
+        window.Pump(100);
+
+        Assert.Equal("hél", box.Text);
+        Assert.Contains("focus", box.PseudoStates);
+    }
+
+    [Fact]
     public void Closing_one_window_raises_Closed_and_leaves_the_others_running()
     {
         var (first, _) = Setup();
@@ -178,6 +208,20 @@ static unsafe class Events
         e.key.windowID = (SDL_WindowID)windowId;
         e.key.down = true;
         e.key.repeat = repeat;
+
+        Push(e);
+    }
+
+    /// <summary>Pushes typed text.</summary>
+    /// <param name="text">The text.</param>
+    /// <param name="windowId">The window that has the keyboard focus.</param>
+    public static void PushText(string text, uint windowId)
+    {
+        SDL_Event e = default;
+
+        e.type = (uint)SDL_EventType.SDL_EVENT_TEXT_INPUT;
+        e.text.windowID = (SDL_WindowID)windowId;
+        e.text.text = (byte*)Marshal.StringToCoTaskMemUTF8(text);
 
         Push(e);
     }

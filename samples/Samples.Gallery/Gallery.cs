@@ -18,6 +18,7 @@ static class Gallery
             "#options": { "gap": "6px", "flex-direction": "column", "align-items": "start" },
             "ProgressBar": { "width": "240px" },
             "Slider": { "width": "240px" },
+            "TextBox": { "width": "240px" },
             "Button.secondary": {
               "background": "#e5e7eb", "color": "#1f2937",
               "&:hover": { "background": "#d1d5db" },
@@ -75,6 +76,13 @@ static class Gallery
         options.Children.Add(large);
         options.Children.Add(new ToggleSwitch { Text = "Dark mode" });
         options.Children.Add(progress);
+
+        var name = new TextBox { Placeholder = "Type your name" };
+        var greeting = new TextBlock { Text = "Hello!" };
+
+        name.TextChanged += (_, _) => greeting.Text = $"Hello, {(name.Text.Length == 0 ? "stranger" : name.Text)}!";
+        options.Children.Add(name);
+        options.Children.Add(greeting);
 
         var slider = new Slider { Value = 0.6 };
 

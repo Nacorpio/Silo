@@ -59,10 +59,13 @@ public sealed class PointerRouter(Control root)
     {
         var changed = Move(x, y);
 
-        pressed = FindButton(hovered);
-        dragged = FindSlider(hovered);
+        pressed = Find<Button>(hovered);
+        dragged = Find<Slider>(hovered);
 
         changed |= dragged?.PointerDown(dragged.ToLocal(x, y).X) ?? false;
+
+        if (Find<TextBox>(hovered) is { } box)
+            changed |= box.PointerDown(box.ToLocal(x, y).X);
 
         return (pressed?.PointerDown() ?? false) | changed;
     }
@@ -83,7 +86,7 @@ public sealed class PointerRouter(Control root)
 
         changed |= slider?.PointerUp() ?? false;
 
-        return (button?.PointerUp(FindButton(hovered) == button) ?? false) | changed;
+        return (button?.PointerUp(Find<Button>(hovered) == button) ?? false) | changed;
     }
 
     /// <summary>Turns the mouse wheel over a point.</summary>
@@ -121,26 +124,16 @@ public sealed class PointerRouter(Control root)
         return changed;
     }
 
-    /// <summary>Finds the Slider that is a Control or one of its ancestors.</summary>
+    /// <summary>Finds the first Control of a type among a Control and its ancestors.</summary>
+    /// <typeparam name="T">The type to look for.</typeparam>
     /// <param name="control">The Control to start from.</param>
-    /// <returns>The nearest Slider, or <see langword="null"/>.</returns>
-    static Slider? FindSlider(Control? control)
+    /// <returns>The nearest match, or <see langword="null"/>.</returns>
+    static T? Find<T>(Control? control)
+        where T : Control
     {
         for (var c = control; c is not null; c = c.Parent as Control)
-            if (c is Slider slider)
-                return slider;
-
-        return null;
-    }
-
-    /// <summary>Finds the Button that is a Control or one of its ancestors.</summary>
-    /// <param name="control">The Control to start from.</param>
-    /// <returns>The nearest Button, or <see langword="null"/>.</returns>
-    static Button? FindButton(Control? control)
-    {
-        for (var c = control; c is not null; c = c.Parent as Control)
-            if (c is Button button)
-                return button;
+            if (c is T match)
+                return match;
 
         return null;
     }
