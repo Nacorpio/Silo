@@ -40,6 +40,7 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>The longest <see cref="Run"/> waits for an event before it checks again, in milliseconds.</summary>
     const int IdleMilliseconds = 100;
 
+
     /// <summary>The root of the Control tree.</summary>
     readonly Control root;
 
