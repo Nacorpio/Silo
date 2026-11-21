@@ -24,7 +24,7 @@ namespace Silo;
 /// list.ScrollBy(120);
 /// </code>
 /// </example>
-public class ScrollViewer : Control
+public class ScrollViewer : Control, IScrollable
 {
     /// <summary>How far the content has been scrolled up, in pixels.</summary>
     double offset;
@@ -69,9 +69,7 @@ public class ScrollViewer : Control
     /// <remarks>A ScrollViewer always lays its child out in a column, whatever <c>flex-direction</c> says.</remarks>
     protected override FlexDirection LayoutDirection => FlexDirection.Column;
 
-    /// <summary>Scrolls the content.</summary>
-    /// <param name="delta">The distance in pixels. Positive scrolls down, which moves the content up.</param>
-    /// <returns><see langword="true"/> when the offset changed, so a new frame is needed.</returns>
+    /// <inheritdoc/>
     public bool ScrollBy(double delta)
     {
         var before = Offset;

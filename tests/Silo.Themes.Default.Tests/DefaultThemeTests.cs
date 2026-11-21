@@ -97,4 +97,14 @@ public class DefaultThemeTests
 
         Assert.Equal(new Color(0x3b, 0x82, 0xf6), box.GetValue(Control.BorderColorProperty));
     }
+
+    [Fact]
+    public void List_views_select_with_the_accent_and_get_a_default_height()
+    {
+        var list = new ListView();
+
+        Assert.Empty(list.ApplyStyles(Resolver()));
+        Assert.Equal(new Color(0x3b, 0x82, 0xf6), list.GetValue(ListView.SelectionColorProperty));
+        Assert.Equal(new Length(160, LengthUnit.Px), list.GetValue(Control.HeightProperty));
+    }
 }

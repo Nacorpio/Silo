@@ -132,11 +132,13 @@ public abstract class Control : Element, ILayoutNode
     public static readonly StyledProperty<bool> BoldProperty =
         StyledProperty.Register<Control, bool>("font-weight", false, ValueParsers.Weight, inherits: true);
 
+
     /// <summary>The cached layout view of the style properties, or <see langword="null"/> after a property changed.</summary>
     LayoutStyle? layoutStyle;
 
     /// <summary>The text measurer set on this Control.</summary>
     ITextMeasurer? textMeasurer;
+
 
     /// <summary>
     /// Runs before the first Control is created, so that the Styled properties above are registered before any Stylesheet

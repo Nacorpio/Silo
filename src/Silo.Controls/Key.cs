@@ -35,4 +35,10 @@ public enum Key
 
     /// <summary>The Enter or Return key.</summary>
     Enter,
+
+    /// <summary>The up arrow key.</summary>
+    Up,
+
+    /// <summary>The down arrow key.</summary>
+    Down,
 }
