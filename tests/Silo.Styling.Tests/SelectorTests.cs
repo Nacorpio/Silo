@@ -3,17 +3,6 @@ using Xunit;
 
 public class SelectorTests
 {
-    sealed class Node(string type, string? name = null, string[]? classes = null, string[]? states = null, Node? parent = null) : IStyleNode
-    {
-        public string TypeName => type;
-        public string? Name => name;
-
-        public IReadOnlyCollection<string> Classes => classes ?? [];
-        public IReadOnlyCollection<string> PseudoStates => states ?? [];
-
-        public IStyleNode? Parent => parent;
-    }
-
     [Theory]
     [InlineData("Button", 0, 0, 1)]
     [InlineData(".a.b", 0, 2, 0)]
@@ -30,7 +19,7 @@ public class SelectorTests
     [Fact]
     public void Matches_type_class_and_state()
     {
-        var n = new Node("Button", classes: ["primary"], states: ["hover"]);
+        var n = new TestNode("Button", classes: ["primary"], states: ["hover"]);
 
         Assert.True(Selector.Parse("Button.primary:hover").Matches(n));
         Assert.False(Selector.Parse("Button.primary:pressed").Matches(n));
@@ -40,9 +29,9 @@ public class SelectorTests
     [Fact]
     public void Child_and_descendant_combinators()
     {
-        var box = new Node("Box", classes: ["card"]);
-        var mid = new Node("Box", parent: box);
-        var btn = new Node("Button", parent: mid);
+        var box = new TestNode("Box", classes: ["card"]);
+        var mid = new TestNode("Box", parent: box);
+        var btn = new TestNode("Button", parent: mid);
         Assert.True(Selector.Parse(".card Button").Matches(btn));
 
         Assert.False(Selector.Parse(".card > Button").Matches(btn));
@@ -55,7 +44,7 @@ public class SelectorTests
         var s = Selector.Parse("Button.primary::part(icon)");
 
         Assert.Equal("icon", s.Part);
-        Assert.True(s.Matches(new Node("Button", classes: ["primary"])));
+        Assert.True(s.Matches(new TestNode("Button", classes: ["primary"])));
     }
 
     [Fact]
