@@ -154,7 +154,6 @@ internal static class ValueParsers
     public static bool Weight(string text, out bool value)
     {
         text = text.Trim();
-
         value = text == "bold";
 
         if (text is "bold" or "normal")
