@@ -6,6 +6,7 @@ public class TestNode(LayoutStyle? style = null, Func<double?, Size>? measure = 
     public LayoutStyle Style { get; } = style ?? new LayoutStyle();
     public IReadOnlyList<ILayoutNode> Children { get; } = children;
     public Rect Rect { get; private set; }
+
     public Size Measure(double? availableWidth) => measure?.Invoke(availableWidth) ?? default;
     public void SetLayout(Rect rect) => Rect = rect;
 
