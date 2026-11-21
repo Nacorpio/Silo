@@ -109,9 +109,7 @@ public static class FlexLayout
         node.SetLayout(rect);
 
         if (node.Children.Count == 0)
-        {
             return;
-        }
 
         var style = node.Style;
         var isRow = style.Direction == FlexDirection.Row;
@@ -132,9 +130,7 @@ public static class FlexLayout
         var items = new List<Item>(node.Children.Count);
 
         foreach (var child in node.Children)
-        {
             items.Add(CreateItem(child, isRow, contentWidth, mainSize, crossSize));
-        }
 
         ResolveFlexibleLengths(items, mainSize, gap);
 
@@ -207,9 +203,7 @@ public static class FlexLayout
         item.Min = Math.Max(item.MainInsets, Resolve(min, mainSize) ?? 0);
 
         if (Resolve(max, mainSize) is { } maximum)
-        {
             item.Max = Math.Max(item.Min, maximum);
-        }
 
         item.Base = BaseSize(item, isRow, s.Basis ?? mainProperty, crossProperty, mainSize, crossSize);
 
@@ -280,14 +274,10 @@ public static class FlexLayout
     static double BaseSize(Item item, bool isRow, Length? basis, Length? crossProperty, double mainSize, double crossSize)
     {
         if (Resolve(basis, mainSize) is { } resolved)
-        {
             return Math.Max(item.MainInsets, resolved);
-        }
 
         if (isRow)
-        {
             return Intrinsic(item.Node, null).Width;
-        }
 
         var limit = Resolve(crossProperty, crossSize) ?? (crossSize - item.CrossMargins);
 
@@ -305,19 +295,13 @@ public static class FlexLayout
         var style = item.Node.Style;
 
         if (Resolve(isRow ? style.Height : style.Width, crossSize) is { } explicitCross)
-        {
             return explicitCross;
-        }
 
         if (align == AlignItems.Stretch)
-        {
             return crossSize - item.CrossMargins;
-        }
 
         if (isRow)
-        {
             return Intrinsic(item.Node, item.Target).Height;
-        }
 
         return Intrinsic(item.Node, crossSize - item.CrossMargins).Width;
     }
@@ -330,14 +314,10 @@ public static class FlexLayout
         var total = items.Sum(i => i.Node.Style.Grow);
 
         if (total < 1)
-        {
             free *= total;
-        }
 
         foreach (var item in items)
-        {
-            item.Target = item.Base + (total > 0 ? free * item.Node.Style.Grow / total : 0);
-        }
+            item.Target = item.Base + Share(free, item.Node.Style.Grow, total);
     }
 
     /// <summary>Takes overflow back from shrinking items in proportion to their shrink factor times their base size.</summary>
@@ -348,10 +328,15 @@ public static class FlexLayout
         var total = items.Sum(i => i.Node.Style.Shrink * i.Base);
 
         foreach (var item in items)
-        {
-            item.Target = item.Base + (total > 0 ? free * item.Node.Style.Shrink * item.Base / total : 0);
-        }
+            item.Target = item.Base + Share(free, item.Node.Style.Shrink * item.Base, total);
     }
+
+    /// <summary>Computes one item's part of the free space.</summary>
+    /// <param name="free">The free space to share out.</param>
+    /// <param name="weight">The item's weight, a grow factor or a shrink factor times the base size.</param>
+    /// <param name="total">The sum of the weights of all items taking part.</param>
+    /// <returns>The item's share, or 0 when nothing is shared.</returns>
+    static double Share(double free, double weight, double total) => total > 0 ? free * weight / total : 0;
 
     /// <summary>Computes the starting offset and the extra space between items for a <see cref="JustifyContent"/>.</summary>
     /// <param name="justify">The distribution mode.</param>
@@ -483,14 +468,10 @@ public static class FlexLayout
     static double Clamp(double value, Length? min, Length? max, double basis)
     {
         if (Resolve(max, basis) is { } maximum)
-        {
             value = Math.Min(value, maximum);
-        }
 
         if (Resolve(min, basis) is { } minimum)
-        {
             value = Math.Max(value, minimum);
-        }
 
         return value;
     }
