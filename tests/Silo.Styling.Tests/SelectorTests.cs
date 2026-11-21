@@ -7,6 +7,7 @@ public class SelectorTests
     {
         public string TypeName => type;
         public string? Name => name;
+
         public IReadOnlyCollection<string> Classes => classes ?? [];
         public IReadOnlyCollection<string> PseudoStates => states ?? [];
         public IStyleNode? Parent => parent;

@@ -49,6 +49,7 @@ public class JsoncStylesheetReaderTests
     {
         var sheet = JsoncStylesheetReader.Read(Source, "t.jsonc");
         var decl = sheet.Rules[0].Declarations[0];
+
         Assert.Equal("background", decl.Property);
         Assert.Equal("var(--accent)", decl.Value);
         Assert.Equal("t.jsonc", decl.Span.File);
@@ -60,6 +61,7 @@ public class JsoncStylesheetReaderTests
     {
         var ex = Assert.Throws<StylesheetException>(() =>
             JsoncStylesheetReader.Read("""{ "rules": { "Button..x": {} } }""", "bad.jsonc"));
+
         Assert.Contains("bad.jsonc", ex.Message);
     }
 }
