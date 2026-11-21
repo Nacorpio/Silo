@@ -28,6 +28,7 @@ public static class Lengths
         return length switch
         {
             null => null,
+
             { Unit: LengthUnit.Px } l => l.Value,
             { Unit: LengthUnit.Percent } l => basis * l.Value / 100,
             { Unit: LengthUnit.Em or LengthUnit.Rem } l => l.Value * EmPixels,
