@@ -22,13 +22,11 @@ public class StylesheetWatcherTests
         File.WriteAllText(file, """{ "rules": { "A": { "opacity": "1" } } }""");
 
         using var watcher = new StylesheetWatcher(file) { Delay = TimeSpan.FromMilliseconds(20) };
-
         var edited = """{ "rules": { "A": { "opacity": "1" }, "B": { "opacity": "0" } } }""";
 
         var sheet = await Next<Stylesheet>(a => watcher.Reloaded += a.Invoke, () => File.WriteAllText(file, edited));
 
         Assert.Equal(2, sheet.Rules.Count);
-
         dir.Delete(true);
     }
 
@@ -41,7 +39,6 @@ public class StylesheetWatcherTests
         File.WriteAllText(file, """{ "rules": {} }""");
 
         using var watcher = new StylesheetWatcher(file) { Delay = TimeSpan.FromMilliseconds(20) };
-
         var error = await Next<Exception>(a => watcher.Failed += a.Invoke, () => File.WriteAllText(file, "{ nope"));
 
         Assert.IsType<StylesheetException>(error);
@@ -51,7 +48,6 @@ public class StylesheetWatcherTests
         var sheet = await Next<Stylesheet>(a => watcher.Reloaded += a.Invoke, () => File.WriteAllText(file, fixedText));
 
         Assert.Single(sheet.Rules);
-
         dir.Delete(true);
     }
 }
