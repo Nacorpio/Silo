@@ -103,6 +103,7 @@ public sealed class Selector
         while (true)
         {
             var sawSpace = false;
+
             while (pos < text.Length && char.IsWhiteSpace(text[pos])) { pos++; sawSpace = true; }
             if (pos >= text.Length) break;
             if (text[pos] == '>')
