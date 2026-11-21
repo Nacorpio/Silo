@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Silo.Core/Silo.Core.csproj" />
+    <ProjectReference Include="../Silo.Layout/Silo.Layout.csproj" />
+    <ProjectReference Include="../Silo.Rendering/Silo.Rendering.csproj" />
+    <ProjectReference Include="../Silo.Styling/Silo.Styling.csproj" />
+  </ItemGroup>
+</Project>

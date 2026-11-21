@@ -28,9 +28,6 @@ namespace Silo.Layout;
 /// </example>
 public static class FlexLayout
 {
-    /// <summary>The number of pixels that one <c>em</c> or <c>rem</c> resolves to until text metrics are available.</summary>
-    const double EmPixels = 16;
-
     /// <summary>
     /// Lays out a tree and reports the result to every node through <see cref="ILayoutNode.SetLayout"/>.
     /// </summary>
@@ -459,18 +456,7 @@ public static class FlexLayout
     /// <param name="length">The length, or <see langword="null"/> for auto.</param>
     /// <param name="basis">The value that 100% stands for.</param>
     /// <returns>The size in pixels, or <see langword="null"/> for auto and for units that are not valid in layout.</returns>
-    static double? Resolve(Length? length, double basis)
-    {
-        return length switch
-        {
-            null => null,
-            { Unit: LengthUnit.Px } l => l.Value,
-            { Unit: LengthUnit.Percent } l => basis * l.Value / 100,
-            { Unit: LengthUnit.Em or LengthUnit.Rem } l => l.Value * EmPixels,
-
-            _ => null,
-        };
-    }
+    static double? Resolve(Length? length, double basis) => Lengths.Resolve(length, basis);
 
     /// <summary>Limits a size by optional minimum and maximum lengths, where the minimum wins.</summary>
     /// <param name="value">The size to limit.</param>

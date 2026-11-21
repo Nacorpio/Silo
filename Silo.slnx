@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Silo.Controls/Silo.Controls.csproj" />
     <Project Path="src/Silo.Core/Silo.Core.csproj" />
     <Project Path="src/Silo.Layout/Silo.Layout.csproj" />
     <Project Path="src/Silo.Rendering/Silo.Rendering.csproj" />
@@ -7,6 +8,7 @@
     <Project Path="src/Silo.Styling/Silo.Styling.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Silo.Controls.Tests/Silo.Controls.Tests.csproj" />
     <Project Path="tests/Silo.Core.Tests/Silo.Core.Tests.csproj" />
     <Project Path="tests/Silo.Layout.Tests/Silo.Layout.Tests.csproj" />
     <Project Path="tests/Silo.Rendering.Tests/Silo.Rendering.Tests.csproj" />

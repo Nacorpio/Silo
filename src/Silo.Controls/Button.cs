@@ -1,0 +1,44 @@
+namespace Silo;
+
+/// <summary>
+/// A push button that shows a line of text and raises <see cref="Click"/> when it is pressed and released.
+/// </summary>
+/// <remarks>
+/// <para>
+/// A Button sets the <c>hover</c> Pseudo-state while the pointer is over it and the <c>active</c> Pseudo-state while it is
+/// pressed, so a Stylesheet can restyle it with <c>Button:hover</c> and <c>Button:active</c>. The platform layer drives it
+/// with <see cref="Control.SetHovered"/>, <see cref="PointerDown"/> and <see cref="PointerUp"/>.
+/// </para>
+/// <para>Styles must be applied again after the state changes to show the new look.</para>
+/// </remarks>
+/// <example>
+/// <code language="csharp">
+/// var save = new Button { Text = "Save" };
+///
+/// save.Click += (_, _) => document.Save();
+/// </code>
+/// </example>
+public class Button : TextControl
+{
+    /// <summary>Raised when the pointer is released over the Button after it was pressed on it.</summary>
+    public event EventHandler? Click;
+
+    /// <summary>Presses the Button.</summary>
+    /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
+    public bool PointerDown() => SetPressed(true);
+
+    /// <summary>Releases the Button.</summary>
+    /// <param name="inside"><see langword="true"/> when the pointer is still over the Button, which makes the release a click.</param>
+    /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
+    public bool PointerUp(bool inside)
+    {
+        var wasPressed = PseudoStates.Contains("active");
+
+        var changed = SetPressed(false);
+
+        if (wasPressed && inside)
+            Click?.Invoke(this, EventArgs.Empty);
+
+        return changed;
+    }
+}
