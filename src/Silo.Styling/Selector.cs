@@ -88,6 +88,7 @@ public sealed class Selector
         for (var i = 0; i < _compounds.Length; i++)
         {
             if (i > 0) sb.Append(_combinators[i] == Combinator.Child ? " > " : " ");
+
             sb.Append(_compounds[i]);
         }
         return sb.ToString();
