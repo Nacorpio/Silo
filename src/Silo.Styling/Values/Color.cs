@@ -16,6 +16,7 @@ namespace Silo.Styling.Values;
 /// </remarks>
 public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
 {
+    /// <summary>The supported color names, matched without regard to case.</summary>
     static readonly Dictionary<string, Color> Named = new(StringComparer.OrdinalIgnoreCase)
     {
         ["transparent"] = new(0, 0, 0, 0),
@@ -153,6 +154,7 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
         }
     }
 
+    /// <summary>Parses the digits after <c>#</c>: 3, 4, 6 or 8 hex digits.</summary>
     static bool Hex(string digits, out Color color)
     {
         color = default;
@@ -174,19 +176,24 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
         return true;
     }
 
+    /// <summary>Reads a finite number with the invariant culture, or returns <see langword="null"/>.</summary>
     static double? Number(string text)
         => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var n) && double.IsFinite(n) ? n : null;
 
     /// <summary>Reads "0.5" or "50%" as a fraction of one.</summary>
+    /// <summary>Reads <c>0.5</c> or <c>50%</c> as a fraction of one.</summary>
     static double? Fraction(string text)
         => text.EndsWith('%') ? Number(text[..^1]) / 100 : Number(text);
 
+    /// <summary>Reads a channel written as 0 to 255 or as a percentage.</summary>
     static byte? Channel(string text)
         => text.EndsWith('%') ? Number(text[..^1]) is { } p ? ToByte(p / 100) : null : Number(text) is { } n ? ToByte(n / 255) : null;
 
+    /// <summary>Converts a fraction from 0 to 1 to a byte, clamping out-of-range input.</summary>
     static byte ToByte(double fraction)
         => (byte)Math.Round(Math.Clamp(fraction, 0, 1) * 255);
 
+    /// <summary>Converts HSL (hue in degrees, saturation and lightness from 0 to 1) to sRGB.</summary>
     static Color FromHsl(double hue, double saturation, double lightness, double alpha)
     {
         hue = (hue % 360 + 360) % 360;
@@ -210,6 +217,7 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
         return new Color(ToByte(r + m), ToByte(g + m), ToByte(b + m), ToByte(alpha));
     }
 
+    /// <summary>Converts OKLCH to sRGB through OKLab and linear sRGB; colors outside the gamut are clipped.</summary>
     static Color FromOklch(double lightness, double chroma, double hue, double alpha)
     {
         var radians = hue * Math.PI / 180;
@@ -227,6 +235,7 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
         return new Color(ToByte(Gamma(r)), ToByte(Gamma(g)), ToByte(Gamma(blue)), ToByte(alpha));
     }
 
+    /// <summary>Applies the sRGB transfer function to a linear channel value and clamps it to 0 to 1.</summary>
     static double Gamma(double linear)
     {
         linear = Math.Clamp(linear, 0, 1);

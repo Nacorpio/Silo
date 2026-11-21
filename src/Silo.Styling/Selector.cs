@@ -118,9 +118,12 @@ public sealed record CompoundSelector(
 /// </example>
 public sealed class Selector
 {
+    /// <summary>The compounds from left to right.</summary>
     readonly CompoundSelector[] _compounds;
+    /// <summary>The combinator in front of each compound; the first entry is <see cref="Combinator.None"/>.</summary>
     readonly Combinator[] _combinators;
 
+    /// <summary>Creates a Selector from already parsed parts and works out its specificity. Use <see cref="Parse"/> from outside.</summary>
     Selector(CompoundSelector[] compounds, Combinator[] combinators)
     {
         _compounds = compounds;
@@ -155,6 +158,7 @@ public sealed class Selector
     /// </returns>
     public bool Matches(IStyleNode node) => MatchFrom(_compounds.Length - 1, node);
 
+    /// <summary>Matches the compounds from <paramref name="index"/> leftwards, walking up the ancestors of <paramref name="node"/> as the combinators require.</summary>
     bool MatchFrom(int index, IStyleNode node)
     {
         if (!_compounds[index].Matches(node)) return false;
@@ -240,6 +244,7 @@ public sealed class Selector
         return new Selector(compounds.ToArray(), combinators.ToArray());
     }
 
+    /// <summary>Parses one compound starting at <paramref name="pos"/> and leaves <paramref name="pos"/> after it.</summary>
     static CompoundSelector ParseCompound(string text, ref int pos)
     {
         string? type = null, id = null, part = null;
@@ -272,9 +277,12 @@ public sealed class Selector
         return new CompoundSelector(type, id, classes, states, part);
     }
 
+    /// <summary>Whether a character can start a name.</summary>
     static bool IsIdentStart(char c) => char.IsLetter(c) || c == '_';
+    /// <summary>Whether a character can continue a name; names may contain letters, digits, <c>_</c> and <c>-</c>.</summary>
     static bool IsIdentChar(char c) => char.IsLetterOrDigit(c) || c == '_' || c == '-';
 
+    /// <summary>Reads a name at <paramref name="pos"/> and advances past it.</summary>
     static string ReadIdent(string text, ref int pos)
     {
         var start = pos;
@@ -284,5 +292,6 @@ public sealed class Selector
         return text[start..pos];
     }
 
+    /// <summary>Creates the exception for an invalid Selector.</summary>
     static FormatException Bad(string text, string why) => new($"Invalid selector '{text}': {why}.");
 }

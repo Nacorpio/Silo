@@ -40,6 +40,7 @@ namespace Silo.Styling;
 /// </example>
 public static class JsoncStylesheetReader
 {
+    /// <summary>Reader settings: comments are skipped and trailing commas are allowed, which is what makes the JSON "JSONC".</summary>
     static readonly JsonReaderOptions Options = new() { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
 
     /// <summary>Reads a Stylesheet from JSONC text.</summary>
@@ -62,13 +63,18 @@ public static class JsoncStylesheetReader
         catch (JsonException ex) { throw new StylesheetException($"{fileName}({ex.LineNumber + 1},{ex.BytePositionInLine + 1}): {ex.Message}"); }
     }
 
+    /// <summary>One pass over the bytes of a Stylesheet. A ref struct because <see cref="Utf8JsonReader"/> is one.</summary>
     ref struct Parser(byte[] bytes, string file)
     {
+        /// <summary>The streaming reader. Unlike a JSON document it keeps source order and duplicate keys.</summary>
         Utf8JsonReader _r = new(bytes, Options);
         
+        /// <summary>The flattened Rules in source order.</summary>
         readonly List<Rule> _rules = [];
+        /// <summary>The top-level Tokens.</summary>
         readonly Dictionary<string, TokenDeclaration> _tokens = new(StringComparer.Ordinal);
 
+        /// <summary>Converts a byte offset into a 1-based line and column; the column counts characters, not bytes.</summary>
         SourceSpan Here(long offset)
         {
             var line = 1; var col = 1;
@@ -80,8 +86,10 @@ public static class JsoncStylesheetReader
             return new SourceSpan(file, line, col);
         }
 
+        /// <summary>Creates an error whose message starts with the position of <paramref name="offset"/>.</summary>
         StylesheetException Fail(long offset, string message) => new($"{Here(offset)}: {message}");
 
+        /// <summary>Reads the whole document: the <c>tokens</c> and <c>rules</c> keys.</summary>
         public Stylesheet ReadSheet()
         {
             Next(); Expect(JsonTokenType.StartObject);
@@ -103,13 +111,16 @@ public static class JsoncStylesheetReader
             return new Stylesheet(_tokens, _rules, Encoding.UTF8.GetString(bytes));
         }
 
+        /// <summary>Advances to the next token and returns <see langword="false"/> at the end of the input.</summary>
         bool Next() => _r.Read();
 
+        /// <summary>Throws unless the current token is of the given type.</summary>
         void Expect(JsonTokenType t)
         {
             if (_r.TokenType != t) throw Fail(_r.TokenStartIndex, $"Expected {t}, found {_r.TokenType}.");
         }
 
+        /// <summary>Reads an object of Token names and values into <paramref name="into"/>.</summary>
         void ReadTokens(Dictionary<string, TokenDeclaration> into)
         {
             Expect(JsonTokenType.StartObject);
@@ -124,6 +135,7 @@ public static class JsoncStylesheetReader
             }
         }
 
+        /// <summary>Reads a string, number or boolean value as text.</summary>
         string ReadScalar()
         {
             switch (_r.TokenType)
@@ -136,6 +148,7 @@ public static class JsoncStylesheetReader
             }
         }
 
+        /// <summary>Reads the <c>rules</c> object: one Rule for each Selector key.</summary>
         void ReadRules()
         {
             Expect(JsonTokenType.StartObject);
@@ -149,6 +162,7 @@ public static class JsoncStylesheetReader
             }
         }
 
+        /// <summary>Reads one Rule body. Nested Rules are added after it, with the parent Selector put into their own.</summary>
         void ReadRule(string selectorText, long at)
         {
             Selector selector;

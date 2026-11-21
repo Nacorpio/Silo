@@ -94,6 +94,7 @@ public readonly record struct Length(double Value, LengthUnit Unit)
         return false;
     }
 
+    /// <summary>Reads a finite number with the invariant culture.</summary>
     static bool Number(string text, out double number)
         => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out number) && double.IsFinite(number);
 }
