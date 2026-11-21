@@ -163,7 +163,6 @@ public class Element : IStyleNode
         ArgumentNullException.ThrowIfNull(property);
 
         var before = GetObject(property);
-
         var removed = localValues.Remove(property);
 
         NotifyIfChanged(property, before);
@@ -215,11 +214,8 @@ public class Element : IStyleNode
     void ApplyStylesCore(StyleResolver resolver, List<StyleDiagnostic> diagnostics)
     {
         var cascaded = resolver.Cascade(this);
-
         var tokens = resolver.ResolveTokens(this);
-
         var properties = StyledProperty.GetProperties(GetType());
-
         var before = new object?[properties.Count];
 
         for (var i = 0; i < properties.Count; i++)

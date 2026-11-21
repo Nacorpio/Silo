@@ -106,7 +106,6 @@ public abstract class StyledProperty
         ArgumentNullException.ThrowIfNull(parser);
 
         var property = new StyledProperty<T>(name, typeof(TOwner), defaultValue, parser, inherits);
-
         var list = Registry.GetOrAdd(typeof(TOwner), static _ => []);
 
         lock (list)
@@ -135,7 +134,6 @@ public abstract class StyledProperty
         ArgumentNullException.ThrowIfNull(type);
 
         var result = new List<StyledProperty>();
-
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
         for (var current = type; current is not null && typeof(Element).IsAssignableFrom(current); current = current.BaseType)
