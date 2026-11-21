@@ -18,6 +18,14 @@ _Avoid_: Widget, component
 A named Element inside a Control's Part tree, reachable from Stylesheets but defined only in C#.
 _Avoid_: Template part, sub-element, child
 
+**View**:
+An Element tree defined in a View format and compiled to the same C# you could write by hand.
+_Avoid_: Markup, template, page, layout
+
+**View format**:
+A concrete syntax that Views can be written in; JSONC is the first one.
+_Avoid_: Markup language, view language, dialect
+
 **Class**:
 A free-form label that app code attaches to an Element so Selectors can match it.
 _Avoid_: Tag, style key
