@@ -12,7 +12,6 @@ public class FlexLayoutTests
         var root = new TestNode();
 
         FlexLayout.Arrange(root, new Size(800, 600));
-
         Assert.Equal(new Rect(0, 0, 800, 600), root.Rect);
     }
 
@@ -163,7 +162,6 @@ public class FlexLayoutTests
         var root = new TestNode(new LayoutStyle { Padding = TestNode.All(10), Border = TestNode.All(2) }, null, child);
 
         FlexLayout.Arrange(root, new Size(200, 100));
-
         Assert.Equal(new Rect(17, 17, 166, 66), child.Rect);
     }
 
@@ -174,7 +172,6 @@ public class FlexLayoutTests
         var root = new TestNode(new LayoutStyle { AlignItems = AlignItems.Start }, null, text);
 
         FlexLayout.Arrange(root, new Size(300, 100));
-
         Assert.Equal(new Rect(0, 0, 68, 22), text.Rect);
     }
 
@@ -188,7 +185,6 @@ public class FlexLayoutTests
         var root = new TestNode(new LayoutStyle { Direction = FlexDirection.Column }, null, text);
 
         FlexLayout.Arrange(root, new Size(100, 300));
-
         Assert.Equal(new Rect(0, 0, 100, 20), text.Rect);
     }
 
@@ -201,7 +197,6 @@ public class FlexLayoutTests
         var root = new TestNode(new LayoutStyle { AlignItems = AlignItems.Start }, null, inner);
 
         FlexLayout.Arrange(root, new Size(300, 100));
-
         Assert.Equal(new Rect(0, 0, 54, 16), inner.Rect);
     }
 
@@ -212,7 +207,6 @@ public class FlexLayoutTests
         var root = new TestNode(new LayoutStyle { Padding = TestNode.All(10) }, null, child);
 
         FlexLayout.Arrange(root, new Size(220, 100));
-
         Assert.Equal(50, child.Rect.Width);
     }
 }
