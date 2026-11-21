@@ -196,6 +196,22 @@ public abstract class Control : Element, ILayoutNode
         context.Restore();
     }
 
+    /// <summary>Converts a point from the root Control's coordinates to this Control's border box.</summary>
+    /// <param name="x">The horizontal position, relative to the root Control.</param>
+    /// <param name="y">The vertical position, relative to the root Control.</param>
+    /// <returns>The position relative to this Control's border box, which may be outside it.</returns>
+    /// <remarks>It undoes the positions and the scrolling of every ancestor, so call it after <see cref="Arrange"/>.</remarks>
+    public (double X, double Y) ToLocal(double x, double y)
+    {
+        if (Parent is not Control parent)
+            return (x - Bounds.X, y - Bounds.Y);
+
+        var (parentX, parentY) = parent.ToLocal(x, y);
+        var (offsetX, offsetY) = parent.ChildOffset;
+
+        return (parentX - offsetX - Bounds.X, parentY - offsetY - Bounds.Y);
+    }
+
     /// <summary>Finds the topmost Control at a point.</summary>
     /// <param name="x">The horizontal position, relative to this Control's border box.</param>
     /// <param name="y">The vertical position, relative to this Control's border box.</param>

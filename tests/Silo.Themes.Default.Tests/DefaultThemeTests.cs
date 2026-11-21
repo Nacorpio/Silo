@@ -68,4 +68,19 @@ public class DefaultThemeTests
         Assert.Equal(new Color(0x3b, 0x82, 0xf6), toggle.GetValue(ToggleButton.IndicatorBackgroundProperty));
         Assert.Equal(new Color(0xe5, 0xe7, 0xeb), bar.GetValue(Control.BackgroundProperty));
     }
+
+    [Fact]
+    public void Sliders_use_the_accent_and_darken_while_dragged()
+    {
+        var slider = new Slider();
+
+        slider.ApplyStyles(Resolver());
+
+        Assert.Equal(new Color(0x3b, 0x82, 0xf6), slider.GetValue(Slider.FillColorProperty));
+
+        slider.PointerDown(0);
+
+        Assert.Empty(slider.ApplyStyles(Resolver()));
+        Assert.Equal(new Color(0x1d, 0x4e, 0xd8), slider.GetValue(Slider.FillColorProperty));
+    }
 }
