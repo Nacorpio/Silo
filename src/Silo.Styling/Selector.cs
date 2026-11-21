@@ -110,6 +110,7 @@ public sealed class Selector
                 if (compounds.Count == 0 || pending == Combinator.Child) throw Bad(text, "unexpected '>'");
                 pending = Combinator.Child; pos++; continue;
             }
+
             if (compounds.Count > 0)
             {
                 if (pending == Combinator.None) pending = sawSpace ? Combinator.Descendant : Combinator.None;
