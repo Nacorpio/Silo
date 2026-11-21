@@ -33,6 +33,7 @@ public class ControlTests
     {
         var a = new Box { Name = "a" };
         var b = new Box { Name = "b" };
+
         var root = Root(a, b);
 
         root.ApplyStyles(Resolver("""
@@ -55,6 +56,7 @@ public class ControlTests
     public void Column_direction_and_alignment_come_from_the_stylesheet()
     {
         var child = new Box { Name = "child" };
+
         var root = Root(child);
 
         root.ApplyStyles(Resolver("""{ "rules": { "#root": { "flex-direction": "column", "align-items": "center" }, "#child": { "width": "30px", "height": "10px" } } }"""));
@@ -67,6 +69,7 @@ public class ControlTests
     public void Rendering_paints_background_and_border_before_the_children()
     {
         var child = new Box { Name = "child" };
+
         var root = Root(child);
 
         root.ApplyStyles(Resolver("""
@@ -102,6 +105,7 @@ public class ControlTests
     public void Text_size_comes_from_the_measurer_and_is_drawn_in_the_content_box()
     {
         var text = new TextBlock { Text = "Hello" };
+
         var root = Root(text);
 
         root.ApplyStyles(Resolver("""{ "rules": { "#root": { "align-items": "start" }, "TextBlock": { "padding": "4px", "color": "#112233" } } }"""));
@@ -115,6 +119,7 @@ public class ControlTests
     public void Font_and_color_properties_inherit_from_ancestors()
     {
         var text = new TextBlock { Text = "Hi" };
+
         var root = Root(text);
 
         root.ApplyStyles(Resolver("""{ "rules": { "#root": { "color": "#ff0000", "font-size": "20px", "font-weight": "bold", "font-family": "Inter" } } }"""));
@@ -127,6 +132,7 @@ public class ControlTests
     public void Text_align_center_moves_the_text_inside_the_content_box()
     {
         var text = new TextBlock { Text = "Hi" };
+
         var root = Root(text);
 
         root.ApplyStyles(Resolver("""{ "rules": { "TextBlock": { "text-align": "center", "width": "100px", "height": "30px" } } }"""));
@@ -162,6 +168,7 @@ public class ControlTests
     {
         var inner = new Box { Name = "inner" };
         var outer = new Box { Name = "outer" };
+
         var root = Root(outer);
 
         outer.Children.Add(inner);
