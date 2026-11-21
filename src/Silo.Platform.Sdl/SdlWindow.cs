@@ -44,6 +44,9 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>The longest <see cref="Run"/> waits for an event before it checks again, in milliseconds.</summary>
     const int IdleMilliseconds = 100;
 
+    /// <summary>How many pixels one notch of the mouse wheel scrolls.</summary>
+    const double WheelStep = 40;
+
 
     /// <summary>The windows that are open, which share the event loop.</summary>
     static readonly List<SdlWindow> Open = [];
@@ -218,6 +221,7 @@ public sealed unsafe class SdlWindow : IDisposable
         SDL_EventType.SDL_EVENT_MOUSE_MOTION => (uint)e.motion.windowID,
         SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN or SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP => (uint)e.button.windowID,
         SDL_EventType.SDL_EVENT_KEY_DOWN => (uint)e.key.windowID,
+        SDL_EventType.SDL_EVENT_MOUSE_WHEEL => (uint)e.wheel.windowID,
         SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED or SDL_EventType.SDL_EVENT_WINDOW_EXPOSED or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED or SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => (uint)e.window.windowID,
 
         _ => 0,
@@ -266,6 +270,7 @@ public sealed unsafe class SdlWindow : IDisposable
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 1 => router.Down(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP when e.button.button == 1 => router.Up(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => router.Leave(),
+            SDL_EventType.SDL_EVENT_MOUSE_WHEEL => router.Scroll(e.wheel.mouse_x, e.wheel.mouse_y, -e.wheel.y * WheelStep),
 
             SDL_EventType.SDL_EVENT_KEY_DOWN => PressKey(e.key),
 

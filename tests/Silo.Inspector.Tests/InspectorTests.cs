@@ -44,7 +44,7 @@ public class InspectorTests
 
         Assert.Equal(2, view.RowCount);
 
-        var tree = (Box)view.Children[0];
+        var tree = (Box)((ScrollViewer)view.Children[0]).Content!;
         var row = (Button)tree.Children[1];
 
         row.PointerDown();
@@ -61,8 +61,8 @@ public class InspectorTests
         view.SetTree(Sample());
         view.SetProperties(2, "Button#ok", [new InspectorProperty("gap", "3px", "local", null, null)]);
 
-        var tree = (Box)view.Children[0];
-        var details = (Box)view.Children[1];
+        var tree = (Box)((ScrollViewer)view.Children[0]).Content!;
+        var details = (Box)((ScrollViewer)view.Children[1]).Content!;
 
         Assert.False(tree.Children[0].HasClass("selected"));
         Assert.True(tree.Children[1].HasClass("selected"));
@@ -108,7 +108,7 @@ public class InspectorTests
 
         await controller.SelectAsync(2);
 
-        var details = (Box)view.Children[1];
+        var details = (Box)((ScrollViewer)view.Children[1]).Content!;
         var lines = details.Children.Cast<TextBlock>().Select(t => t.Text).ToList();
 
         Assert.Equal("Button#save", lines[0]);
