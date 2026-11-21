@@ -54,9 +54,7 @@ public class PointerRouterTests
         button.Click += (_, _) => clicks++;
 
         router.Down(5, 5);
-
         Assert.Contains("active", button.PseudoStates);
-
         router.Up(5, 5);
 
         Assert.Equal(1, clicks);
