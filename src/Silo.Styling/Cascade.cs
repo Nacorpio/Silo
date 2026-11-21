@@ -45,6 +45,7 @@ public sealed record CascadedValue(string Property, string Value, Declaration So
 /// </example>
 public sealed class StyleResolver(IReadOnlyList<Stylesheet> sheets)
 {
+    /// <summary>The deepest <c>var()</c> nesting that <see cref="Compute"/> follows before it assumes the Tokens form a cycle.</summary>
     const int MaxTokenDepth = 32;
 
     /// <summary>
@@ -184,6 +185,9 @@ public sealed class StyleResolver(IReadOnlyList<Stylesheet> sheets)
     public static string Compute(string value, IReadOnlyDictionary<string, string> tokens)
         => Substitute(value, tokens, 0);
 
+    /// <summary>Finds the Rules that match an Element or Part, ordered from lowest to highest priority: specificity, then source order.</summary>
+    /// <param name="node">The Element to match against.</param>
+    /// <param name="part">The Part name, or <see langword="null"/> for the Element itself.</param>
     IEnumerable<Rule> MatchingRules(IStyleNode node, string? part)
     {
         var matches = new List<(Rule Rule, int Order)>();
@@ -208,6 +212,7 @@ public sealed class StyleResolver(IReadOnlyList<Stylesheet> sheets)
             .Select(m => m.Rule);
     }
 
+    /// <summary>Replaces <c>var()</c> references in <paramref name="value"/>, recursing into Token values and fallbacks. <paramref name="depth"/> counts the nesting.</summary>
     static string Substitute(string value, IReadOnlyDictionary<string, string> tokens, int depth)
     {
         if (depth > MaxTokenDepth)
@@ -259,6 +264,7 @@ public sealed class StyleResolver(IReadOnlyList<Stylesheet> sheets)
         return sb.ToString();
     }
 
+    /// <summary>Returns the index of the parenthesis that closes the one at <paramref name="open"/>, counting nested pairs.</summary>
     static int FindClosingParenthesis(string value, int open)
     {
         var depth = 0;
