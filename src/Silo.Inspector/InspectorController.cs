@@ -54,7 +54,8 @@ public sealed class InspectorController
     /// <returns>A task that completes when the view has been updated.</returns>
     public async Task RefreshAsync()
     {
-        var root = InspectorNode.Parse(await client.CallAsync("tree.snapshot"));
+        var result = await client.CallAsync("tree.snapshot");
+        var root = InspectorNode.Parse(result);
 
         post(() =>
         {
@@ -69,9 +70,21 @@ public sealed class InspectorController
     /// <returns>A task that completes when the view has been updated.</returns>
     public async Task SelectAsync(int id)
     {
-        var properties = InspectorProperty.ParseAll(await client.CallAsync("element.cascade", $$"""{"id":{{id}}}"""));
+        var parameters = $$"""{"id":{{id}}}""";
+        var result = await client.CallAsync("element.cascade", parameters);
+        var properties = InspectorProperty.ParseAll(result);
 
-        post(() => view.SetProperties(id, nodes.TryGetValue(id, out var node) ? node.Label : $"#{id}", properties));
+        post(() => Show(id, properties));
+    }
+
+    /// <summary>Shows the properties of an Element, titled with the Element's label.</summary>
+    /// <param name="id">The id of the Element.</param>
+    /// <param name="properties">The properties to list.</param>
+    void Show(int id, IReadOnlyList<InspectorProperty> properties)
+    {
+        var title = nodes.TryGetValue(id, out var node) ? node.Label : $"#{id}";
+
+        view.SetProperties(id, title, properties);
     }
 
     /// <summary>Remembers a node and its descendants.</summary>
