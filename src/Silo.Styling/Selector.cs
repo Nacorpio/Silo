@@ -158,6 +158,7 @@ public sealed class Selector
         }
 
         if (pos == start) throw Bad(text, "empty compound");
+
         return new CompoundSelector(type, id, classes, states, part);
     }
 
@@ -169,6 +170,7 @@ public sealed class Selector
         var start = pos;
         if (pos >= text.Length || !(IsIdentStart(text[pos]) || text[pos] == '-')) throw Bad(text, "expected an identifier");
         while (pos < text.Length && IsIdentChar(text[pos])) pos++;
+
         return text[start..pos];
     }
 
