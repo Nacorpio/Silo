@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Silo.Platform.Sdl/Silo.Platform.Sdl.csproj" />
+    <ProjectReference Include="../../src/Silo.Themes.Default/Silo.Themes.Default.csproj" />
+  </ItemGroup>
+</Project>
