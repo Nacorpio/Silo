@@ -29,6 +29,9 @@ public class ToggleSwitch : ToggleButton
         var diameter = box.Height - 6;
         var x = IsChecked ? box.Right - 3 - diameter : box.X + 3;
 
-        context.FillRect(new Rect(x, box.Y + 3, diameter, diameter), IsChecked ? GetValue(IndicatorMarkColorProperty) : GetValue(IndicatorBorderColorProperty), diameter / 2);
+        var thumb = new Rect(x, box.Y + 3, diameter, diameter);
+        var color = GetValue(IsChecked ? IndicatorMarkColorProperty : IndicatorBorderColorProperty);
+
+        context.FillRect(thumb, color, diameter / 2);
     }
 }

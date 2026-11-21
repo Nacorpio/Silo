@@ -52,6 +52,9 @@ public class ProgressBar : Control
         if (width <= 0)
             return;
 
-        context.FillRect(new Rect(content.X, content.Y, width, content.Height), GetValue(BarColorProperty), Math.Min(GetValue(BorderRadiusProperty), width / 2));
+        var bar = new Rect(content.X, content.Y, width, content.Height);
+        var radius = Math.Min(GetValue(BorderRadiusProperty), width / 2);
+
+        context.FillRect(bar, GetValue(BarColorProperty), radius);
     }
 }

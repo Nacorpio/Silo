@@ -108,6 +108,8 @@ public abstract class ToggleButton : Button
 
         var inset = box.Width / 4;
 
-        context.FillRect(new Rect(box.X + inset, box.Y + inset, box.Width - inset * 2, box.Height - inset * 2), GetValue(IndicatorMarkColorProperty), IndicatorRadius / 2);
+        var mark = new Rect(box.X + inset, box.Y + inset, box.Width - inset * 2, box.Height - inset * 2);
+
+        context.FillRect(mark, GetValue(IndicatorMarkColorProperty), IndicatorRadius / 2);
     }
 }
