@@ -41,7 +41,8 @@ namespace Silo.Styling;
 public static class JsoncStylesheetReader
 {
     /// <summary>Reader settings: comments are skipped and trailing commas are allowed, which is what makes the JSON "JSONC".</summary>
-    static readonly JsonReaderOptions Options = new() { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
+    static readonly JsonReaderOptions Options =
+        new() { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
 
     /// <summary>Reads a Stylesheet from JSONC text.</summary>
     /// <param name="json">The Stylesheet text.</param>
@@ -60,7 +61,12 @@ public static class JsoncStylesheetReader
         var r = new Parser(bytes, fileName);
         
         try { return r.ReadSheet(); }
-        catch (JsonException ex) { throw new StylesheetException($"{fileName}({ex.LineNumber + 1},{ex.BytePositionInLine + 1}): {ex.Message}"); }
+        catch (JsonException ex)
+        {
+            var position = $"{ex.LineNumber + 1},{ex.BytePositionInLine + 1}";
+
+            throw new StylesheetException($"{fileName}({position}): {ex.Message}");
+        }
     }
 
     /// <summary>One pass over the bytes of a Stylesheet. A ref struct because <see cref="Utf8JsonReader"/> is one.</summary>

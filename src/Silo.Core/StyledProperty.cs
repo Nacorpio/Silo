@@ -99,7 +99,11 @@ public abstract class StyledProperty
     /// <exception cref="ArgumentException">
     /// <paramref name="name"/> is empty, or <typeparamref name="TOwner"/> already declares a property with that name.
     /// </exception>
-    public static StyledProperty<T> Register<TOwner, T>(string name, T defaultValue, ValueParser<T> parser, bool inherits = false)
+    public static StyledProperty<T> Register<TOwner, T>(
+        string name,
+        T defaultValue,
+        ValueParser<T> parser,
+        bool inherits = false)
         where TOwner : Element
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
@@ -112,7 +116,9 @@ public abstract class StyledProperty
         {
             if (list.Exists(p => p.Name == name))
             {
-                throw new ArgumentException($"{typeof(TOwner).Name} already declares a Styled property named '{name}'.", nameof(name));
+                var message = $"{typeof(TOwner).Name} already declares a Styled property named '{name}'.";
+
+                throw new ArgumentException(message, nameof(name));
             }
 
             list.Add(property);
@@ -136,7 +142,7 @@ public abstract class StyledProperty
         var result = new List<StyledProperty>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
-        for (var current = type; current is not null && typeof(Element).IsAssignableFrom(current); current = current.BaseType)
+        for (var current = type; current is not null && IsElement(current); current = current.BaseType)
         {
             if (!Registry.TryGetValue(current, out var list))
             {
@@ -157,6 +163,11 @@ public abstract class StyledProperty
 
         return result;
     }
+
+    /// <summary>Tells whether a type is <see cref="Element"/> or derives from it.</summary>
+    /// <param name="type">The type.</param>
+    /// <returns><see langword="true"/> for an Element type.</returns>
+    static bool IsElement(Type type) => typeof(Element).IsAssignableFrom(type);
 
     /// <summary>
     /// Finds a Styled property of an Element type by its Stylesheet name.

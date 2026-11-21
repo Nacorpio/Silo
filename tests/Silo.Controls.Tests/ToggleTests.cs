@@ -108,7 +108,9 @@ public class ToggleTests
 
         box.Render(builder);
 
-        Assert.DoesNotContain(builder.Build().Commands, c => c is FillRectCommand { Color: var color } && color == mark);
+        var commands = builder.Build().Commands;
+
+        Assert.DoesNotContain(commands, c => c is FillRectCommand { Color: var color } && color == mark);
     }
 
     [Fact]

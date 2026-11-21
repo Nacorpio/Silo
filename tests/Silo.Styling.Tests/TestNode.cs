@@ -1,6 +1,11 @@
 using Silo.Styling;
 
-public sealed class TestNode(string type, string? name = null, string[]? classes = null, string[]? states = null, TestNode? parent = null) : IStyleNode
+public sealed class TestNode(
+    string type,
+    string? name = null,
+    string[]? classes = null,
+    string[]? states = null,
+    TestNode? parent = null) : IStyleNode
 {
     public string TypeName => type;
     public string? Name => name;

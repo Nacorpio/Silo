@@ -42,7 +42,8 @@ public sealed class StylesheetWatcher : IDisposable
 
         watcher = new FileSystemWatcher(Path.GetDirectoryName(this.path)!, Path.GetFileName(this.path))
         {
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime,
+            NotifyFilter =
+                NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime,
         };
 
         watcher.Changed += (_, _) => Schedule();

@@ -1,7 +1,10 @@
 using Silo.Layout;
 using Silo.Styling.Values;
 
-public class TestNode(LayoutStyle? style = null, Func<double?, Size>? measure = null, params TestNode[] children) : ILayoutNode
+public class TestNode(
+    LayoutStyle? style = null,
+    Func<double?, Size>? measure = null,
+    params TestNode[] children) : ILayoutNode
 {
     public LayoutStyle Style { get; } = style ?? new LayoutStyle();
     public IReadOnlyList<ILayoutNode> Children { get; } = children;

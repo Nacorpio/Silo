@@ -129,7 +129,9 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
 
             case "hsl" or "hsla":
             {
-                if (Number(arguments[0].TrimEnd('d', 'e', 'g')) is { } h && Fraction(arguments[1]) is { } s && Fraction(arguments[2]) is { } l)
+                if (Number(arguments[0].TrimEnd('d', 'e', 'g')) is { } h
+                    && Fraction(arguments[1]) is { } s
+                    && Fraction(arguments[2]) is { } l)
                 {
                     color = FromHsl(h, s, l, alpha.Value);
 
@@ -141,7 +143,9 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
 
             case "oklch":
             {
-                if (Fraction(arguments[0]) is { } lightness && Number(arguments[1]) is { } chroma && Number(arguments[2].TrimEnd('d', 'e', 'g')) is { } hue)
+                if (Fraction(arguments[0]) is { } lightness
+                    && Number(arguments[1]) is { } chroma
+                    && Number(arguments[2].TrimEnd('d', 'e', 'g')) is { } hue)
                 {
                     color = FromOklch(lightness, chroma, hue, alpha.Value);
 
@@ -168,7 +172,8 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
             digits = string.Concat(digits.Select(c => $"{c}{c}"));
         }
 
-        if (digits.Length is not (6 or 8) || !uint.TryParse(digits, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var value))
+        if (digits.Length is not (6 or 8)
+            || !uint.TryParse(digits, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var value))
         {
             return false;
         }
@@ -182,7 +187,9 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
 
     /// <summary>Reads a finite number with the invariant culture, or returns <see langword="null"/>.</summary>
     static double? Number(string text)
-        => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var n) && double.IsFinite(n) ? n : null;
+        => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var n) && double.IsFinite(n)
+            ? n
+            : null;
 
     /// <summary>Reads "0.5" or "50%" as a fraction of one.</summary>
     /// <summary>Reads <c>0.5</c> or <c>50%</c> as a fraction of one.</summary>
@@ -191,7 +198,9 @@ public readonly record struct Color(byte R, byte G, byte B, byte A = 255)
 
     /// <summary>Reads a channel written as 0 to 255 or as a percentage.</summary>
     static byte? Channel(string text)
-        => text.EndsWith('%') ? Number(text[..^1]) is { } p ? ToByte(p / 100) : null : Number(text) is { } n ? ToByte(n / 255) : null;
+        => text.EndsWith('%')
+            ? Number(text[..^1]) is { } p ? ToByte(p / 100) : null
+            : Number(text) is { } n ? ToByte(n / 255) : null;
 
     /// <summary>Converts a fraction from 0 to 1 to a byte, clamping out-of-range input.</summary>
     static byte ToByte(double fraction)

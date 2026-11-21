@@ -88,7 +88,11 @@ public readonly record struct Length(double Value, LengthUnit Unit)
 
         var units = new (string Suffix, LengthUnit Unit)[]
         {
-            ("px", LengthUnit.Px), ("rem", LengthUnit.Rem), ("em", LengthUnit.Em), ("fr", LengthUnit.Fr), ("%", LengthUnit.Percent),
+            ("px", LengthUnit.Px),
+            ("rem", LengthUnit.Rem),
+            ("em", LengthUnit.Em),
+            ("fr", LengthUnit.Fr),
+            ("%", LengthUnit.Percent),
         };
 
         foreach (var (suffix, unit) in units)
@@ -113,5 +117,7 @@ public readonly record struct Length(double Value, LengthUnit Unit)
 
     /// <summary>Reads a finite number with the invariant culture.</summary>
     static bool Number(string text, out double number)
-        => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out number) && double.IsFinite(number);
+       
+            => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out number)
+            && double.IsFinite(number);
 }

@@ -48,7 +48,8 @@ public sealed class DiagnosticsClient : IAsyncDisposable
     /// <exception cref="TimeoutException">No server was listening on the pipe in time.</exception>
     public static async Task<DiagnosticsClient> ConnectAsync(string pipeName, TimeSpan? timeout = null)
     {
-        var pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+        var options = PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly;
+        var pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, options);
 
         await pipe.ConnectAsync((int)(timeout ?? TimeSpan.FromSeconds(5)).TotalMilliseconds);
 
@@ -64,11 +65,13 @@ public sealed class DiagnosticsClient : IAsyncDisposable
     {
         var id = ++lastId;
         var methodText = JsonSerializer.Serialize(method, ClientJson.Default.String);
-        var request = $$"""{"jsonrpc":"2.0","id":{{id}},"method":{{methodText}}{{(parameters is null ? "" : $",\"params\":{parameters}")}}}""";
+        var extra = parameters is null ? "" : $",\"params\":{parameters}";
+        var request = $$"""{"jsonrpc":"2.0","id":{{id}},"method":{{methodText}}{{extra}}}""";
 
         await writer.WriteLineAsync(request);
 
-        var line = await reader.ReadLineAsync() ?? throw new InvalidOperationException("The diagnostics server closed the connection.");
+        var line = await reader.ReadLineAsync()
+            ?? throw new InvalidOperationException("The diagnostics server closed the connection.");
         var response = JsonDocument.Parse(line).RootElement;
 
         if (response.TryGetProperty("error", out var error))

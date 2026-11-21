@@ -35,13 +35,17 @@ public sealed class InspectorView : Box
     const string Sheet = """
         {
           "rules": {
-            "#inspector": { "background": "#111827", "color": "#e5e7eb", "padding": "8px", "gap": "16px", "font-size": "13px", "flex-direction": "row" },
+            "#inspector": {
+              "background": "#111827", "color": "#e5e7eb", "padding": "8px", "gap": "16px", "font-size": "13px",
+              "flex-direction": "row"
+            },
             "#tree-pane": { "width": "360px", "flex-direction": "column" },
             "#details-pane": { "flex-grow": "1", "flex-direction": "column" },
             "#tree": { "flex-direction": "column", "gap": "2px" },
             "#details": { "flex-direction": "column", "gap": "3px" },
             "Button.row": {
-              "background": "#111827", "color": "#d1d5db", "padding": "3px 6px", "text-align": "left", "border-radius": "3px",
+              "background": "#111827", "color": "#d1d5db", "padding": "3px 6px", "text-align": "left",
+              "border-radius": "3px",
               "&:hover": { "background": "#1f2937" },
               "&:active": { "background": "#374151" }
             },

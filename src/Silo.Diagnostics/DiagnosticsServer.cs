@@ -73,7 +73,10 @@ public sealed class DiagnosticsServer : IDisposable
     {
         while (!stop.IsCancellationRequested)
         {
-            var pipe = new NamedPipeServerStream(PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+            var options = PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly;
+            var instances = NamedPipeServerStream.MaxAllowedServerInstances;
+            var mode = PipeTransmissionMode.Byte;
+            var pipe = new NamedPipeServerStream(PipeName, PipeDirection.InOut, instances, mode, options);
 
             try
             {
@@ -97,7 +100,8 @@ public sealed class DiagnosticsServer : IDisposable
         await using (pipe)
         {
             using var reader = new StreamReader(pipe, Encoding.UTF8, leaveOpen: true);
-            await using var writer = new StreamWriter(pipe, new UTF8Encoding(false), leaveOpen: true) { AutoFlush = true };
+            await using var writer =
+                new StreamWriter(pipe, new UTF8Encoding(false), leaveOpen: true) { AutoFlush = true };
 
             try
             {

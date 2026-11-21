@@ -57,7 +57,13 @@ public sealed class SkiaDrawingContext(SKCanvas canvas) : IDrawingContext
     /// <inheritdoc/>
     public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0)
     {
-        using var paint = new SKPaint { Color = ToSkia(color), IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = (float)width };
+        using var paint = new SKPaint
+        {
+            Color = ToSkia(color),
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = (float)width,
+        };
 
         canvas.DrawRoundRect(ToSkia(rect), (float)cornerRadius, (float)cornerRadius, paint);
     }

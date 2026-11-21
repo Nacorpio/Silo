@@ -93,7 +93,9 @@ public sealed unsafe class SdlWindow : IDisposable
         if (!SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
             throw new InvalidOperationException($"SDL could not start: {SDL3.SDL_GetError()}");
 
-        window = SDL3.SDL_CreateWindow(title, width, height, SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY);
+        var flags = SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY;
+
+        window = SDL3.SDL_CreateWindow(title, width, height, flags);
 
         if (window is null)
             throw new InvalidOperationException($"SDL could not create the window: {SDL3.SDL_GetError()}");
@@ -222,7 +224,10 @@ public sealed unsafe class SdlWindow : IDisposable
         SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN or SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP => (uint)e.button.windowID,
         SDL_EventType.SDL_EVENT_KEY_DOWN => (uint)e.key.windowID,
         SDL_EventType.SDL_EVENT_MOUSE_WHEEL => (uint)e.wheel.windowID,
-        SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED or SDL_EventType.SDL_EVENT_WINDOW_EXPOSED or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED or SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => (uint)e.window.windowID,
+        SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED
+            or SDL_EventType.SDL_EVENT_WINDOW_EXPOSED
+            or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED
+            or SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => (uint)e.window.windowID,
 
         _ => 0,
     };
@@ -270,7 +275,8 @@ public sealed unsafe class SdlWindow : IDisposable
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 1 => router.Down(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP when e.button.button == 1 => router.Up(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => router.Leave(),
-            SDL_EventType.SDL_EVENT_MOUSE_WHEEL => router.Scroll(e.wheel.mouse_x, e.wheel.mouse_y, -e.wheel.y * WheelStep),
+            SDL_EventType.SDL_EVENT_MOUSE_WHEEL
+                => router.Scroll(e.wheel.mouse_x, e.wheel.mouse_y, -e.wheel.y * WheelStep),
 
             SDL_EventType.SDL_EVENT_KEY_DOWN => PressKey(e.key),
 
@@ -328,7 +334,8 @@ public sealed unsafe class SdlWindow : IDisposable
 
         root.Render(builder);
 
-        using var bitmap = new SKBitmap(new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
+        using var bitmap =
+            new SKBitmap(new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
 
         using (var canvas = new SKCanvas(bitmap))
         {

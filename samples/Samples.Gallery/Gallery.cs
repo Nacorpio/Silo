@@ -8,7 +8,10 @@ static class Gallery
     const string Sheet = """
         {
           "rules": {
-            "#root": { "background": "#f3f4f6", "padding": "16px", "gap": "12px", "flex-direction": "column", "align-items": "start" },
+            "#root": {
+              "background": "#f3f4f6", "padding": "16px", "gap": "12px", "flex-direction": "column",
+              "align-items": "start"
+            },
             ".title": { "font-size": "24px", "font-weight": "bold" },
             ".muted": { "color": "#6b7280" },
             "#row": { "gap": "8px", "flex-direction": "row" },

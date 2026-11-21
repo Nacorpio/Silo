@@ -111,10 +111,14 @@ public class DiagnosticsAgentTests
 
         button.SetValue(Control.GapProperty, new Silo.Styling.Values.Length(3, Silo.Styling.Values.LengthUnit.Px));
 
-        var id = Call(agent, "tree.snapshot").GetProperty("result").GetProperty("children")[0].GetProperty("id").GetInt32();
+        var id =
+            Call(agent, "tree.snapshot").GetProperty("result").GetProperty("children")[0].GetProperty("id").GetInt32();
         var properties = Call(agent, "element.cascade", $$"""{"id":{{id}}}""").GetProperty("result").GetProperty("properties");
 
-        string Origin(string name) => properties.EnumerateArray().Single(p => p.GetProperty("name").GetString() == name).GetProperty("origin").GetString()!;
+        string Origin(string name) => properties.EnumerateArray()
+            .Single(p => p.GetProperty("name").GetString() == name)
+            .GetProperty("origin")
+            .GetString()!;
 
         Assert.Equal("local", Origin("gap"));
         Assert.Equal("default", Origin("opacity"));
@@ -125,8 +129,11 @@ public class DiagnosticsAgentTests
     {
         var (agent, _, _) = Setup();
 
-        Assert.Equal(-32700, JsonDocument.Parse(agent.Handle("{ nope")!).RootElement.GetProperty("error").GetProperty("code").GetInt32());
-        Assert.Equal(-32600, JsonDocument.Parse(agent.Handle("""{"jsonrpc":"2.0","id":1}""")!).RootElement.GetProperty("error").GetProperty("code").GetInt32());
+        var malformed = JsonDocument.Parse(agent.Handle("{ nope")!).RootElement;
+        var invalid = JsonDocument.Parse(agent.Handle("""{"jsonrpc":"2.0","id":1}""")!).RootElement;
+
+        Assert.Equal(-32700, malformed.GetProperty("error").GetProperty("code").GetInt32());
+        Assert.Equal(-32600, invalid.GetProperty("error").GetProperty("code").GetInt32());
         Assert.Equal(-32601, Call(agent, "nope").GetProperty("error").GetProperty("code").GetInt32());
         Assert.Equal(-32602, Call(agent, "element.cascade", """{"id":999}""").GetProperty("error").GetProperty("code").GetInt32());
     }

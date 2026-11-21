@@ -179,7 +179,10 @@ public class FlexLayoutTests
     public void Wrapping_text_in_a_column_gets_its_height_from_the_final_width()
     {
         // Text that needs 200px unwrapped and 10px of height per line at 100px.
-        Size Wrap(double? width) => width is null or >= 200 ? new Size(200, 10) : new Size(width.Value, Math.Ceiling(200 / width.Value) * 10);
+        Size Wrap(double? width)
+            => width is null or >= 200
+                ? new Size(200, 10)
+                : new Size(width.Value, Math.Ceiling(200 / width.Value) * 10);
 
         var text = new TestNode(null, Wrap);
         var root = new TestNode(new LayoutStyle { Direction = FlexDirection.Column }, null, text);

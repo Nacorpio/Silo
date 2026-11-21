@@ -92,7 +92,8 @@ public class InspectorTests
 
         var agent = new DiagnosticsAgent(app, () => new StyleResolver([JsoncStylesheetReader.Read("""{ "rules": { "Button": { "padding": "4px" } } }""", "app.jsonc")]));
 
-        using var server = new DiagnosticsServer(agent, work => Task.FromResult(work()), $"silo-test-{Guid.NewGuid():N}");
+        using var server =
+            new DiagnosticsServer(agent, work => Task.FromResult(work()), $"silo-test-{Guid.NewGuid():N}");
 
         server.Start();
         app.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read("""{ "rules": { "Button": { "padding": "4px" } } }""", "app.jsonc")]));

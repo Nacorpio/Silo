@@ -8,7 +8,12 @@ namespace Silo.Inspector;
 /// <param name="Name">The Element's name, or <see langword="null"/>.</param>
 /// <param name="Classes">The Classes on the Element.</param>
 /// <param name="Children">The child Elements.</param>
-public sealed record InspectorNode(int Id, string Type, string? Name, IReadOnlyList<string> Classes, IReadOnlyList<InspectorNode> Children)
+public sealed record InspectorNode(
+    int Id,
+    string Type,
+    string? Name,
+    IReadOnlyList<string> Classes,
+    IReadOnlyList<InspectorNode> Children)
 {
     /// <summary>Reads a node from a <c>tree.snapshot</c> result.</summary>
     /// <param name="json">The result, or one of its <c>children</c>.</param>
@@ -35,7 +40,8 @@ public sealed record InspectorProperty(string Name, string Value, string Origin,
     /// <summary>Reads the properties from an <c>element.cascade</c> result.</summary>
     /// <param name="json">The result.</param>
     /// <returns>The properties, in the order the agent listed them.</returns>
-    public static IReadOnlyList<InspectorProperty> ParseAll(JsonElement json) => json.GetProperty("properties").EnumerateArray().Select(Parse).ToList();
+    public static IReadOnlyList<InspectorProperty> ParseAll(JsonElement json)
+        => json.GetProperty("properties").EnumerateArray().Select(Parse).ToList();
 
     /// <summary>Reads one property.</summary>
     /// <param name="json">The property's JSON.</param>
@@ -45,7 +51,19 @@ public sealed record InspectorProperty(string Name, string Value, string Origin,
         json.GetProperty("value").GetString() ?? "",
         json.GetProperty("origin").GetString()!,
         json.TryGetProperty("declared", out var declared) ? declared.GetString() : null,
-        json.TryGetProperty("source", out var source) ? $"{source.GetProperty("file").GetString()}:{source.GetProperty("line").GetInt32()}:{source.GetProperty("column").GetInt32()}" : null);
+        json.TryGetProperty("source", out var source) ? Location(source) : null);
+
+    /// <summary>Formats a source location as <c>file:line:column</c>.</summary>
+    /// <param name="source">The <c>source</c> object of a property.</param>
+    /// <returns>The location text.</returns>
+    static string Location(JsonElement source)
+    {
+        var file = source.GetProperty("file").GetString();
+        var line = source.GetProperty("line").GetInt32();
+        var column = source.GetProperty("column").GetInt32();
+
+        return $"{file}:{line}:{column}";
+    }
 
     /// <summary>Gets the text that the property panel shows for this property.</summary>
     public string Label => Origin switch

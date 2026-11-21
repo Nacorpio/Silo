@@ -36,6 +36,7 @@ public sealed class SkiaTextMeasurer : ITextMeasurer
         var weight = style.Bold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal;
         var slant = style.Italic ? SKFontStyleSlant.Italic : SKFontStyleSlant.Upright;
 
-        return SKTypeface.FromFamilyName(style.FontFamily, weight, SKFontStyleWidth.Normal, slant) ?? SKTypeface.Default;
+        return SKTypeface.FromFamilyName(style.FontFamily, weight, SKFontStyleWidth.Normal, slant)
+            ?? SKTypeface.Default;
     }
 }

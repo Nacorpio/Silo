@@ -15,7 +15,8 @@ namespace Silo;
 public abstract class TextControl : Control
 {
     /// <summary>The horizontal position of the text in the content box.</summary>
-    public static readonly StyledProperty<TextAlign> TextAlignProperty = StyledProperty.Register<TextControl, TextAlign>("text-align", TextAlign.Left, ValueParsers.TextAlignment);
+    public static readonly StyledProperty<TextAlign> TextAlignProperty =
+        StyledProperty.Register<TextControl, TextAlign>("text-align", TextAlign.Left, ValueParsers.TextAlignment);
 
     /// <summary>The text to show.</summary>
     string text = string.Empty;
@@ -73,10 +74,12 @@ public abstract class TextControl : Control
 
     /// <summary>Builds the font description from the current property values.</summary>
     /// <returns>The text style used for both measuring and drawing.</returns>
-    TextStyle CurrentTextStyle() => new(GetValue(FontFamilyProperty), GetValue(FontSizeProperty), GetValue(BoldProperty));
+    TextStyle CurrentTextStyle()
+        => new(GetValue(FontFamilyProperty), GetValue(FontSizeProperty), GetValue(BoldProperty));
 
     /// <summary>Gets the text measurer, which must have been set on this Control or an ancestor.</summary>
     /// <returns>The measurer.</returns>
     /// <exception cref="InvalidOperationException">No measurer is set on this Control or any ancestor.</exception>
-    ITextMeasurer Measurer() => TextMeasurer ?? throw new InvalidOperationException($"{TypeName} needs a text measurer. Set Control.TextMeasurer on the root.");
+    ITextMeasurer Measurer() => TextMeasurer ?? throw new InvalidOperationException(
+        $"{TypeName} needs a text measurer. Set Control.TextMeasurer on the root.");
 }

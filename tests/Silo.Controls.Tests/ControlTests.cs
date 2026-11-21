@@ -88,7 +88,11 @@ public class ControlTests
         Assert.Contains(new FillRectCommand(new Rect(0, 0, 100, 60), new Color(255, 0, 0), 4), commands);
         Assert.Contains(new StrokeRectCommand(new Rect(1, 1, 98, 58), new Color(0, 255, 0), 2, 4), commands);
         Assert.Contains(new FillRectCommand(new Rect(0, 0, 20, 20), new Color(0, 0, 255), 0), commands);
-        Assert.True(commands.ToList().FindIndex(c => c is FillRectCommand { Color.R: 255 }) < commands.ToList().FindIndex(c => c is FillRectCommand { Color.B: 255 }));
+        var list = commands.ToList();
+        var red = list.FindIndex(c => c is FillRectCommand { Color.R: 255 });
+        var blue = list.FindIndex(c => c is FillRectCommand { Color.B: 255 });
+
+        Assert.True(red < blue);
     }
 
     [Fact]
@@ -112,7 +116,9 @@ public class ControlTests
         root.Arrange(new Size(300, 100));
 
         Assert.Equal(new Rect(0, 0, 43, 22), text.Bounds);
-        Assert.Contains(new DrawTextCommand("Hello", 4, 4, new TextStyle("sans-serif", 14), new Color(17, 34, 51)), Frame(root).Commands);
+        var expected = new DrawTextCommand("Hello", 4, 4, new TextStyle("sans-serif", 14), new Color(17, 34, 51));
+
+        Assert.Contains(expected, Frame(root).Commands);
     }
 
     [Fact]
@@ -125,7 +131,9 @@ public class ControlTests
         root.ApplyStyles(Resolver("""{ "rules": { "#root": { "color": "#ff0000", "font-size": "20px", "font-weight": "bold", "font-family": "Inter" } } }"""));
         root.Arrange(new Size(100, 50));
 
-        Assert.Contains(new DrawTextCommand("Hi", 0, 18, new TextStyle("Inter", 20, true), new Color(255, 0, 0)), Frame(root).Commands);
+        var expected = new DrawTextCommand("Hi", 0, 18, new TextStyle("Inter", 20, true), new Color(255, 0, 0));
+
+        Assert.Contains(expected, Frame(root).Commands);
     }
 
     [Fact]
@@ -138,7 +146,9 @@ public class ControlTests
         root.ApplyStyles(Resolver("""{ "rules": { "TextBlock": { "text-align": "center", "width": "100px", "height": "30px" } } }"""));
         root.Arrange(new Size(200, 100));
 
-        Assert.Contains(new DrawTextCommand("Hi", 43, 8, new TextStyle("sans-serif", 14), new Color(0, 0, 0)), Frame(root).Commands);
+        var expected = new DrawTextCommand("Hi", 43, 8, new TextStyle("sans-serif", 14), new Color(0, 0, 0));
+
+        Assert.Contains(expected, Frame(root).Commands);
     }
 
     [Fact]
