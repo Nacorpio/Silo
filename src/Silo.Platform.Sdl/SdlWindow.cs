@@ -53,6 +53,7 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>The SDL window.</summary>
     readonly SDL_Window* window;
 
+
     /// <summary>The Stylesheets the Controls are styled with.</summary>
     StyleResolver? styles;
 
