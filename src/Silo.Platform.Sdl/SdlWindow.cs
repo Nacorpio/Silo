@@ -22,6 +22,10 @@ namespace Silo.Platform.Sdl;
 /// Everything runs on the thread that created the window. To change anything from another thread, such as a hot-reloaded
 /// Stylesheet, use <see cref="Post"/>.
 /// </para>
+/// <para>
+/// A process can have several windows, such as an app and its Inspector. They share one event loop: pumping any window
+/// handles the events of all of them, and an event goes to the window that it was meant for.
+/// </para>
 /// </remarks>
 /// <example>
 /// <code language="csharp">
@@ -41,6 +45,10 @@ public sealed unsafe class SdlWindow : IDisposable
     const int IdleMilliseconds = 100;
 
 
+    /// <summary>The windows that are open, which share the event loop.</summary>
+    static readonly List<SdlWindow> Open = [];
+
+
     /// <summary>The root of the Control tree.</summary>
     readonly Control root;
 
@@ -53,6 +61,9 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>The SDL window.</summary>
     readonly SDL_Window* window;
 
+    /// <summary>The id that SDL puts in the events of this window.</summary>
+    readonly uint id;
+
 
     /// <summary>The Stylesheets the Controls are styled with.</summary>
     StyleResolver? styles;
@@ -62,6 +73,9 @@ public sealed unsafe class SdlWindow : IDisposable
 
     /// <summary>Whether the window was closed.</summary>
     bool closed;
+
+    /// <summary>Whether <see cref="Dispose"/> has run.</summary>
+    bool disposed;
 
     /// <summary>Creates a window and shows it.</summary>
     /// <param name="title">The window title.</param>
@@ -83,9 +97,24 @@ public sealed unsafe class SdlWindow : IDisposable
 
         this.root = root;
 
+        id = (uint)SDL3.SDL_GetWindowID(window);
         root.TextMeasurer ??= new SkiaTextMeasurer();
         router = new PointerRouter(root);
+
+        Open.Add(this);
     }
+
+    /// <summary>Raised when a key is pressed while this window has the keyboard focus.</summary>
+    public event Action<Key>? KeyPressed;
+
+    /// <summary>Raised when the user closes the window, after which the window no longer draws or handles input.</summary>
+    public event EventHandler? Closed;
+
+    /// <summary>Gets the root Control of the window.</summary>
+    public Control Root => root;
+
+    /// <summary>Gets the id that SDL puts in the events of this window.</summary>
+    public uint Id => id;
 
     /// <summary>Gets or sets the color that every frame is cleared with. The default is white.</summary>
     public Color Background { get; set; } = new(255, 255, 255);
@@ -133,21 +162,19 @@ public sealed unsafe class SdlWindow : IDisposable
 
     /// <summary>Waits for an event, handles everything that is queued, and draws a frame if something changed.</summary>
     /// <param name="timeoutMilliseconds">The longest to wait for an event.</param>
-    /// <returns><see langword="false"/> once the window has been closed.</returns>
+    /// <returns><see langword="false"/> once this window has been closed.</returns>
+    /// <remarks>Events are handled for every open window, not only this one, and every window that changed draws a frame.</remarks>
     public bool Pump(int timeoutMilliseconds)
     {
         SDL_Event e;
 
         if (SDL3.SDL_WaitEventTimeout(&e, timeoutMilliseconds))
             do
-                Handle(e);
+                Dispatch(e);
             while (SDL3.SDL_PollEvent(&e));
 
-        while (posted.TryDequeue(out var work))
-            work();
-
-        if (dirty && !closed)
-            Draw();
+        foreach (var open in Open.ToArray())
+            open.Tick();
 
         return !closed;
     }
@@ -155,8 +182,67 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Closes the window.</summary>
     public void Dispose()
     {
+        if (disposed)
+            return;
+
+        disposed = true;
+
+        Open.Remove(this);
+
         SDL3.SDL_DestroyWindow(window);
-        SDL3.SDL_Quit();
+        SDL3.SDL_QuitSubSystem(SDL_InitFlags.SDL_INIT_VIDEO);
+    }
+
+    /// <summary>Sends an event to the window that it was meant for.</summary>
+    /// <param name="e">The event.</param>
+    static void Dispatch(SDL_Event e)
+    {
+        if ((SDL_EventType)e.type == SDL_EventType.SDL_EVENT_QUIT)
+        {
+            foreach (var open in Open.ToArray())
+                open.Close();
+
+            return;
+        }
+
+        var target = WindowIdOf(e);
+
+        (Open.FirstOrDefault(w => w.id == target) ?? Open.FirstOrDefault())?.Handle(e);
+    }
+
+    /// <summary>Reads the id of the window that an event is for.</summary>
+    /// <param name="e">The event.</param>
+    /// <returns>The window id, or 0 for an event that does not name a window.</returns>
+    static uint WindowIdOf(SDL_Event e) => (SDL_EventType)e.type switch
+    {
+        SDL_EventType.SDL_EVENT_MOUSE_MOTION => (uint)e.motion.windowID,
+        SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN or SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP => (uint)e.button.windowID,
+        SDL_EventType.SDL_EVENT_KEY_DOWN => (uint)e.key.windowID,
+        SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED or SDL_EventType.SDL_EVENT_WINDOW_EXPOSED or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED or SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => (uint)e.window.windowID,
+
+        _ => 0,
+    };
+
+    /// <summary>Converts an SDL key code to a <see cref="Key"/>.</summary>
+    /// <param name="code">The SDL key code.</param>
+    /// <returns>The key, or <see cref="Key.Unknown"/>.</returns>
+    static Key ToKey(SDL_Keycode code) => code switch
+    {
+        SDL_Keycode.SDLK_ESCAPE => Key.Escape,
+        SDL_Keycode.SDLK_F5 => Key.F5,
+        SDL_Keycode.SDLK_F12 => Key.F12,
+
+        _ => Key.Unknown,
+    };
+
+    /// <summary>Runs the posted work and draws a frame if one is needed.</summary>
+    void Tick()
+    {
+        while (posted.TryDequeue(out var work))
+            work();
+
+        if (dirty && !closed)
+            Draw();
     }
 
     /// <summary>Applies the Stylesheets to the tree and asks for a frame.</summary>
@@ -174,12 +260,14 @@ public sealed unsafe class SdlWindow : IDisposable
     {
         var changed = (SDL_EventType)e.type switch
         {
-            SDL_EventType.SDL_EVENT_QUIT or SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED => Close(),
+            SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED => Close(),
 
             SDL_EventType.SDL_EVENT_MOUSE_MOTION => router.Move(e.motion.x, e.motion.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 1 => router.Down(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP when e.button.button == 1 => router.Up(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => router.Leave(),
+
+            SDL_EventType.SDL_EVENT_KEY_DOWN => PressKey(e.key),
 
             SDL_EventType.SDL_EVENT_WINDOW_EXPOSED or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED => true,
 
@@ -190,11 +278,28 @@ public sealed unsafe class SdlWindow : IDisposable
             Restyle();
     }
 
-    /// <summary>Marks the window as closed.</summary>
+    /// <summary>Raises <see cref="KeyPressed"/> for a key press that is not an auto-repeat.</summary>
+    /// <param name="key">The SDL keyboard event.</param>
+    /// <returns>Always <see langword="false"/>, since a key press changes nothing by itself.</returns>
+    bool PressKey(SDL_KeyboardEvent key)
+    {
+        if (!key.repeat)
+            KeyPressed?.Invoke(ToKey(key.key));
+
+        return false;
+    }
+
+    /// <summary>Marks the window as closed, takes it out of the event loop and raises <see cref="Closed"/>.</summary>
     /// <returns>Always <see langword="false"/>, so that no frame is drawn.</returns>
     bool Close()
     {
+        if (closed)
+            return false;
+
         closed = true;
+
+        Open.Remove(this);
+        Closed?.Invoke(this, EventArgs.Empty);
 
         return false;
     }

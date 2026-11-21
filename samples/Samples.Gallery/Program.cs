@@ -1,4 +1,5 @@
 using Silo;
+using Silo.Inspector;
 using Silo.Layout;
 using Silo.Platform.Sdl;
 using Silo.Rendering;
@@ -9,7 +10,7 @@ using Silo.Styling.Values;
 // Usage:
 //   dotnet run --project samples/Samples.Gallery -- [--theme <file.jsonc>] [--screenshot <out.png>]
 // With --theme the file is watched and the window restyles when it is saved. With --screenshot the gallery is drawn to a
-// PNG without opening a window.
+// PNG without opening a window. F12 opens the Inspector in a second window.
 var theme = ArgumentAfter("--theme");
 var screenshot = ArgumentAfter("--screenshot");
 
@@ -26,6 +27,7 @@ if (screenshot is not null)
 }
 
 using var window = new SdlWindow("Silo gallery", 640, 360, root) { Styles = Resolve(overrides) };
+using var attachment = window.AttachDiagnostics();
 using var watcher = theme is null ? null : new StylesheetWatcher(theme);
 
 if (watcher is not null)
@@ -33,6 +35,8 @@ if (watcher is not null)
     watcher.Reloaded += sheet => window.Post(() => window.Styles = Resolve(sheet));
     watcher.Failed += error => Console.Error.WriteLine(error.Message);
 }
+
+Console.WriteLine("Press F12 to open the Inspector.");
 
 window.Run();
 

@@ -2,5 +2,6 @@
   <ItemGroup>
     <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
     <ProjectReference Include="../Silo.Diagnostics/Silo.Diagnostics.csproj" />
+    <ProjectReference Include="../Silo.Platform.Sdl/Silo.Platform.Sdl.csproj" />
   </ItemGroup>
 </Project>
