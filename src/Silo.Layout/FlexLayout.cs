@@ -159,6 +159,7 @@ public static class FlexLayout
             {
                 AlignItems.Center => (crossSize - cross - item.CrossMargins) / 2 + item.CrossMarginStart,
                 AlignItems.End => crossSize - cross - item.CrossMarginEnd,
+
                 _ => item.CrossMarginStart,
             };
 
@@ -366,6 +367,7 @@ public static class FlexLayout
             JustifyContent.SpaceBetween when count > 1 => (0, free / (count - 1)),
             JustifyContent.SpaceAround when count > 0 => (free / count / 2, free / count),
             JustifyContent.SpaceEvenly when count > 0 => (free / (count + 1), free / (count + 1)),
+
             _ => (0, 0),
         };
     }
@@ -467,6 +469,7 @@ public static class FlexLayout
             { Unit: LengthUnit.Px } l => l.Value,
             { Unit: LengthUnit.Percent } l => basis * l.Value / 100,
             { Unit: LengthUnit.Em or LengthUnit.Rem } l => l.Value * EmPixels,
+
             _ => null,
         };
     }
