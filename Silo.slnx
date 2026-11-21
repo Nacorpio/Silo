@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Silo.Styling/Silo.Styling.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/Silo.Styling.Tests/Silo.Styling.Tests.csproj" />
-  </Folder>
-</Solution>
