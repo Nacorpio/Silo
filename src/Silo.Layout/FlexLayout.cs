@@ -148,28 +148,10 @@ public static class FlexLayout
             var child = item.Node.Style;
             var align = child.AlignSelf ?? style.AlignItems;
 
-            var crossProperty = isRow ? child.Height : child.Width;
             var crossMin = isRow ? child.MinHeight : child.MinWidth;
             var crossMax = isRow ? child.MaxHeight : child.MaxWidth;
 
-            double cross;
-
-            if (Resolve(crossProperty, crossSize) is { } explicitCross)
-            {
-                cross = explicitCross;
-            }
-            else if (align == AlignItems.Stretch)
-            {
-                cross = crossSize - item.CrossMargins;
-            }
-            else if (isRow)
-            {
-                cross = Intrinsic(item.Node, item.Target).Height;
-            }
-            else
-            {
-                cross = Intrinsic(item.Node, crossSize - item.CrossMargins).Width;
-            }
+            var cross = CrossSize(item, isRow, align, crossSize);
 
             cross = Math.Max(item.CrossInsets, Clamp(cross, crossMin, crossMax, crossSize));
 
@@ -228,20 +210,7 @@ public static class FlexLayout
             item.Max = Math.Max(item.Min, maximum);
         }
 
-        if (Resolve(s.Basis ?? mainProperty, mainSize) is { } basis)
-        {
-            item.Base = Math.Max(item.MainInsets, basis);
-        }
-        else if (isRow)
-        {
-            item.Base = Intrinsic(child, null).Width;
-        }
-        else
-        {
-            var limit = Resolve(crossProperty, crossSize) ?? (crossSize - item.CrossMargins);
-
-            item.Base = Intrinsic(child, limit).Height;
-        }
+        item.Base = BaseSize(item, isRow, s.Basis ?? mainProperty, crossProperty, mainSize, crossSize);
 
         item.Hypothetical = Math.Clamp(item.Base, item.Min, item.Max);
 
@@ -268,6 +237,8 @@ public static class FlexLayout
             item.Frozen = factor <= 0 || (growing ? item.Base > item.Hypothetical : item.Base < item.Hypothetical);
         }
 
+        Action<List<Item>, double> distribute = growing ? Grow : Shrink;
+
         while (items.Any(i => !i.Frozen))
         {
             var taken = items.Sum(i => (i.Frozen ? i.Target : i.Base) + i.MainMargins) + gaps;
@@ -275,29 +246,7 @@ public static class FlexLayout
 
             var unfrozen = items.Where(i => !i.Frozen).ToList();
 
-            if (growing)
-            {
-                var total = unfrozen.Sum(i => i.Node.Style.Grow);
-
-                if (total < 1)
-                {
-                    free *= total;
-                }
-
-                foreach (var item in unfrozen)
-                {
-                    item.Target = item.Base + (total > 0 ? free * item.Node.Style.Grow / total : 0);
-                }
-            }
-            else
-            {
-                var total = unfrozen.Sum(i => i.Node.Style.Shrink * i.Base);
-
-                foreach (var item in unfrozen)
-                {
-                    item.Target = item.Base + (total > 0 ? free * item.Node.Style.Shrink * item.Base / total : 0);
-                }
-            }
+            distribute(unfrozen, free);
 
             var violation = 0.0;
 
@@ -316,6 +265,90 @@ public static class FlexLayout
 
                 item.Frozen |= freeze;
             }
+        }
+    }
+
+    /// <summary>Computes the flex base size of an item.</summary>
+    /// <param name="item">The item, with margins and insets set.</param>
+    /// <param name="isRow">Whether the container's main axis is horizontal.</param>
+    /// <param name="basis">The flex basis or main size property, or <see langword="null"/> for content size.</param>
+    /// <param name="crossProperty">The item's size property on the cross axis, or <see langword="null"/>.</param>
+    /// <param name="mainSize">The container's content size along the main axis.</param>
+    /// <param name="crossSize">The container's content size along the cross axis.</param>
+    /// <returns>The base size in pixels.</returns>
+    static double BaseSize(Item item, bool isRow, Length? basis, Length? crossProperty, double mainSize, double crossSize)
+    {
+        if (Resolve(basis, mainSize) is { } resolved)
+        {
+            return Math.Max(item.MainInsets, resolved);
+        }
+
+        if (isRow)
+        {
+            return Intrinsic(item.Node, null).Width;
+        }
+
+        var limit = Resolve(crossProperty, crossSize) ?? (crossSize - item.CrossMargins);
+
+        return Intrinsic(item.Node, limit).Height;
+    }
+
+    /// <summary>Computes an item's border box size on the cross axis, before its min and max apply.</summary>
+    /// <param name="item">The item, whose main size is already resolved.</param>
+    /// <param name="isRow">Whether the container's main axis is horizontal.</param>
+    /// <param name="align">The item's effective alignment.</param>
+    /// <param name="crossSize">The container's content size along the cross axis.</param>
+    /// <returns>The cross size in pixels.</returns>
+    static double CrossSize(Item item, bool isRow, AlignItems align, double crossSize)
+    {
+        var style = item.Node.Style;
+
+        if (Resolve(isRow ? style.Height : style.Width, crossSize) is { } explicitCross)
+        {
+            return explicitCross;
+        }
+
+        if (align == AlignItems.Stretch)
+        {
+            return crossSize - item.CrossMargins;
+        }
+
+        if (isRow)
+        {
+            return Intrinsic(item.Node, item.Target).Height;
+        }
+
+        return Intrinsic(item.Node, crossSize - item.CrossMargins).Width;
+    }
+
+    /// <summary>Hands out free space to growing items in proportion to their grow factors.</summary>
+    /// <param name="items">The items that are not frozen yet.</param>
+    /// <param name="free">The free space, which is positive when growing.</param>
+    static void Grow(List<Item> items, double free)
+    {
+        var total = items.Sum(i => i.Node.Style.Grow);
+
+        if (total < 1)
+        {
+            free *= total;
+        }
+
+        foreach (var item in items)
+        {
+            item.Target = item.Base + (total > 0 ? free * item.Node.Style.Grow / total : 0);
+        }
+    }
+
+    /// <summary>Takes overflow back from shrinking items in proportion to their shrink factor times their base size.</summary>
+    /// <param name="items">The items that are not frozen yet.</param>
+    /// <param name="free">The free space, which is negative when shrinking.</param>
+    static void Shrink(List<Item> items, double free)
+    {
+        var total = items.Sum(i => i.Node.Style.Shrink * i.Base);
+
+        foreach (var item in items)
+        {
+            item.Target = item.Base + (total > 0 ? free * item.Node.Style.Shrink * item.Base / total : 0);
         }
     }
 
