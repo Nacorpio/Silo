@@ -77,6 +77,9 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         if (Find<TextBox>(hovered) is { } box)
             changed |= box.PointerDown(box.ToLocal(x, y).X);
 
+        if (Find<ComboBox>(hovered) is { } combo)
+            changed |= combo.PointerDown();
+
         if (Find<ListView>(hovered) is { } list)
             changed |= list.PointerDown(list.ToLocal(x, y).Y);
 

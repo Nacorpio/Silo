@@ -67,6 +67,12 @@ public class ListView : Control, IScrollable
     /// <summary>Raised after <see cref="SelectedIndex"/> changed.</summary>
     public event EventHandler? SelectionChanged;
 
+    /// <summary>
+    /// Raised when the user picks a row: by pressing the pointer on it, or Enter on the selected row. Unlike
+    /// <see cref="SelectionChanged"/> it is also raised for the row that is already selected. The argument is the row's index.
+    /// </summary>
+    public event EventHandler<int>? Activated;
+
     /// <summary>Gets or sets the rows. Setting it clears the selection and scrolls to the top.</summary>
     public IReadOnlyList<string> Items
     {
@@ -134,6 +140,9 @@ public class ListView : Control, IScrollable
 
         SelectedIndex = (int)Math.Floor((y - Viewport.Y + Offset) / RowHeight);
 
+        if (selectedIndex >= 0)
+            Activated?.Invoke(this, selectedIndex);
+
         return before != selectedIndex;
     }
 
@@ -159,6 +168,10 @@ public class ListView : Control, IScrollable
 
             case Key.End:
                 SelectedIndex = last;
+                break;
+
+            case Key.Enter when selectedIndex >= 0:
+                Activated?.Invoke(this, selectedIndex);
                 break;
         }
 

@@ -78,6 +78,10 @@ static class Gallery
         options.Children.Add(new ToggleSwitch { Text = "Dark mode" });
         options.Children.Add(progress);
 
+        var size = new ComboBox { Items = ["Small", "Medium", "Large", "Extra large"], SelectedIndex = 1 };
+
+        options.Children.Add(size);
+
         var name = new TextBox { Placeholder = "Type your name" };
         var greeting = new TextBlock { Text = "Hello!" };
 

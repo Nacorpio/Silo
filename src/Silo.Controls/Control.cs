@@ -139,6 +139,9 @@ public abstract class Control : Element, ILayoutNode
     /// <summary>The text measurer set on this Control.</summary>
     ITextMeasurer? textMeasurer;
 
+    /// <summary>The layer set on this Control, if any.</summary>
+    OverlayLayer? overlays;
+
 
     /// <summary>
     /// Runs before the first Control is created, so that the Styled properties above are registered before any Stylesheet
@@ -159,6 +162,16 @@ public abstract class Control : Element, ILayoutNode
     {
         get => textMeasurer ?? (Parent as Control)?.TextMeasurer;
         set => textMeasurer = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the layer that popups are shown in. When it is not set, the nearest ancestor's layer is used, so the
+    /// platform window sets it once on the root.
+    /// </summary>
+    public OverlayLayer? Overlays
+    {
+        get => overlays ?? (Parent as Control)?.Overlays;
+        set => overlays = value;
     }
 
     /// <inheritdoc/>

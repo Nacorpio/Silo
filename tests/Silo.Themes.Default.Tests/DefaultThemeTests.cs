@@ -107,4 +107,18 @@ public class DefaultThemeTests
         Assert.Equal(new Color(0x3b, 0x82, 0xf6), list.GetValue(ListView.SelectionColorProperty));
         Assert.Equal(new Length(160, LengthUnit.Px), list.GetValue(Control.HeightProperty));
     }
+
+    [Fact]
+    public void Combo_boxes_look_like_text_boxes_and_get_an_accent_border_while_focused()
+    {
+        var combo = new ComboBox();
+
+        Assert.Empty(combo.ApplyStyles(Resolver()));
+        Assert.Equal(new Color(0x9c, 0xa3, 0xaf), combo.GetValue(Control.BorderColorProperty));
+
+        combo.SetFocused(true);
+        combo.ApplyStyles(Resolver());
+
+        Assert.Equal(new Color(0x3b, 0x82, 0xf6), combo.GetValue(Control.BorderColorProperty));
+    }
 }
