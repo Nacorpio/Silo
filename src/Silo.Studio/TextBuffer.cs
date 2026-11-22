@@ -30,7 +30,7 @@ public sealed class TextBuffer
     public const string Indent = "  ";
 
     /// <summary>The line break that the text had when it was loaded, written back by <see cref="ToFileText"/>.</summary>
-    readonly string lineBreak;
+    string lineBreak;
 
     /// <summary>The states that <see cref="Undo"/> goes back to, newest last.</summary>
     readonly Stack<State> undo = new();
@@ -143,12 +143,13 @@ public sealed class TextBuffer
     /// <returns>The text.</returns>
     public string GetLine(int line) => state.Text[LineStart(line)..LineEnd(line)];
 
-    /// <summary>Replaces all of the text, which also clears the selection and the undo steps.</summary>
+    /// <summary>Replaces all of the text, which also clears the selection and the undo steps and takes over its line breaks.</summary>
     /// <param name="text">The new text.</param>
     public void Reset(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
 
+        lineBreak = text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
         state = new(text.Replace("\r\n", "\n", StringComparison.Ordinal), 0, 0);
 
         undo.Clear();

@@ -8,12 +8,13 @@ using Silo.Studio;
 using Silo.Styling;
 using Silo.Styling.Values;
 
-// Usage: silo-studio [--dark] [--theme <file.jsonc>] [--screenshot <out.png>]
+// Usage: silo-studio [--dark] [--text] [--theme <file.jsonc>] [--screenshot <out.png>]
 //        silo-studio --assembly <app.dll> --list-previews
 //        silo-studio --assembly <app.dll> --preview <name> [--dark] [--theme <file.jsonc>] [--screenshot <out.png>]
 // Shows every Control in every Pseudo-state with the default theme. With --theme the file is applied on top of the default
 // theme and opened in the editor beside the gallery: edit a Rule's properties and the gallery restyles as you type, then
 // press Save. The file is watched, so a change made in another editor is loaded unless Studio has unsaved edits. With
+// --text the editor shows the file as text instead of as Rules; the Visual and Text buttons switch while it runs. With
 // --screenshot the gallery is drawn to a PNG without opening a window. F12 opens the Inspector in a second window.
 // With --assembly alone, Studio lists the methods marked [Preview] in the assembly beside the gallery; picking one shows it
 // in its own window with the Default theme and the --theme file on top. Studio runs --list-previews and --preview in a
@@ -31,6 +32,9 @@ if (assembly is not null && previewMode)
 var model = theme is null ? null : OpenTheme(theme);
 
 var view = new StudioView(model) { Variant = args.Contains("--dark") ? ThemeVariant.Dark : ThemeVariant.Light };
+
+if (view.Editor is not null)
+    view.Editor.TextMode = args.Contains("--text");
 
 StyleResolver Resolve()
 {
@@ -70,6 +74,9 @@ using var attachment = window.AttachDiagnostics();
 using var watcher = theme is null ? null : new StylesheetWatcher(theme);
 
 shown = window;
+
+if (view.Editor is not null)
+    view.Editor.Clipboard = new SdlClipboard();
 
 view.VariantChanged += (_, _) => window.Styles = Resolve();
 

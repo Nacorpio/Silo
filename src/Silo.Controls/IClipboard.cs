@@ -1,4 +1,4 @@
-namespace Silo.Studio;
+namespace Silo;
 
 /// <summary>Reads and writes the text that the clipboard holds.</summary>
 public interface IClipboard

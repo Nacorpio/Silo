@@ -45,7 +45,7 @@ public sealed class StudioView : Window
     {
         Name = "studio";
         Title = "Silo Studio";
-        InitialWidth = editor is null ? 820 : 1160;
+        InitialWidth = editor is null ? 820 : 1260;
         InitialHeight = 620;
 
         var bar = new Box { Name = "bar" };

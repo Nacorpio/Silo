@@ -23,11 +23,21 @@ public static class StudioStyles
             "#body": { "flex-direction": "row", "flex-grow": "1" },
             "#scroll": { "flex-grow": "1" },
             "#editor": {
-              "width": "340px", "padding": "0px 16px 16px 8px", "gap": "8px", "flex-direction": "column"
+              "width": "440px", "padding": "0px 16px 16px 8px", "gap": "8px", "flex-direction": "column"
             },
             "#editor .title": { "font-size": "15px", "font-weight": "bold" },
             "#editor .muted": { "color": "var(--muted)", "font-size": "12px" },
             "#editor-toolbar": { "flex-direction": "row", "gap": "6px" },
+            "#editor-modes": { "flex-direction": "row", "gap": "6px" },
+            "#editor-modes Button.selected": { "background": "var(--accent)", "color": "var(--accent-text)" },
+            "#visual-view": { "gap": "8px", "flex-direction": "column" },
+            "#editor-content": { "flex-direction": "column", "flex-grow": "1" },
+            "#source": {
+              "flex-grow": "1", "height": "380px", "font-family": "var(--font-mono)", "font-size": "12px",
+              "background": "var(--surface)", "color": "var(--text)", "border-width": "1px", "border-color": "var(--border)",
+              "border-radius": "4px", "caret-color": "var(--text)", "gutter-color": "var(--muted)",
+              "&:focus": { "border-color": "var(--accent)" }
+            },
             "#editor Button": {
               "background": "var(--track)", "color": "var(--text)", "padding": "3px 10px",
               "&:hover": { "background": "var(--border)" }
@@ -40,7 +50,7 @@ public static class StudioStyles
             "#add-row": { "flex-direction": "row", "gap": "6px" },
             "#add-row TextBox": { "width": "100px" },
             "#add-rule-row": { "flex-direction": "row", "gap": "6px" },
-            "#add-rule-row TextBox": { "width": "214px" },
+            "#add-rule-row TextBox": { "width": "314px" },
             "#previews-panel": {
               "width": "340px", "padding": "0px 16px 16px 8px", "gap": "8px", "flex-direction": "column"
             },
