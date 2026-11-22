@@ -20,7 +20,25 @@ public static class StudioStyles
               "&:hover": { "background": "var(--border)" },
               "&.selected": { "background": "var(--accent)", "color": "var(--accent-text)" }
             },
+            "#body": { "flex-direction": "row", "flex-grow": "1" },
             "#scroll": { "flex-grow": "1" },
+            "#editor": {
+              "width": "340px", "padding": "0px 16px 16px 8px", "gap": "8px", "flex-direction": "column"
+            },
+            "#editor .title": { "font-size": "15px", "font-weight": "bold" },
+            "#editor .muted": { "color": "var(--muted)", "font-size": "12px" },
+            "#editor-toolbar": { "flex-direction": "row", "gap": "6px" },
+            "#editor Button": {
+              "background": "var(--track)", "color": "var(--text)", "padding": "3px 10px",
+              "&:hover": { "background": "var(--border)" }
+            },
+            "#rules": { "height": "132px" },
+            "#declarations": { "gap": "4px", "flex-direction": "column" },
+            ".declaration": { "flex-direction": "row", "gap": "6px", "align-items": "center" },
+            ".declaration-name": { "width": "96px", "font-size": "12px" },
+            ".declaration TextBox": { "flex-grow": "1" },
+            "#add-row": { "flex-direction": "row", "gap": "6px" },
+            "#add-row TextBox": { "width": "100px" },
             "#matrix": { "padding": "0px 16px 16px 16px", "gap": "10px", "flex-direction": "column" },
             ".matrix-row": { "flex-direction": "row", "align-items": "center", "gap": "8px" },
             ".row-label": { "width": "110px", "color": "var(--muted)" },

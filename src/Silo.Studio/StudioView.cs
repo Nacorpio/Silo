@@ -3,7 +3,8 @@ using Silo.Styling;
 namespace Silo.Studio;
 
 /// <summary>
-/// The Studio window's contents: a title bar with the theme variant switch above a scrolling <see cref="ThemeMatrix"/>.
+/// The Studio window's contents: a title bar with the theme variant switch above a scrolling <see cref="ThemeMatrix"/> and,
+/// when a theme is being edited, the <see cref="ThemeEditorPanel"/> beside it.
 /// </summary>
 /// <remarks>
 /// The view does not choose Stylesheets. It raises <see cref="VariantChanged"/> when the user picks Light or Dark, and the
@@ -33,15 +34,20 @@ public sealed class StudioView : Window
 
 
     /// <summary>Creates the view with the light variant selected.</summary>
-    public StudioView()
+    /// <param name="editor">
+    /// The theme that is being edited, or <see langword="null"/> to show the gallery only. A theme gets the editor panel beside
+    /// the gallery.
+    /// </param>
+    public StudioView(ThemeEditorModel? editor = null)
     {
         Name = "studio";
         Title = "Silo Studio";
-        InitialWidth = 820;
+        InitialWidth = editor is null ? 820 : 1160;
         InitialHeight = 620;
 
         var bar = new Box { Name = "bar" };
         var title = new TextBlock { Text = "Theme gallery" };
+        var body = new Box { Name = "body" };
         var scroll = new ScrollViewer { Name = "scroll", Content = Matrix };
 
         title.AddClass("title");
@@ -53,14 +59,22 @@ public sealed class StudioView : Window
         bar.Children.Add(light);
         bar.Children.Add(dark);
 
+        body.Children.Add(scroll);
+
+        if (editor is not null)
+            body.Children.Add(Editor = new ThemeEditorPanel(editor));
+
         Children.Add(bar);
-        Children.Add(scroll);
+        Children.Add(body);
 
         ShowSelected();
     }
 
     /// <summary>Gets <c>Window</c>, so that the theme's Window Rules apply to Studio.</summary>
     public override string TypeName => "Window";
+
+    /// <summary>Gets the theme editor beside the gallery, or <see langword="null"/> when no theme is being edited.</summary>
+    public ThemeEditorPanel? Editor { get; }
 
     /// <summary>Gets the table of Controls in all of their states.</summary>
     public ThemeMatrix Matrix { get; } = new();
