@@ -63,6 +63,7 @@ public class ComboBoxTests
         var raised = 0;
 
         combo.SelectionChanged += (_, _) => raised++;
+
         combo.Open();
         Layout(layer, resolver);
 

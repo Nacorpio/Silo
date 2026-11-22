@@ -111,6 +111,7 @@ public class OverlayLayerTests
         var menu = new Box();
 
         under.Click += (_, _) => clicked++;
+
         root.Children.Add(under);
         root.ApplyStyles(resolver);
         root.Arrange(new Size(400, 300));
@@ -135,6 +136,7 @@ public class OverlayLayerTests
         var clicked = 0;
 
         item.Click += (_, _) => clicked++;
+
         menu.Children.Add(item);
 
         layer.Show(menu, 100, 100);
@@ -215,6 +217,7 @@ public class OverlayLayerTests
         var clicked = 0;
 
         under.Click += (_, _) => clicked++;
+
         root.Children.Add(under);
         root.ApplyStyles(resolver);
         root.Arrange(new Size(400, 300));
