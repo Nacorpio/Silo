@@ -131,4 +131,13 @@ public class DefaultThemeTests
         Assert.Equal(new Color(0x9c, 0xa3, 0xaf), menu.GetValue(Control.BorderColorProperty));
         Assert.Equal(new Color(0x3b, 0x82, 0xf6), menu.GetValue(ListView.SelectionColorProperty));
     }
+
+    [Fact]
+    public void Text_is_set_in_Segoe_UI_by_default()
+    {
+        var text = new TextBlock();
+
+        Assert.Empty(text.ApplyStyles(Resolver()));
+        Assert.Equal("Segoe UI", text.GetValue(Control.FontFamilyProperty));
+    }
 }

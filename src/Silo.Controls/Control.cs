@@ -122,7 +122,7 @@ public abstract class Control : Element, ILayoutNode
 
     /// <summary>The font family. Inherited by descendants.</summary>
     public static readonly StyledProperty<string> FontFamilyProperty =
-        StyledProperty.Register<Control, string>("font-family", "sans-serif", ValueParsers.Text, inherits: true);
+        StyledProperty.Register<Control, string>("font-family", "Segoe UI", ValueParsers.Text, inherits: true);
 
     /// <summary>The font size in pixels. Inherited by descendants.</summary>
     public static readonly StyledProperty<double> FontSizeProperty =
