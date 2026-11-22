@@ -25,6 +25,9 @@ public sealed class StudioView : Window
     /// <summary>The button that picks the dark variant.</summary>
     readonly Button dark = new() { Text = "Dark", Name = "dark" };
 
+    /// <summary>The row that holds the gallery and the panels.</summary>
+    readonly Box body = new() { Name = "body" };
+
     /// <summary>The variant that the matrix is shown in.</summary>
     ThemeVariant variant;
 
@@ -47,7 +50,6 @@ public sealed class StudioView : Window
 
         var bar = new Box { Name = "bar" };
         var title = new TextBlock { Text = "Theme gallery" };
-        var body = new Box { Name = "body" };
         var scroll = new ScrollViewer { Name = "scroll", Content = Matrix };
 
         title.AddClass("title");
@@ -98,6 +100,18 @@ public sealed class StudioView : Window
 
             VariantChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    /// <summary>Adds a panel beside the gallery and the editor, such as the list of Previews.</summary>
+    /// <param name="panel">The panel.</param>
+    /// <remarks>The window grows by the width of the panel when it was not opened yet.</remarks>
+    public void AddPanel(Control panel)
+    {
+        ArgumentNullException.ThrowIfNull(panel);
+
+        body.Children.Add(panel);
+
+        InitialWidth += 340;
     }
 
     /// <summary>Marks the button of the current variant with the <c>selected</c> Class.</summary>
