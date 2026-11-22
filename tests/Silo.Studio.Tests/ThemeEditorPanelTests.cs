@@ -52,7 +52,7 @@ public class ThemeEditorPanelTests
 
         Assert.Equal(["rules", "Button"], panel.SelectedPath);
         Assert.Equal(["red", "4px"], RowBoxes(panel).Select(b => b.Text));
-        Assert.Equal(["Button", "TextBlock"], Find<ListView>(panel, "rules").Items);
+        Assert.Equal(["Tokens", "Button", "TextBlock"], Find<ListView>(panel, "rules").Items);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public class ThemeEditorPanelTests
     {
         var (_, panel) = Create();
 
-        Find<ListView>(panel, "rules").SelectedIndex = 1;
+        Find<ListView>(panel, "rules").SelectedIndex = 2;
 
         Assert.Equal(["rules", "TextBlock"], panel.SelectedPath);
         Assert.Equal(["black"], RowBoxes(panel).Select(b => b.Text));
@@ -179,6 +179,67 @@ public class ThemeEditorPanelTests
         {
             File.Delete(path);
         }
+    }
+
+    [Fact]
+    public void The_Tokens_can_be_selected_and_edited_like_a_Rule_and_are_created_when_the_theme_has_none()
+    {
+        var (model, panel) = Create();
+
+        Find<ListView>(panel, "rules").SelectedIndex = 0;
+
+        Assert.Equal(ThemeEditorModel.TokensPath, panel.SelectedPath);
+        Assert.Empty(RowBoxes(panel));
+
+        Find<TextBox>(panel, "new-property").Text = "--accent";
+        Find<TextBox>(panel, "new-value").Text = "#10b981";
+
+        Click(Find<Button>(panel, "add"));
+
+        Assert.Equal(["#10b981"], RowBoxes(panel).Select(b => b.Text));
+        Assert.Contains("\"tokens\"", model.Document.Text);
+        Assert.Empty(model.Issues);
+    }
+
+    [Fact]
+    public void Add_rule_adds_the_typed_Selector_and_selects_it_and_ignores_an_empty_one()
+    {
+        var (model, panel) = Create();
+
+        Click(Find<Button>(panel, "add-rule"));
+
+        Assert.False(model.IsDirty);
+
+        Find<TextBox>(panel, "new-rule").Text = "Slider";
+
+        Click(Find<Button>(panel, "add-rule"));
+
+        Assert.Equal(["rules", "Slider"], panel.SelectedPath);
+        Assert.Equal("Slider", model.Rules[^1].Selector);
+        Assert.Equal("Slider", Find<TextBlock>(panel, "selected-rule").Text);
+        Assert.Equal(string.Empty, Find<TextBox>(panel, "new-rule").Text);
+    }
+
+    [Fact]
+    public void SelectType_selects_the_Rule_for_a_Control_type_and_says_when_there_is_none()
+    {
+        var (_, panel) = Create();
+
+        Assert.True(panel.SelectType("TextBlock"));
+        Assert.Equal(["rules", "TextBlock"], panel.SelectedPath);
+        Assert.False(panel.SelectType("Slider"));
+        Assert.Equal(["rules", "TextBlock"], panel.SelectedPath);
+    }
+
+    [Fact]
+    public void Clicking_the_label_of_a_row_in_the_gallery_selects_its_Rule_in_the_editor()
+    {
+        var (model, _) = Create();
+        var view = new StudioView(model);
+
+        Click(Find<Button>(view.Matrix, "row-Button"));
+
+        Assert.Equal(["rules", "Button"], view.Editor!.SelectedPath);
     }
 
     [Fact]

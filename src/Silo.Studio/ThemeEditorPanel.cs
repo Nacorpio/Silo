@@ -67,6 +67,7 @@ public sealed class ThemeEditorPanel : Box
         Children.Add(selected);
         Children.Add(declarations);
         Children.Add(BuildAddRow());
+        Children.Add(BuildAddRuleRow());
         Children.Add(status);
 
         rules.SelectionChanged += (_, _) => SelectFromList();
@@ -131,6 +132,52 @@ public sealed class ThemeEditorPanel : Box
         return row;
     }
 
+    /// <summary>Builds the row where a new Rule is typed.</summary>
+    /// <returns>The row.</returns>
+    Box BuildAddRuleRow()
+    {
+        var row = new Box { Name = "add-rule-row" };
+        var selector = new TextBox { Placeholder = "new Rule, such as Slider", Name = "new-rule" };
+        var add = new Button { Text = "Add rule", Name = "add-rule" };
+
+        add.Click += (_, _) => AddRule(selector);
+
+        row.Children.Add(selector);
+        row.Children.Add(add);
+
+        return row;
+    }
+
+    /// <summary>Adds the typed Rule and selects it.</summary>
+    /// <param name="selector">The box with the Selector.</param>
+    void AddRule(TextBox selector)
+    {
+        var text = selector.Text.Trim();
+
+        if (text.Length == 0)
+            return;
+
+        selector.Text = string.Empty;
+        selectedPath = model.AddRule(text);
+
+        Rebuild();
+    }
+
+    /// <summary>Selects the Rule that styles a Control type, such as when its row in the gallery is clicked.</summary>
+    /// <param name="type">The type name.</param>
+    /// <returns><see langword="false"/> when the theme has no Rule for the type.</returns>
+    public bool SelectType(string type)
+    {
+        var rule = model.FindRuleForType(type);
+
+        if (rule is null)
+            return false;
+
+        Select(rule.Path);
+
+        return true;
+    }
+
     /// <summary>Adds the typed property to the selected Rule.</summary>
     /// <param name="property">The box with the property name.</param>
     /// <param name="value">The box with the value.</param>
@@ -158,7 +205,7 @@ public sealed class ThemeEditorPanel : Box
     /// <summary>Selects the Rule that the list shows as selected.</summary>
     void SelectFromList()
     {
-        var all = model.Rules;
+        var all = model.Targets;
 
         if (rules.SelectedIndex < 0 || rules.SelectedIndex >= all.Count)
             return;
@@ -185,14 +232,14 @@ public sealed class ThemeEditorPanel : Box
     /// <summary>Updates the list, the rows and the lines of text.</summary>
     void Rebuild()
     {
-        var all = model.Rules;
+        var all = model.Targets;
 
         rules.Items = [.. all.Select(r => r.Selector)];
 
         if (selectedPath is not null && all.All(r => !r.Path.SequenceEqual(selectedPath)))
             selectedPath = null;
 
-        selectedPath ??= all.FirstOrDefault()?.Path;
+        selectedPath ??= (all.Count > 1 ? all[1] : all[0]).Path;
 
         var index = all.ToList().FindIndex(r => selectedPath is not null && r.Path.SequenceEqual(selectedPath));
 
@@ -207,7 +254,7 @@ public sealed class ThemeEditorPanel : Box
     {
         declarations.Children.Clear();
 
-        var rule = model.Rules.FirstOrDefault(r => selectedPath is not null && r.Path.SequenceEqual(selectedPath));
+        var rule = model.Targets.FirstOrDefault(r => selectedPath is not null && r.Path.SequenceEqual(selectedPath));
 
         selected.Text = rule?.Selector ?? "Select a Rule";
 

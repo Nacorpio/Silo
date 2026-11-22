@@ -62,7 +62,11 @@ public sealed class StudioView : Window
         body.Children.Add(scroll);
 
         if (editor is not null)
+        {
             body.Children.Add(Editor = new ThemeEditorPanel(editor));
+
+            Matrix.RowSelected += (_, row) => Editor.SelectType(row);
+        }
 
         Children.Add(bar);
         Children.Add(body);
