@@ -111,4 +111,12 @@ public sealed class DisplayListBuilder : IDrawingContext
 
         commands.Add(new DrawImageCommand(image, destination));
     }
+
+    /// <inheritdoc/>
+    public void DrawMask(IImage image, Rect destination, Color color)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+
+        commands.Add(new DrawMaskCommand(image, destination, color));
+    }
 }

@@ -2,6 +2,7 @@ using Silo;
 using Silo.Layout;
 using Silo.Rendering;
 using Silo.Styling;
+using Silo.Styling.Values;
 using Xunit;
 
 public class ImageTests
@@ -45,6 +46,22 @@ public class ImageTests
         var root = Arranged(image, """{ "rules": { "Box": { "align-items": "start" }, "Image": { "width": "100px", "height": "100px" } } }""");
 
         Assert.Equal([new DrawImageCommand(picture, new Rect(0, 25, 100, 50))], Render(root));
+    }
+
+    [Fact]
+    public void A_mask_image_is_drawn_in_the_text_color_instead_of_as_a_picture()
+    {
+        var picture = new FakeImage(16, 16);
+        var image = new Image { Source = picture, IsMask = true };
+        var root = Arranged(image, """{ "rules": { "Box": { "align-items": "start" }, "Image": { "color": "#ff0000" } } }""");
+        var builder = new DisplayListBuilder();
+
+        root.Render(builder);
+
+        var commands = builder.Build().Commands;
+
+        Assert.Empty(commands.OfType<DrawImageCommand>());
+        Assert.Equal([new DrawMaskCommand(picture, new Rect(0, 0, 16, 16), new Color(255, 0, 0))], commands.OfType<DrawMaskCommand>());
     }
 
     [Fact]

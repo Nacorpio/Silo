@@ -74,4 +74,10 @@ public interface IDrawingContext
     /// <param name="image">The image to draw. It must come from the same backend as the context.</param>
     /// <param name="destination">The rectangle to fill. The image is stretched to it, so pass one with the image's aspect ratio to avoid distortion.</param>
     void DrawImage(IImage image, Rect destination);
+
+    /// <summary>Draws an image as a mask: its shape is kept, but every pixel gets one color.</summary>
+    /// <param name="image">The image to use as the mask. It must come from the same backend as the context. Only its alpha channel matters, so a picture with transparent surroundings becomes a silhouette.</param>
+    /// <param name="destination">The rectangle to fill. The image is stretched to it.</param>
+    /// <param name="color">The color of the silhouette. Its alpha scales the alpha of the image.</param>
+    void DrawMask(IImage image, Rect destination, Color color);
 }

@@ -29,6 +29,12 @@ public class Image : Control
     /// <summary>Gets or sets the picture, or <see langword="null"/> to show nothing.</summary>
     public IImage? Source { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether the picture is drawn as a mask: only its shape (its alpha channel) is used, and it is filled with the
+    /// Control's <c>color</c>. That makes one monochrome icon follow the theme, including <c>:hover</c> and dark variants.
+    /// </summary>
+    public bool IsMask { get; set; }
+
 
     /// <summary>Finds where a picture goes when it is scaled to fit inside a box and centered.</summary>
     /// <param name="image">The picture.</param>
@@ -60,7 +66,12 @@ public class Image : Control
 
         var destination = Fit(Source, ContentBox(bounds));
 
-        if (destination.Width > 0)
+        if (destination.Width <= 0)
+            return;
+
+        if (IsMask)
+            context.DrawMask(Source, destination, GetValue(ColorProperty));
+        else
             context.DrawImage(Source, destination);
     }
 }

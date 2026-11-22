@@ -90,6 +90,20 @@ public sealed class SkiaDrawingContext(SKCanvas canvas) : IDrawingContext
         canvas.DrawImage(skia.Image, ToSkia(destination), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear), paint);
     }
 
+    /// <inheritdoc/>
+    /// <exception cref="ArgumentException">The image was not created by <see cref="SkiaImage"/>.</exception>
+    public void DrawMask(IImage image, Rect destination, Color color)
+    {
+        if (image is not SkiaImage skia)
+            throw new ArgumentException("Only a SkiaImage can be drawn by this context.", nameof(image));
+
+        // SrcIn keeps the alpha of the picture and takes the color of the filter.
+        using var filter = SKColorFilter.CreateBlendMode(ToSkia(color), SKBlendMode.SrcIn);
+        using var paint = new SKPaint { IsAntialias = true, ColorFilter = filter };
+
+        canvas.DrawImage(skia.Image, ToSkia(destination), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear), paint);
+    }
+
     /// <summary>Converts a layout rectangle to a Skia rectangle.</summary>
     /// <param name="rect">The layout rectangle.</param>
     /// <returns>The same area as an <see cref="SKRect"/>.</returns>

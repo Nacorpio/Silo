@@ -162,6 +162,21 @@ public class SkiaRendererTests
     }
 
     [Fact]
+    public void A_mask_keeps_the_shape_of_the_image_and_takes_the_color()
+    {
+        // Left half opaque blue, right half transparent.
+        using var image = SkiaImage.Create(2, 1, canvas => canvas.DrawRect(0, 0, 1, 1, new SKPaint { Color = new SKColor(0, 0, 255) }));
+        var builder = new DisplayListBuilder();
+
+        builder.DrawMask(image, new Rect(0, 0, 40, 20), new Color(255, 0, 0));
+
+        using var bitmap = SkiaRenderer.Render(builder.Build(), 40, 20, White);
+
+        Assert.Equal(new SKColor(255, 0, 0), PixelAt(bitmap, 5, 10));
+        Assert.Equal(new SKColor(255, 255, 255), PixelAt(bitmap, 35, 10));
+    }
+
+    [Fact]
     public void An_encoded_image_round_trips_through_Decode()
     {
         using var source = SkiaImage.Create(4, 3, canvas => canvas.Clear(new SKColor(255, 0, 0)));

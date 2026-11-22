@@ -86,3 +86,13 @@ public sealed record DrawImageCommand(IImage Image, Rect Destination) : DrawComm
     /// <inheritdoc/>
     public override void Execute(IDrawingContext context) => context.DrawImage(Image, Destination);
 }
+
+/// <summary>Records <see cref="IDrawingContext.DrawMask"/>.</summary>
+/// <param name="Image">The image that gives the shape.</param>
+/// <param name="Destination">The rectangle it fills.</param>
+/// <param name="Color">The color of the silhouette.</param>
+public sealed record DrawMaskCommand(IImage Image, Rect Destination, Color Color) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.DrawMask(Image, Destination, Color);
+}
