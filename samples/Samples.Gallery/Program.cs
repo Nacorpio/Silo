@@ -8,17 +8,19 @@ using Silo.Styling;
 using Silo.Styling.Values;
 
 // Usage:
-//   dotnet run --project samples/Samples.Gallery -- [--theme <file.jsonc>] [--screenshot <out.png>]
-// With --theme the file is watched and the window restyles when it is saved. With --screenshot the gallery is drawn to a
-// PNG without opening a window. F12 opens the Inspector in a second window.
+//   dotnet run --project samples/Samples.Gallery -- [--dark] [--theme <file.jsonc>] [--screenshot <out.png>]
+// With --dark the dark variant of the default theme is used. With --theme the file is watched and the window restyles
+// when it is saved. With --screenshot the gallery is drawn to a PNG without opening a window. F12 opens the Inspector
+// in a second window.
 var theme = ArgumentAfter("--theme");
 var screenshot = ArgumentAfter("--screenshot");
 
+var variant = args.Contains("--dark") ? ThemeVariant.Dark : ThemeVariant.Light;
 var root = Gallery.Build();
 var overrides = theme is null ? null : JsoncStylesheetReader.Read(File.ReadAllText(theme), Path.GetFileName(theme));
 
 StyleResolver Resolve(Stylesheet? custom)
-    => new(custom is null ? [DefaultTheme.Load(), Gallery.Styles()] : [DefaultTheme.Load(), Gallery.Styles(), custom]);
+    => new(custom is null ? [.. DefaultTheme.Load(variant), Gallery.Styles()] : [.. DefaultTheme.Load(variant), Gallery.Styles(), custom]);
 
 if (screenshot is not null)
 {

@@ -49,6 +49,37 @@ public class DefaultThemeTests
     }
 
     [Fact]
+    public void The_light_variant_is_the_default_theme_alone()
+    {
+        Assert.Single(DefaultTheme.Load(ThemeVariant.Light));
+    }
+
+    [Fact]
+    public void The_dark_variant_overrides_only_Tokens_and_restyles_every_Control()
+    {
+        var sheets = DefaultTheme.Load(ThemeVariant.Dark);
+        var window = new Window();
+        var text = new TextBlock { Text = "Hi" };
+        var button = new Button { Text = "Ok" };
+
+        window.Children.Add(text);
+        window.Children.Add(button);
+
+        Assert.Equal(2, sheets.Length);
+        Assert.Empty(sheets[1].Rules);
+        Assert.Empty(window.ApplyStyles(new StyleResolver(sheets)));
+        Assert.Equal(new Color(0x11, 0x18, 0x27), window.GetValue(Control.BackgroundProperty));
+        Assert.Equal(new Color(0xf3, 0xf4, 0xf6), text.GetValue(Control.ColorProperty));
+        Assert.Equal(new Color(0x3b, 0x82, 0xf6), button.GetValue(Control.BackgroundProperty));
+    }
+
+    [Fact]
+    public void An_unknown_variant_is_rejected()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => DefaultTheme.Load((ThemeVariant)7));
+    }
+
+    [Fact]
     public void Text_inherits_the_theme_color_and_font_size()
     {
         var root = new Box();
