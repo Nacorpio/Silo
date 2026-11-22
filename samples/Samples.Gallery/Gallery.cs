@@ -66,7 +66,9 @@ static class Gallery
 
         primary.Tooltip = "Counts the clicks";
         primary.TooltipShortcut = "Ctrl+Enter";
+
         secondary.Tooltip = "Does nothing yet";
+
         danger.Tooltip = "Sets the counter back to 0";
         danger.TooltipShortcut = "Ctrl+Shift+R";
 
