@@ -94,6 +94,20 @@
           "description": "One to four lengths, like CSS padding. Declared by Control.",
           "$ref": "#/$defs/scalar"
         },
+        "button-position": {
+          "description": "One of the keywords. Declared by TabHeader.",
+          "anyOf": [
+            {
+              "enum": [
+                "left",
+                "right"
+              ]
+            },
+            {
+              "pattern": "^\\s*var\\("
+            }
+          ]
+        },
         "caret-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextBox.",
           "$ref": "#/$defs/scalar"
@@ -148,8 +162,26 @@
           "description": "A length such as 12px or 50%. Declared by Control.",
           "$ref": "#/$defs/scalar"
         },
+        "icon-gap": {
+          "description": "A number. Declared by TabHeader.",
+          "$ref": "#/$defs/scalar"
+        },
+        "icon-position": {
+          "description": "One of the keywords. Declared by TabHeader.",
+          "anyOf": [
+            {
+              "enum": [
+                "left",
+                "right"
+              ]
+            },
+            {
+              "pattern": "^\\s*var\\("
+            }
+          ]
+        },
         "icon-size": {
-          "description": "A number. Declared by ListView.",
+          "description": "A number. Declared by ListView, TabHeader.",
           "$ref": "#/$defs/scalar"
         },
         "indicator-background": {

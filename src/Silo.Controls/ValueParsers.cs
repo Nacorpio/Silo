@@ -187,6 +187,45 @@ internal static class ValueParsers
         return parsed is not null;
     }
 
+    /// <summary>Parses <c>left</c>, <c>top</c> or <c>right</c>.</summary>
+    /// <param name="text">The Computed text.</param>
+    /// <param name="value">The position.</param>
+    /// <returns><see langword="true"/> when the text is a known keyword.</returns>
+    public static bool IconPlacement(string text, out IconPosition value)
+    {
+        IconPosition? parsed = text.Trim() switch
+        {
+            "left" => IconPosition.Left,
+            "top" => IconPosition.Top,
+            "right" => IconPosition.Right,
+
+            _ => null,
+        };
+
+        value = parsed.GetValueOrDefault();
+
+        return parsed is not null;
+    }
+
+    /// <summary>Parses <c>left</c> or <c>right</c>.</summary>
+    /// <param name="text">The Computed text.</param>
+    /// <param name="value">The position.</param>
+    /// <returns><see langword="true"/> when the text is a known keyword.</returns>
+    public static bool ButtonPlacement(string text, out ButtonPosition value)
+    {
+        ButtonPosition? parsed = text.Trim() switch
+        {
+            "left" => ButtonPosition.Left,
+            "right" => ButtonPosition.Right,
+
+            _ => null,
+        };
+
+        value = parsed.GetValueOrDefault();
+
+        return parsed is not null;
+    }
+
     /// <summary>Parses a string value, which is always valid and keeps the text as written.</summary>
     /// <param name="text">The Computed text.</param>
     /// <param name="value">The trimmed text, without surrounding quotes.</param>

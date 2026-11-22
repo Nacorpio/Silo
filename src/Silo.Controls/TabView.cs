@@ -1,3 +1,5 @@
+using Silo.Rendering;
+
 namespace Silo;
 
 /// <summary>Shows one of several pieces of content at a time, chosen by clicking its header in a row above.</summary>
@@ -41,6 +43,9 @@ public class TabView : Control
 
     /// <summary>Raised after <see cref="SelectedIndex"/> changed.</summary>
     public event EventHandler? SelectionChanged;
+
+    /// <summary>Raised when the close button of a tab is clicked. The tab stays until <see cref="RemoveTab"/> is called.</summary>
+    public event EventHandler<TabCloseRequestedEventArgs>? CloseRequested;
 
     /// <summary>Gets the row of headers, so that code can add a Class to it.</summary>
     public TabStrip Strip => strip;
@@ -87,12 +92,14 @@ public class TabView : Control
     /// <summary>Adds a tab at the end. The first tab that is added is selected.</summary>
     /// <param name="header">The title in the header.</param>
     /// <param name="content">What is shown while the tab is selected.</param>
+    /// <param name="icon">The icon in the header, or <see langword="null"/> for none.</param>
+    /// <param name="closable"><see langword="true"/> to add a close button that raises <see cref="CloseRequested"/>.</param>
     /// <returns>The index of the new tab.</returns>
-    public int AddTab(string header, Control content)
+    public int AddTab(string header, Control content, IImage? icon = null, bool closable = false)
     {
         ArgumentNullException.ThrowIfNull(content);
 
-        var tab = new TabHeader { Text = header };
+        var tab = new TabHeader { Text = header, Icon = icon };
         var index = contents.Count;
 
         tab.Click += (_, _) => SelectedIndex = headers.IndexOf(tab);
@@ -101,10 +108,50 @@ public class TabView : Control
         contents.Add(content);
         strip.Children.Add(tab);
 
+        if (closable)
+            AddCloseButton(tab);
+
         if (selectedIndex < 0)
             SelectedIndex = index;
 
         return index;
+    }
+
+    /// <summary>Removes a tab.</summary>
+    /// <param name="index">The index of the tab.</param>
+    /// <remarks>
+    /// When the selected tab is removed, the tab after it is selected, or the one before it when it was the last. When a tab
+    /// before the selected one is removed, the selection stays on the same tab and only its index changes.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The index is not the index of a tab.</exception>
+    public void RemoveTab(int index)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, contents.Count);
+
+        var wasSelected = index == selectedIndex;
+
+        if (wasSelected)
+            Children.Remove(contents[index]);
+
+        strip.Children.Remove(headers[index]);
+        headers.RemoveAt(index);
+        contents.RemoveAt(index);
+
+        if (!wasSelected)
+        {
+            if (index < selectedIndex)
+                selectedIndex--;
+
+            return;
+        }
+
+        selectedIndex = -1;
+
+        if (contents.Count > 0)
+            SelectedIndex = Math.Min(index, contents.Count - 1);
+        else
+            SelectionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Gets the header of a tab.</summary>
@@ -116,4 +163,15 @@ public class TabView : Control
     /// <param name="index">The index of the tab.</param>
     /// <returns>The content.</returns>
     public Control GetContent(int index) => contents[index];
+
+    /// <summary>Adds the button that raises <see cref="CloseRequested"/> to a header.</summary>
+    /// <param name="tab">The header.</param>
+    void AddCloseButton(TabHeader tab)
+    {
+        var close = new TabHeaderButton { Text = "\u00d7" };
+
+        close.Click += (_, _) => CloseRequested?.Invoke(this, new TabCloseRequestedEventArgs(headers.IndexOf(tab)));
+
+        tab.AddButton(close);
+    }
 }

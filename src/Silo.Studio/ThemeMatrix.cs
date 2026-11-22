@@ -57,7 +57,7 @@ public sealed class ThemeMatrix : Box
         var tabs = new TabView();
 
         tabs.AddTab("One", new TextBlock { Text = "First" });
-        tabs.AddTab("Two", new TextBlock { Text = "Second" });
+        tabs.AddTab("Two", new TextBlock { Text = "Second" }, closable: true);
 
         return tabs;
     }
