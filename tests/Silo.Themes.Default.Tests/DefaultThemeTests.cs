@@ -140,4 +140,15 @@ public class DefaultThemeTests
         Assert.Empty(text.ApplyStyles(Resolver()));
         Assert.Equal("Segoe UI", text.GetValue(Control.FontFamilyProperty));
     }
+
+    [Fact]
+    public void Tooltips_are_small_light_text_on_a_dark_box()
+    {
+        var tip = new Tooltip();
+
+        Assert.Empty(tip.ApplyStyles(Resolver()));
+        Assert.Equal(new Color(0x1f, 0x29, 0x37), tip.GetValue(Control.BackgroundProperty));
+        Assert.Equal(new Color(0xf9, 0xfa, 0xfb), tip.GetValue(Control.ColorProperty));
+        Assert.Equal(12, tip.GetValue(Control.FontSizeProperty));
+    }
 }

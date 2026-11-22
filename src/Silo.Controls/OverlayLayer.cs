@@ -19,6 +19,10 @@ namespace Silo;
 /// The window also closes the top overlay when Escape is pressed.
 /// </para>
 /// <para>
+/// An overlay shown with <c>modal: false</c>, such as a tooltip, is only drawn: the pointer goes through it to what is
+/// below, and it has no backdrop, so a press does not close it. Whoever shows it closes it.
+/// </para>
+/// <para>
 /// A platform window owns one layer (<c>SdlWindow.Overlays</c>) and calls <see cref="ApplyStyles"/>, <see cref="Arrange"/>
 /// and <see cref="Render"/> after it handled the window content. <see cref="Show"/> overwrites the Control's
 /// <c>margin</c> and <c>flex-shrink</c>, which is how it is positioned.
@@ -44,8 +48,11 @@ public sealed class OverlayLayer
     public event EventHandler? Changed;
 
 
-    /// <summary>Gets how many overlays are shown.</summary>
+    /// <summary>Gets how many overlays are shown, modal or not.</summary>
     public int Count => hosts.Count;
+
+    /// <summary>Gets how many of the overlays are modal.</summary>
+    public int ModalCount => hosts.Count(host => host.IsModal);
 
     /// <summary>Gets or sets the object that measures text in the overlays.</summary>
     public ITextMeasurer? TextMeasurer { get; set; }
@@ -60,15 +67,18 @@ public sealed class OverlayLayer
     /// <param name="content">The Control to show. It must not be part of another tree.</param>
     /// <param name="x">The horizontal position of its left edge, relative to the window. It is moved left when it would stick out.</param>
     /// <param name="y">The vertical position of its top edge, relative to the window. It is moved up when it would stick out.</param>
+    /// <param name="modal">
+    /// <see langword="true"/> (the default) to take the pointer and close on a press outside. <see langword="false"/> to only draw it.
+    /// </param>
     /// <exception cref="InvalidOperationException">The Control is already shown, or has a parent.</exception>
-    public void Show(Control content, double x, double y)
+    public void Show(Control content, double x, double y, bool modal = true)
     {
         ArgumentNullException.ThrowIfNull(content);
 
         if (Contains(content) || content.Parent is not null)
             throw new InvalidOperationException("The Control is already part of a tree.");
 
-        hosts.Add(new OverlayHost(content, x, y) { TextMeasurer = TextMeasurer });
+        hosts.Add(new OverlayHost(content, x, y, modal) { TextMeasurer = TextMeasurer });
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -89,9 +99,9 @@ public sealed class OverlayLayer
         return true;
     }
 
-    /// <summary>Closes the overlay that was shown last.</summary>
+    /// <summary>Closes the modal overlay that was shown last.</summary>
     /// <returns><see langword="true"/> when there was one.</returns>
-    public bool CloseTop() => hosts.Count > 0 && Close(hosts[^1].Content);
+    public bool CloseTop() => hosts.FindLast(host => host.IsModal) is { } top && Close(top.Content);
 
     /// <summary>Closes every overlay.</summary>
     /// <returns><see langword="true"/> when there was at least one.</returns>
@@ -99,9 +109,8 @@ public sealed class OverlayLayer
     {
         var any = hosts.Count > 0;
 
-        while (CloseTop())
-        {
-        }
+        foreach (var host in hosts.ToArray())
+            Close(host.Content);
 
         return any;
     }
@@ -136,15 +145,15 @@ public sealed class OverlayLayer
             host.Render(context);
     }
 
-    /// <summary>Finds the topmost Control of the overlays at a point.</summary>
+    /// <summary>Finds the topmost Control of the modal overlays at a point.</summary>
     /// <param name="x">The horizontal position, relative to the window.</param>
     /// <param name="y">The vertical position, relative to the window.</param>
     /// <returns>
     /// The Control at the point, the invisible backdrop when the point is outside every overlay (see <see cref="IsBackdrop"/>),
-    /// or <see langword="null"/> when nothing is shown.
+    /// or <see langword="null"/> when no modal overlay is shown.
     /// </returns>
     public Control? HitTest(double x, double y)
-        => hosts.Count == 0 ? null : hosts[^1].HitTest(x, y) ?? hosts[^1];
+        => hosts.FindLast(host => host.IsModal) is { } top ? top.HitTest(x, y) ?? top : null;
 
     /// <summary>Tells whether a hit is the invisible backdrop behind an overlay.</summary>
     /// <param name="hit">A Control returned by <see cref="HitTest"/>.</param>

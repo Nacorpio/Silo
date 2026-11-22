@@ -180,6 +180,12 @@ public abstract class Control : Element, ILayoutNode
     /// </summary>
     public ContextMenu? ContextMenu { get; set; }
 
+    /// <summary>
+    /// Gets or sets the text of the tooltip that appears when the pointer rests on this Control or on one of its descendants
+    /// that has none. The default is <see langword="null"/>, which shows nothing.
+    /// </summary>
+    public string? Tooltip { get; set; }
+
     /// <inheritdoc/>
     LayoutStyle ILayoutNode.Style => layoutStyle ??= BuildLayoutStyle();
 

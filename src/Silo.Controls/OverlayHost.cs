@@ -19,9 +19,11 @@ sealed class OverlayHost : Control
     /// <param name="content">The overlay's Control.</param>
     /// <param name="x">The horizontal position of the overlay's left edge.</param>
     /// <param name="y">The vertical position of the overlay's top edge.</param>
-    public OverlayHost(Control content, double x, double y)
+    /// <param name="modal">Whether the overlay takes the pointer, with a backdrop behind it.</param>
+    public OverlayHost(Control content, double x, double y, bool modal)
     {
         Content = content;
+        IsModal = modal;
 
         SetValue(AlignItemsProperty, AlignItems.Start);
         content.SetValue(FlexShrinkProperty, 0.0);
@@ -35,6 +37,9 @@ sealed class OverlayHost : Control
 
     /// <summary>Gets the overlay's Control.</summary>
     public Control Content { get; }
+
+    /// <summary>Gets whether the overlay takes the pointer. A passive overlay, such as a tooltip, is only drawn.</summary>
+    public bool IsModal { get; }
 
     /// <inheritdoc/>
     protected override FlexDirection LayoutDirection => FlexDirection.Column;

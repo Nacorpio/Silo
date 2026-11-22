@@ -13,6 +13,8 @@
     "--radius": "4px",
     "--border": "#9ca3af",
     "--track": "#e5e7eb",
+    "--tooltip": "#1f2937",
+    "--tooltip-text": "#f9fafb",
     "--muted": "#9ca3af",
   },
   "rules": {
@@ -68,6 +70,13 @@
       "placeholder-color": "var(--muted)",
       "&:hover": { "border-color": "var(--accent-hover)" },
       "&:focus": { "border-color": "var(--accent)" },
+    },
+    "Tooltip": {
+      "background": "var(--tooltip)",
+      "color": "var(--tooltip-text)",
+      "padding": "4px 8px",
+      "border-radius": "var(--radius)",
+      "font-size": "12px",
     },
     "ComboBox": {
       "background": "var(--surface)",

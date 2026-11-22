@@ -64,6 +64,10 @@ static class Gallery
         var secondary = new Button { Text = "Secondary" };
         var danger = new Button { Text = "Reset" };
 
+        primary.Tooltip = "Counts the clicks";
+        secondary.Tooltip = "Does nothing yet";
+        danger.Tooltip = "Sets the counter back to 0";
+
         secondary.AddClass("secondary");
         danger.AddClass("danger");
 

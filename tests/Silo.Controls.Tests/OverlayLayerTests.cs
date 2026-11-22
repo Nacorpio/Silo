@@ -205,4 +205,51 @@ public class OverlayLayerTests
 
         Assert.Equal([1, 2], fills);
     }
+
+    [Fact]
+    public void A_passive_overlay_is_only_drawn_and_never_takes_the_pointer_or_a_press()
+    {
+        var (layer, root, router, resolver) = Setup();
+        var under = new Button { Text = "Under" };
+        var tip = new Box();
+        var clicked = 0;
+
+        under.Click += (_, _) => clicked++;
+        root.Children.Add(under);
+        root.ApplyStyles(resolver);
+        root.Arrange(new Size(400, 300));
+
+        layer.Show(tip, under.Bounds.X, under.Bounds.Y, modal: false);
+        Layout(layer, resolver);
+
+        Assert.Equal(1, layer.Count);
+        Assert.Equal(0, layer.ModalCount);
+        Assert.Null(layer.HitTest(under.Bounds.X + 3, under.Bounds.Y + 3));
+        Assert.False(layer.CloseTop());
+
+        router.Down(under.Bounds.X + 3, under.Bounds.Y + 3);
+        router.Up(under.Bounds.X + 3, under.Bounds.Y + 3);
+
+        Assert.Equal(1, clicked);
+        Assert.True(layer.Contains(tip));
+        Assert.True(layer.CloseAll());
+    }
+
+    [Fact]
+    public void Only_modal_overlays_count_for_the_top_one_and_the_backdrop()
+    {
+        var (layer, _, _, resolver) = Setup();
+        var menu = new Box();
+
+        layer.Show(menu, 10, 10);
+        layer.Show(new Box(), 200, 200, modal: false);
+        Layout(layer, resolver);
+
+        Assert.Equal(2, layer.Count);
+        Assert.Equal(1, layer.ModalCount);
+        Assert.Same(menu, layer.HitTest(12, 12));
+        Assert.True(layer.IsBackdrop(layer.HitTest(205, 205)));
+        Assert.True(layer.CloseTop());
+        Assert.Equal(1, layer.Count);
+    }
 }
