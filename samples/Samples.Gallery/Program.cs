@@ -27,7 +27,7 @@ if (screenshot is not null)
     return;
 }
 
-using var window = new SdlWindow("Silo gallery", 640, 460, root) { Styles = Resolve(overrides) };
+using var window = new SdlWindow(root) { Styles = Resolve(overrides) };
 using var attachment = window.AttachDiagnostics();
 using var watcher = theme is null ? null : new StylesheetWatcher(theme);
 
@@ -53,13 +53,13 @@ void SaveScreenshot(string path, StyleResolver styles)
     root.TextMeasurer = new SkiaTextMeasurer();
 
     root.ApplyStyles(styles);
-    root.Arrange(new Size(640, 460));
+    root.Arrange(new Size(root.InitialWidth, root.InitialHeight));
 
     var builder = new DisplayListBuilder();
 
     root.Render(builder);
 
-    using var bitmap = SkiaRenderer.Render(builder.Build(), 640, 460, new Color(255, 255, 255));
+    using var bitmap = SkiaRenderer.Render(builder.Build(), root.InitialWidth, root.InitialHeight, new Color(255, 255, 255));
 
     File.WriteAllBytes(path, SkiaRenderer.Encode(bitmap));
 }

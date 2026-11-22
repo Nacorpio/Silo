@@ -48,10 +48,10 @@ static class Gallery
         => SkiaImage.Create(32, 32, canvas => canvas.DrawCircle(16, 16, 14, new SKPaint { Color = color, IsAntialias = true }));
 
     /// <summary>Builds the control tree.</summary>
-    /// <returns>The root Control.</returns>
-    public static Box Build()
+    /// <returns>The root Window.</returns>
+    public static Window Build()
     {
-        var root = new Box { Name = "root" };
+        var root = new Window { Name = "root", Title = "Silo gallery", InitialWidth = 640, InitialHeight = 460 };
         var title = new TextBlock { Text = "Silo gallery" };
         var hint = new TextBlock { Text = "Edit theme.jsonc while this runs to restyle it." };
         var row = new Box { Name = "row" };

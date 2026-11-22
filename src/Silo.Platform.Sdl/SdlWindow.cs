@@ -129,6 +129,16 @@ public sealed unsafe class SdlWindow : IDisposable
         Open.Add(this);
     }
 
+    /// <summary>Creates a window for a <see cref="Window"/> Control and shows it.</summary>
+    /// <param name="content">
+    /// The root Control. Its <see cref="Window.Title"/> and initial size open the window, and the title of the native
+    /// window follows it from then on.
+    /// </param>
+    /// <exception cref="InvalidOperationException">SDL could not start or could not create the window.</exception>
+    public SdlWindow(Window content)
+        : this(Checked(content).Title, content.InitialWidth, content.InitialHeight, content)
+        => content.TitleChanged += (_, _) => SetTitle(content.Title);
+
     /// <summary>Raised when a key is pressed while this window has the keyboard focus.</summary>
     public event Action<Key>? KeyPressed;
 
@@ -278,6 +288,19 @@ public sealed unsafe class SdlWindow : IDisposable
 
         _ => Key.Unknown,
     };
+
+    /// <summary>Checks that a Window was given.</summary>
+    /// <param name="content">The Window.</param>
+    /// <returns>The same Window.</returns>
+    static Window Checked(Window content) => content ?? throw new ArgumentNullException(nameof(content));
+
+    /// <summary>Changes the title of the native window.</summary>
+    /// <param name="title">The new title.</param>
+    void SetTitle(string title)
+    {
+        if (!disposed && !closed)
+            SDL3.SDL_SetWindowTitle(window, title);
+    }
 
     /// <summary>Runs the posted work and draws a frame if one is needed.</summary>
     void Tick()

@@ -1,3 +1,4 @@
+using Silo.Layout;
 using Silo;
 using Silo.Styling;
 using Silo.Styling.Values;
@@ -35,6 +36,16 @@ public class DefaultThemeTests
         button.ApplyStyles(Resolver());
 
         Assert.Equal(new Color(0x1d, 0x4e, 0xd8), button.GetValue(Control.BackgroundProperty));
+    }
+
+    [Fact]
+    public void A_Window_gets_the_surface_color_and_stacks_its_children_in_a_column()
+    {
+        var window = new Window();
+
+        Assert.Empty(window.ApplyStyles(Resolver()));
+        Assert.Equal(FlexDirection.Column, window.GetValue(Control.FlexDirectionProperty));
+        Assert.NotEqual(default, window.GetValue(Control.BackgroundProperty));
     }
 
     [Fact]

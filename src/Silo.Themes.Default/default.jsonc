@@ -25,6 +25,13 @@
       "font-family": "var(--font-family)",
       "font-size": "var(--font-size)",
     },
+    "Window": {
+      "background": "var(--surface)",
+      "color": "var(--text)",
+      "font-family": "var(--font-family)",
+      "font-size": "var(--font-size)",
+      "flex-direction": "column",
+    },
     "TextBlock": { "color": "var(--text)" },
     "Button": {
       "background": "var(--accent)",

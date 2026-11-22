@@ -206,6 +206,24 @@ public class SdlWindowTests
     }
 
     [Fact]
+    public void A_window_made_from_a_Window_follows_its_title_without_failing_after_it_is_closed()
+    {
+        SDL3.SDL_SetHint("SDL_VIDEO_DRIVER", "dummy");
+
+        var content = new Window { Title = "One", InitialWidth = 320, InitialHeight = 200 };
+        var window = new SdlWindow(content);
+
+        using (window)
+        {
+            content.Title = "Two";
+
+            Assert.True(window.Pump(0));
+        }
+
+        content.Title = "Three";
+    }
+
+    [Fact]
     public void Closing_one_window_raises_Closed_and_leaves_the_others_running()
     {
         var (first, _) = Setup();
