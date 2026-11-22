@@ -78,6 +78,18 @@ public sealed class SkiaDrawingContext(SKCanvas canvas) : IDrawingContext
         canvas.DrawText(text, (float)x, (float)(y - font.Metrics.Ascent), font, paint);
     }
 
+    /// <inheritdoc/>
+    /// <exception cref="ArgumentException">The image was not created by <see cref="SkiaImage"/>.</exception>
+    public void DrawImage(IImage image, Rect destination)
+    {
+        if (image is not SkiaImage skia)
+            throw new ArgumentException("Only a SkiaImage can be drawn by this context.", nameof(image));
+
+        using var paint = new SKPaint { IsAntialias = true };
+
+        canvas.DrawImage(skia.Image, ToSkia(destination), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear), paint);
+    }
+
     /// <summary>Converts a layout rectangle to a Skia rectangle.</summary>
     /// <param name="rect">The layout rectangle.</param>
     /// <returns>The same area as an <see cref="SKRect"/>.</returns>

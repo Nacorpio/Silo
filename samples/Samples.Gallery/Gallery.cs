@@ -1,5 +1,8 @@
 using Silo;
+using Silo.Rendering;
+using Silo.Rendering.Skia;
 using Silo.Styling;
+using SkiaSharp;
 
 /// <summary>The controls and the Stylesheet that the gallery shows.</summary>
 static class Gallery
@@ -37,6 +40,12 @@ static class Gallery
     /// <summary>Parses the gallery's Stylesheet.</summary>
     /// <returns>The Stylesheet.</returns>
     public static Stylesheet Styles() => JsoncStylesheetReader.Read(Sheet, "gallery.jsonc");
+
+    /// <summary>Draws a small round icon in a color, since the gallery ships no image files.</summary>
+    /// <param name="color">The color of the icon.</param>
+    /// <returns>A 32 by 32 image.</returns>
+    static SkiaImage Dot(SKColor color)
+        => SkiaImage.Create(32, 32, canvas => canvas.DrawCircle(16, 16, 14, new SKPaint { Color = color, IsAntialias = true }));
 
     /// <summary>Builds the control tree.</summary>
     /// <returns>The root Control.</returns>
@@ -91,6 +100,9 @@ static class Gallery
 
         var list = new ListView { Items = Enumerable.Range(1, 200).Select(n => $"Row {n}").ToList() };
 
+        var dots = new IImage?[] { Dot(SKColors.SeaGreen), Dot(SKColors.Goldenrod), Dot(SKColors.MediumPurple), null };
+
+        list.Icons = Enumerable.Range(0, 200).Select(n => dots[n % dots.Length]).ToList();
         list.SelectedIndex = 1;
         options.Children.Add(list);
 
@@ -103,8 +115,8 @@ static class Gallery
         {
             Entries =
             [
-                new MenuItem("Reset clicks", () => count.Text = $"Clicks: {clicks = 0}"),
-                new MenuItem("Clear name", () => name.Text = string.Empty),
+                new MenuItem("Reset clicks", () => count.Text = $"Clicks: {clicks = 0}", Dot(SKColors.OrangeRed)),
+                new MenuItem("Clear name", () => name.Text = string.Empty, Dot(SKColors.SteelBlue)),
             ],
         };
 

@@ -103,4 +103,12 @@ public sealed class DisplayListBuilder : IDrawingContext
     /// <inheritdoc/>
     public void DrawText(string text, double x, double y, TextStyle style, Color color)
         => commands.Add(new DrawTextCommand(text, x, y, style, color));
+
+    /// <inheritdoc/>
+    public void DrawImage(IImage image, Rect destination)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+
+        commands.Add(new DrawImageCommand(image, destination));
+    }
 }

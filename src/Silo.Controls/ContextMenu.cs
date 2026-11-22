@@ -51,6 +51,7 @@ public class ContextMenu : ListView
             entries = value ?? [];
 
             Items = entries.Select(entry => entry.Text).ToList();
+            Icons = entries.Select(entry => entry.Icon).ToList();
         }
     }
 
@@ -92,7 +93,7 @@ public class ContextMenu : ListView
         var measurer = Measurer();
         var width = entries.Select(entry => measurer.Measure(entry.Text, style).Width).DefaultIfEmpty(0).Max();
 
-        return new Size(width + 2 * TextInset, entries.Count * Math.Max(1, GetValue(ItemHeightProperty)));
+        return new Size(width + 2 * TextInset + IconSpace, entries.Count * Math.Max(1, GetValue(ItemHeightProperty)));
     }
 
     /// <summary>Closes the menu and runs an entry.</summary>

@@ -156,4 +156,37 @@ public class ListViewTests
 
         Assert.Equal([2, 2, 2], activated);
     }
+
+    [Fact]
+    public void Icons_are_drawn_in_front_of_the_text_and_every_row_lines_up()
+    {
+        var (root, list, _) = Setup(3);
+        var icon = new FakeImage(32, 32);
+        var builder = new DisplayListBuilder();
+
+        list.Icons = [icon, null, icon];
+        root.Arrange(new Size(300, 300));
+        root.Render(builder);
+
+        var commands = builder.Build().Commands;
+        var images = commands.OfType<DrawImageCommand>().ToList();
+        var texts = commands.OfType<DrawTextCommand>().ToList();
+
+        Assert.Equal(2, images.Count);
+        Assert.Equal(new Rect(8, 2, 16, 16), images[0].Destination);
+        Assert.Equal(8 + 16 + 8, texts[1].X);
+        Assert.Equal(texts[0].X, texts[2].X);
+    }
+
+    [Fact]
+    public void Without_icons_the_text_starts_where_it_always_did()
+    {
+        var (root, list, _) = Setup(2);
+        var builder = new DisplayListBuilder();
+
+        list.Icons = [null, null];
+        root.Render(builder);
+
+        Assert.Equal(8, builder.Build().Commands.OfType<DrawTextCommand>().First().X);
+    }
 }

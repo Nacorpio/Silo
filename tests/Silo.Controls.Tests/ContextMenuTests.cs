@@ -136,4 +136,19 @@ public class ContextMenuTests
 
         Assert.Equal(0, layer.Count);
     }
+
+    [Fact]
+    public void Entry_icons_make_the_menu_wider_by_the_icon_and_its_gap()
+    {
+        var (_, menu, layer, router, _) = Setup();
+        var plain = 5 * 7 + 16;
+
+        menu.Entries = [new MenuItem("Copy", Icon: new FakeImage(8, 8)), new MenuItem("Paste")];
+
+        router.SecondaryDown(40, 30);
+        Layout(layer);
+
+        Assert.Equal(5 * 7 + 16 + 16 + 8, menu.Bounds.Width);
+        Assert.NotEqual(plain, menu.Bounds.Width);
+    }
 }

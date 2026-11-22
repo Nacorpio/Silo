@@ -69,4 +69,9 @@ public interface IDrawingContext
     /// <param name="style">The font to use.</param>
     /// <param name="color">The text color.</param>
     void DrawText(string text, double x, double y, TextStyle style, Color color);
+
+    /// <summary>Draws an image, scaled to fill a rectangle.</summary>
+    /// <param name="image">The image to draw. It must come from the same backend as the context.</param>
+    /// <param name="destination">The rectangle to fill. The image is stretched to it, so pass one with the image's aspect ratio to avoid distortion.</param>
+    void DrawImage(IImage image, Rect destination);
 }
