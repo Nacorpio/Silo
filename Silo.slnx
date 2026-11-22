@@ -12,6 +12,7 @@
     <Project Path="src/Silo.Rendering/Silo.Rendering.csproj" />
     <Project Path="src/Silo.Rendering.Skia/Silo.Rendering.Skia.csproj" />
     <Project Path="src/Silo.Schema/Silo.Schema.csproj" />
+    <Project Path="src/Silo.Studio/Silo.Studio.csproj" />
     <Project Path="src/Silo.Styling/Silo.Styling.csproj" />
     <Project Path="src/Silo.Themes.Default/Silo.Themes.Default.csproj" />
     <Project Path="src/Silo.Validator/Silo.Validator.csproj" />
@@ -26,6 +27,7 @@
     <Project Path="tests/Silo.Rendering.Tests/Silo.Rendering.Tests.csproj" />
     <Project Path="tests/Silo.Rendering.Skia.Tests/Silo.Rendering.Skia.Tests.csproj" />
     <Project Path="tests/Silo.Schema.Tests/Silo.Schema.Tests.csproj" />
+    <Project Path="tests/Silo.Studio.Tests/Silo.Studio.Tests.csproj" />
     <Project Path="tests/Silo.Styling.Tests/Silo.Styling.Tests.csproj" />
     <Project Path="tests/Silo.Themes.Default.Tests/Silo.Themes.Default.Tests.csproj" />
     <Project Path="tests/Silo.Validator.Tests/Silo.Validator.Tests.csproj" />

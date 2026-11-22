@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>silo-studio</AssemblyName>
+    <RootNamespace>Silo.Studio</RootNamespace>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>silo-studio</ToolCommandName>
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
+    <ProjectReference Include="../Silo.Inspector/Silo.Inspector.csproj" />
+    <ProjectReference Include="../Silo.Platform.Sdl/Silo.Platform.Sdl.csproj" />
+    <ProjectReference Include="../Silo.Themes.Default/Silo.Themes.Default.csproj" />
+  </ItemGroup>
+</Project>
