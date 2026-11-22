@@ -14,6 +14,10 @@ namespace Silo;
 /// <c>right</c>) with <c>icon-gap</c> between it and the text. The buttons are <see cref="TabHeaderButton"/>s, placed by
 /// <c>button-position</c> (<c>left</c> or <c>right</c>). Give the header <c>align-items: center</c> so they line up.
 /// </para>
+/// <para>
+/// An icon that is a mask (<see cref="IImage.IsMask"/>) is drawn in the text color of the header, so it changes with
+/// <c>TabHeader:selected</c> and the hover color like the text does.
+/// </para>
 /// <para>Arrange the tree again after changing the text, the icon or the buttons.</para>
 /// </remarks>
 /// <example>

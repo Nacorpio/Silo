@@ -78,6 +78,16 @@ public sealed record DrawTextCommand(string Text, double X, double Y, TextStyle 
     public override void Execute(IDrawingContext context) => context.DrawText(Text, X, Y, Style, Color);
 }
 
+/// <summary>Records <see cref="IDrawingContext.DrawMask"/>.</summary>
+/// <param name="Image">The image whose transparency is used.</param>
+/// <param name="Destination">The rectangle it fills.</param>
+/// <param name="Color">The color of the opaque parts.</param>
+public sealed record DrawMaskCommand(IImage Image, Rect Destination, Color Color) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.DrawMask(Image, Destination, Color);
+}
+
 /// <summary>Records <see cref="IDrawingContext.DrawImage"/>.</summary>
 /// <param name="Image">The image to draw.</param>
 /// <param name="Destination">The rectangle it fills.</param>

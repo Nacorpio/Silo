@@ -45,6 +45,44 @@ public class SkiaRendererTests
     }
 
     [Fact]
+    public void A_mask_is_drawn_in_one_color_where_it_is_opaque_and_leaves_the_rest_alone()
+    {
+        using var mask = SkiaImage.Create(
+            4,
+            2,
+            canvas => canvas.DrawRect(0, 0, 2, 2, new SKPaint { Color = new SKColor(0, 0, 0) }),
+            asMask: true);
+
+        var builder = new DisplayListBuilder();
+
+        builder.DrawMask(mask, new Rect(10, 10, 40, 20), new Color(255, 0, 0));
+
+        using var bitmap = SkiaRenderer.Render(builder.Build(), 60, 40, White);
+
+        Assert.True(mask.IsMask);
+        Assert.Equal(new SKColor(255, 0, 0), PixelAt(bitmap, 15, 20));
+        Assert.Equal(new SKColor(255, 255, 255), PixelAt(bitmap, 45, 20));
+    }
+
+    [Fact]
+    public void A_picture_is_not_a_mask_unless_asked_to_be()
+    {
+        using var picture = SkiaImage.Create(2, 2, canvas => canvas.Clear(new SKColor(0, 0, 255)));
+
+        Assert.False(picture.IsMask);
+    }
+
+    [Fact]
+    public void Drawing_a_mask_with_a_foreign_image_is_rejected()
+    {
+        using var bitmap = new SKBitmap(10, 10);
+        using var canvas = new SKCanvas(bitmap);
+        var context = new SkiaDrawingContext(canvas);
+
+        Assert.Throws<ArgumentException>(() => context.DrawMask(new Foreign(), new Rect(0, 0, 5, 5), White));
+    }
+
+    [Fact]
     public void Clip_rect_limits_drawing()
     {
         var builder = new DisplayListBuilder();

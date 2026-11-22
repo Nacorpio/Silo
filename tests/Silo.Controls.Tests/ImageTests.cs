@@ -56,4 +56,32 @@ public class ImageTests
         Assert.Equal(new Rect(0, 0, 0, 0), image.Bounds);
         Assert.Empty(Render(root));
     }
+
+    [Fact]
+    public void A_mask_is_drawn_in_the_text_color_of_the_Image()
+    {
+        var mask = new FakeMask(16, 16);
+        var image = new Image { Source = mask };
+        var root = Arranged(image, """{ "rules": { "Box": { "align-items": "start" }, "Image": { "color": "#ff0000" } } }""");
+        var builder = new DisplayListBuilder();
+
+        root.Render(builder);
+
+        Assert.Equal(
+            [new DrawMaskCommand(mask, new Rect(0, 0, 16, 16), new Silo.Styling.Values.Color(255, 0, 0))],
+            builder.Build().Commands.OfType<DrawMaskCommand>().ToList());
+        Assert.Empty(builder.Build().Commands.OfType<DrawImageCommand>());
+    }
+
+    [Fact]
+    public void A_mask_takes_the_color_of_its_parent_when_the_Image_has_none()
+    {
+        var image = new Image { Source = new FakeMask(8, 8) };
+        var root = Arranged(image, """{ "rules": { "Box": { "align-items": "start", "color": "#00ff00" } } }""");
+        var builder = new DisplayListBuilder();
+
+        root.Render(builder);
+
+        Assert.Equal(new Silo.Styling.Values.Color(0, 255, 0), builder.Build().Commands.OfType<DrawMaskCommand>().Single().Color);
+    }
 }

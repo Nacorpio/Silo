@@ -1,5 +1,6 @@
 using Silo.Layout;
 using Silo.Rendering;
+using Silo.Styling.Values;
 
 namespace Silo;
 
@@ -11,6 +12,10 @@ namespace Silo;
 /// Without a <c>width</c> and <c>height</c> an Image is as large as its picture. Given a size, it scales the picture to fit
 /// inside the content box without changing its aspect ratio, and centers it, so it never looks distorted. The Image paints its
 /// background and border like any other Control.
+/// </para>
+/// <para>
+/// A picture that is a mask (<see cref="IImage.IsMask"/>) is drawn in the <c>color</c> of the Image, which inherits from its
+/// parent like the text color, so one icon can follow the theme.
 /// </para>
 /// <para>
 /// The picture comes from a rendering backend, for example <c>SkiaImage.Load</c> in Silo.Rendering.Skia. Arrange the tree
@@ -29,6 +34,23 @@ public class Image : Control
     /// <summary>Gets or sets the picture, or <see langword="null"/> to show nothing.</summary>
     public IImage? Source { get; set; }
 
+
+    /// <summary>Draws a picture, or its shape in a color when it is a mask.</summary>
+    /// <param name="context">The context to draw on.</param>
+    /// <param name="image">The picture.</param>
+    /// <param name="destination">The rectangle to fill.</param>
+    /// <param name="color">The color to fill a mask with. It is not used for a picture that is not a mask.</param>
+    internal static void Draw(IDrawingContext context, IImage image, Rect destination, Color color)
+    {
+        if (!image.IsMask)
+        {
+            context.DrawImage(image, destination);
+
+            return;
+        }
+
+        context.DrawMask(image, destination, color);
+    }
 
     /// <summary>Finds where a picture goes when it is scaled to fit inside a box and centered.</summary>
     /// <param name="image">The picture.</param>
@@ -61,6 +83,6 @@ public class Image : Control
         var destination = Fit(Source, ContentBox(bounds));
 
         if (destination.Width > 0)
-            context.DrawImage(Source, destination);
+            Draw(context, Source, destination, GetValue(ColorProperty));
     }
 }

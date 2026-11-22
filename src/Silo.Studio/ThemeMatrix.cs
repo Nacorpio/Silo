@@ -1,3 +1,6 @@
+using Silo.Rendering.Skia;
+using SkiaSharp;
+
 namespace Silo.Studio;
 
 /// <summary>
@@ -25,6 +28,10 @@ public sealed class ThemeMatrix : Box
 {
     /// <summary>The columns, in order. The names are the Pseudo-states that the matrix sets, with <c>normal</c> for none.</summary>
     public static readonly IReadOnlyList<string> States = ["normal", "hover", "pressed", "focus", "checked"];
+
+    /// <summary>The icon that <see cref="Dot"/> creates once.</summary>
+    static SkiaImage? dot;
+
 
     /// <summary>One row: what is shown and in which states it can be.</summary>
     /// <param name="Name">The row label, which is the type name that Selectors use.</param>
@@ -110,14 +117,21 @@ public sealed class ThemeMatrix : Box
         return dialog;
     }
 
+    /// <summary>Gets a small round mask icon, which takes the text color of the Control that shows it.</summary>
+    static SkiaImage Dot => dot ??= SkiaImage.Create(
+        16,
+        16,
+        canvas => canvas.DrawCircle(8, 8, 5, new SKPaint { Color = SKColors.Black, IsAntialias = true }),
+        asMask: true);
+
     /// <summary>Creates a TabView with two tabs, so that a selected and an unselected header show.</summary>
     /// <returns>The TabView.</returns>
     static TabView CreateTabView()
     {
         var tabs = new TabView();
 
-        tabs.AddTab("One", new TextBlock { Text = "First" });
-        tabs.AddTab("Two", new TextBlock { Text = "Second" }, closable: true);
+        tabs.AddTab("One", new TextBlock { Text = "First" }, Dot);
+        tabs.AddTab("Two", new TextBlock { Text = "Second" }, Dot, closable: true);
 
         return tabs;
     }

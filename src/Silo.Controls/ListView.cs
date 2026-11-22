@@ -17,7 +17,8 @@ namespace Silo;
 /// <para>
 /// The selected row is painted with <c>selection-color</c> and <c>selection-text-color</c>. Rows are text for now, with an
 /// optional icon in front: set <see cref="Icons"/> to one <see cref="IImage"/> per row, <see langword="null"/> for a row
-/// without. The icons are scaled to fit a square of <c>icon-size</c> (16px by default). Rows made of Controls arrive with
+/// without. The icons are scaled to fit a square of <c>icon-size</c> (16px by default). An icon that is a mask
+/// (<see cref="IImage.IsMask"/>) is drawn in the text color of its row, so it turns white on the selected row. Rows made of Controls arrive with
 /// templates in Silo.Views.
 /// </para>
 /// </remarks>
@@ -288,7 +289,7 @@ public class ListView : Control, IScrollable
         context.DrawText(items[index], content.X + TextInset + RowIndent(index) + IconSpace, y, style, color);
 
         if (index < icons.Count && icons[index] is { } icon)
-            DrawIcon(context, icon, content.X + TextInset + RowIndent(index), top);
+            DrawIcon(context, icon, content.X + TextInset + RowIndent(index), top, color);
     }
 
     /// <summary>Draws a row's icon, centered vertically in the row.</summary>
@@ -296,13 +297,14 @@ public class ListView : Control, IScrollable
     /// <param name="icon">The icon.</param>
     /// <param name="x">The left edge of the icon's square.</param>
     /// <param name="top">The row's top edge.</param>
-    void DrawIcon(IDrawingContext context, IImage icon, double x, double top)
+    /// <param name="color">The text color of the row, which a mask icon is drawn in.</param>
+    void DrawIcon(IDrawingContext context, IImage icon, double x, double top, Color color)
     {
         var square = new Rect(x, top + (RowHeight - IconSize) / 2, IconSize, IconSize);
         var destination = Image.Fit(icon, square);
 
         if (destination.Width > 0)
-            context.DrawImage(icon, destination);
+            Image.Draw(context, icon, destination, color);
     }
 
     /// <summary>Moves the selection to a row that was found with <see cref="FindSelectable"/>.</summary>

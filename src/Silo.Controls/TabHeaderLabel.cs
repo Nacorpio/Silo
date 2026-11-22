@@ -72,7 +72,7 @@ internal sealed class TabHeaderLabel(TabHeader owner) : Control
         var fitted = Image.Fit(Icon, new Rect(x, y, size.Width, size.Height));
 
         if (fitted.Width > 0)
-            context.DrawImage(Icon, fitted);
+            Image.Draw(context, Icon, fitted, GetValue(ColorProperty));
     }
 
     /// <summary>Measures the icon and the title.</summary>
