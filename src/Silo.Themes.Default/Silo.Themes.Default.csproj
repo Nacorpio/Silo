@@ -4,5 +4,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="default.jsonc" LogicalName="Silo.Themes.Default.default.jsonc" />
+    <EmbeddedResource Include="dark.jsonc" LogicalName="Silo.Themes.Default.dark.jsonc" />
   </ItemGroup>
 </Project>

@@ -12,11 +12,11 @@ static class Gallery
         {
           "rules": {
             "#root": {
-              "background": "#f3f4f6", "padding": "16px", "gap": "12px", "flex-direction": "column",
+              "background": "var(--surface)", "padding": "16px", "gap": "12px", "flex-direction": "column",
               "align-items": "start"
             },
             ".title": { "font-size": "24px", "font-weight": "bold" },
-            ".muted": { "color": "#6b7280" },
+            ".muted": { "color": "var(--muted)" },
             "#row": { "gap": "8px", "flex-direction": "row" },
             "#options": { "gap": "6px", "flex-direction": "column", "align-items": "start" },
             "ProgressBar": { "width": "240px" },
