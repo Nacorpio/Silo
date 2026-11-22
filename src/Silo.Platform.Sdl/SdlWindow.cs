@@ -288,12 +288,7 @@ public sealed unsafe class SdlWindow : IDisposable
         SDL_Keycode.SDLK_TAB => Key.Tab,
         SDL_Keycode.SDLK_PAGEUP => Key.PageUp,
         SDL_Keycode.SDLK_PAGEDOWN => Key.PageDown,
-        SDL_Keycode.SDLK_A => Key.A,
-        SDL_Keycode.SDLK_C => Key.C,
-        SDL_Keycode.SDLK_V => Key.V,
-        SDL_Keycode.SDLK_X => Key.X,
-        SDL_Keycode.SDLK_Y => Key.Y,
-        SDL_Keycode.SDLK_Z => Key.Z,
+        >= SDL_Keycode.SDLK_A and <= SDL_Keycode.SDLK_Z => Key.A + (int)(code - SDL_Keycode.SDLK_A),
 
         _ => Key.Unknown,
     };
@@ -410,10 +405,18 @@ public sealed unsafe class SdlWindow : IDisposable
         if (!key.repeat)
             KeyPressed?.Invoke(pressed);
 
+        var modifiers = ToModifiers(key.mod);
+
         if (pressed == Key.Escape && overlays.CloseTop())
             return true;
 
-        return focus.KeyDown(pressed, ToModifiers(key.mod)) | hidden;
+        if (MenuBar.AccessKeyDown(root, pressed, modifiers))
+            return true;
+
+        if (overlays.ModalCount > 0)
+            return overlays.KeyDown(pressed, modifiers) | hidden;
+
+        return focus.KeyDown(pressed, modifiers) | hidden;
     }
 
     /// <summary>Presses the pointer button and moves the keyboard focus to what was pressed.</summary>

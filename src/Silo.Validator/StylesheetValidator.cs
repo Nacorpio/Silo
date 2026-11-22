@@ -35,7 +35,7 @@ namespace Silo.Validation;
 public static partial class StylesheetValidator
 {
     /// <summary>The Pseudo-states that the Controls set.</summary>
-    static readonly string[] States = ["active", "checked", "expanded", "focus", "hover", "selected"];
+    static readonly string[] States = ["active", "checked", "expanded", "focus", "hover", "open", "selected"];
 
     /// <summary>The Control types by the name that Selectors use.</summary>
     static readonly Lazy<Dictionary<string, Type>> Types = new(FindTypes);

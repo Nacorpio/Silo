@@ -147,10 +147,10 @@ public class ListView : Control, IScrollable
     double IconSize => Math.Max(0, GetValue(IconSizeProperty));
 
     /// <summary>Gets the height of a row in pixels.</summary>
-    double RowHeight => Math.Max(1, GetValue(ItemHeightProperty));
+    protected double RowHeight => Math.Max(1, GetValue(ItemHeightProperty));
 
     /// <summary>Gets the visible area in the ListView's own coordinates.</summary>
-    Rect Viewport => ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height));
+    protected Rect Viewport => ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height));
 
     /// <inheritdoc/>
     public bool ScrollBy(double delta)
@@ -190,28 +190,50 @@ public class ListView : Control, IScrollable
         return before != selectedIndex;
     }
 
+    /// <summary>Gets the top edge of a row in the ListView's own coordinates, which is outside the viewport for a row that is scrolled away.</summary>
+    /// <param name="index">The row's index.</param>
+    /// <returns>The distance from the top of the border box.</returns>
+    protected double RowTop(int index) => Viewport.Y + (index * RowHeight) - Offset;
+
+    /// <summary>Tells whether a row can be selected. A row that cannot is skipped by the arrow keys and ignores the pointer.</summary>
+    /// <param name="index">The row's index.</param>
+    /// <returns><see langword="true"/> unless a derived class says otherwise.</returns>
+    protected virtual bool IsSelectable(int index) => true;
+
+    /// <summary>Finds the first row that can be selected, starting at a row and moving one way.</summary>
+    /// <param name="from">The row to start at, which is included.</param>
+    /// <param name="step">1 to move down or -1 to move up.</param>
+    /// <returns>The row's index, or -1 when there is none.</returns>
+    protected int FindSelectable(int from, int step)
+    {
+        for (var i = from; i >= 0 && i < items.Count; i += step)
+            if (IsSelectable(i))
+                return i;
+
+        return -1;
+    }
+
     /// <inheritdoc/>
     public override bool KeyDown(Key key)
     {
         var before = selectedIndex;
-        var last = items.Count - 1;
 
         switch (key)
         {
             case Key.Up:
-                SelectedIndex = Math.Max(0, selectedIndex - 1);
+                Move(selectedIndex < 0 ? FindSelectable(0, 1) : FindSelectable(selectedIndex - 1, -1));
                 break;
 
             case Key.Down:
-                SelectedIndex = Math.Min(last, selectedIndex + 1);
+                Move(FindSelectable(selectedIndex + 1, 1));
                 break;
 
             case Key.Home:
-                SelectedIndex = 0;
+                Move(FindSelectable(0, 1));
                 break;
 
             case Key.End:
-                SelectedIndex = last;
+                Move(FindSelectable(items.Count - 1, -1));
                 break;
 
             case Key.Enter when selectedIndex >= 0:
@@ -278,12 +300,20 @@ public class ListView : Control, IScrollable
             context.DrawImage(icon, destination);
     }
 
+    /// <summary>Moves the selection to a row that was found with <see cref="FindSelectable"/>.</summary>
+    /// <param name="index">The row's index, or -1 to leave the selection where it is.</param>
+    void Move(int index)
+    {
+        if (index >= 0)
+            SelectedIndex = index;
+    }
+
     /// <summary>Changes the selection.</summary>
-    /// <param name="value">The row's index. Values outside the list select nothing.</param>
+    /// <param name="value">The row's index. Values outside the list, and rows that cannot be selected, select nothing.</param>
     /// <param name="reveal">Whether to scroll the row into view.</param>
     void Select(int value, bool reveal)
     {
-        var next = value >= 0 && value < items.Count ? value : -1;
+        var next = value >= 0 && value < items.Count && IsSelectable(value) ? value : -1;
 
         if (next == selectedIndex)
             return;

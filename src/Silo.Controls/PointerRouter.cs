@@ -63,6 +63,9 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         var hit = Hit(x, y);
         var changed = SetHovered(overlays?.IsBackdrop(hit) == true ? null : hit) | moved;
 
+        if (overlays?.IsBackdrop(hit) == true && TitleBehindBackdrop(x, y) is { Bar: { IsOpen: true } bar } title)
+            changed |= bar.Open(title);
+
         if (Find<ListView>(hovered) is { HoverSelects: true } list)
             changed |= list.PointerMove(list.ToLocal(x, y).Y);
 
@@ -82,7 +85,14 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         var changed = Move(x, y);
 
         if (overlays?.IsBackdrop(Hit(x, y)) == true)
+        {
+            var title = TitleBehindBackdrop(x, y);
+
+            if (title is { Bar: { IsOpen: true } bar })
+                return bar.Toggle(title) | changed;
+
             return overlays.PressOutside() | changed;
+        }
 
         pressed = Find<Button>(hovered);
         dragged = Find<Slider>(hovered);
@@ -174,6 +184,12 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     /// <param name="y">The vertical position, relative to the root Control.</param>
     /// <returns>The Control, the overlays' backdrop, or <see langword="null"/>.</returns>
     Control? Hit(double x, double y) => overlays?.HitTest(x, y) ?? root.HitTest(x, y);
+
+    /// <summary>Finds the title of a <see cref="MenuBar"/> under a point that an open menu's backdrop covers.</summary>
+    /// <param name="x">The horizontal position, relative to the root Control.</param>
+    /// <param name="y">The vertical position, relative to the root Control.</param>
+    /// <returns>The title, or <see langword="null"/> when the point is not on one.</returns>
+    MenuBarItem? TitleBehindBackdrop(double x, double y) => Find<MenuBarItem>(root.HitTest(x, y));
 
     /// <summary>Moves <c>hover</c> to a Control and its ancestors.</summary>
     /// <param name="target">The new Control under the pointer, or <see langword="null"/>.</param>

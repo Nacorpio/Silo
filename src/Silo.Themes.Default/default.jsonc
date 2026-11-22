@@ -81,6 +81,13 @@
     },
     "DialogTitle": { "font-weight": "bold", "font-size": "16px" },
     "DialogButtons": { "flex-direction": "row", "justify-content": "end", "gap": "8px" },
+    "MenuBar": { "flex-direction": "row", "background": "var(--surface)", "color": "var(--text)" },
+    "MenuBarItem": {
+      "color": "var(--text)",
+      "padding": "4px 10px",
+      "&:hover": { "background": "var(--track)" },
+      "&:open": { "background": "var(--border)" },
+    },
     "Button": {
       "background": "var(--accent)",
       "color": "var(--accent-text)",
@@ -159,6 +166,7 @@
       "border-radius": "var(--radius)",
       "selection-color": "var(--accent)",
       "selection-text-color": "var(--accent-text)",
+      "separator-color": "var(--border)",
     },
     "ListView": {
       "height": "160px",
