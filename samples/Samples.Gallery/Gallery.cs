@@ -94,6 +94,8 @@ static class Gallery
         options.Children.Add(large);
         options.Children.Add(new ToggleSwitch { Text = "Dark mode" });
         options.Children.Add(progress);
+        options.Children.Add(new Separator());
+        options.Children.Add(new Expander { Header = "Advanced", Content = new TextBlock { Text = "More options go here." } });
 
         var size = new ComboBox { Items = ["Small", "Medium", "Large", "Extra large"], SelectedIndex = 1 };
 

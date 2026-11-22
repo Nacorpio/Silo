@@ -131,6 +131,19 @@
       "&:hover": { "slider-fill-color": "var(--accent-hover)" },
       "&:active": { "slider-fill-color": "var(--accent-active)" },
     },
+    "Separator": {
+      "height": "1px",
+      "background": "var(--border)",
+      "margin": "6px 0",
+    },
+    "Expander": { "flex-direction": "column" },
+    "Expander .expander-header": {
+      "background": "var(--track)",
+      "color": "var(--text)",
+      "text-align": "left",
+      "&:hover": { "background": "var(--border)" },
+      "&:active": { "background": "var(--border)" },
+    },
     "ProgressBar": {
       "height": "8px",
       "background": "var(--track)",

@@ -131,6 +131,19 @@ public class DefaultThemeTests
     }
 
     [Fact]
+    public void Separators_and_Expanders_resolve_without_diagnostics()
+    {
+        var separator = new Separator();
+        var expander = new Expander { Header = "More", Content = new TextBlock(), IsExpanded = true };
+
+        Assert.Empty(separator.ApplyStyles(Resolver()));
+        Assert.Empty(expander.ApplyStyles(Resolver()));
+
+        Assert.Equal(new Color(0x9c, 0xa3, 0xaf), separator.GetValue(Control.BackgroundProperty));
+        Assert.Equal(new Color(0xe5, 0xe7, 0xeb), expander.Children[0].GetValue(Control.BackgroundProperty));
+    }
+
+    [Fact]
     public void Sliders_use_the_accent_and_darken_while_dragged()
     {
         var slider = new Slider();
