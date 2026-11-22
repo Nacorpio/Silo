@@ -168,6 +168,18 @@
       "selection-text-color": "var(--accent-text)",
       "separator-color": "var(--border)",
     },
+    "TreeView": {
+      "height": "160px",
+      "background": "var(--surface)",
+      "color": "var(--text)",
+      "border-width": "1px",
+      "border-color": "var(--border)",
+      "border-radius": "var(--radius)",
+      "selection-color": "var(--accent)",
+      "selection-text-color": "var(--accent-text)",
+      "indent": "16px",
+      "&:focus": { "border-color": "var(--accent)" },
+    },
     "ListView": {
       "height": "160px",
       "background": "var(--surface)",
