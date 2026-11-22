@@ -39,9 +39,16 @@ public static class StudioStyles
             ".declaration TextBox": { "flex-grow": "1" },
             "#add-row": { "flex-direction": "row", "gap": "6px" },
             "#add-row TextBox": { "width": "100px" },
+            "#add-rule-row": { "flex-direction": "row", "gap": "6px" },
+            "#add-rule-row TextBox": { "width": "214px" },
             "#matrix": { "padding": "0px 16px 16px 16px", "gap": "10px", "flex-direction": "column" },
             ".matrix-row": { "flex-direction": "row", "align-items": "center", "gap": "8px" },
             ".row-label": { "width": "110px", "color": "var(--muted)" },
+            "Button.row-label": {
+              "background": "var(--surface)", "padding": "2px 0px", "text-align": "left", "border-radius": "3px",
+              "&:hover": { "background": "var(--track)", "color": "var(--text)" },
+              "&:active": { "background": "var(--border)" }
+            },
             ".column-title": { "width": "124px", "color": "var(--muted)", "font-size": "12px" },
             ".cell": { "width": "124px", "align-items": "start" },
             ".not-applicable": { "color": "var(--border)" },

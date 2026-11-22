@@ -47,6 +47,10 @@ public sealed class ThemeMatrix : Box
         new("TextBlock", () => new TextBlock { Text = "Some text" }, ["normal"]),
     ];
 
+    /// <summary>Raised when the label of a row is clicked, with the row name, so an editor can show the Rule that styles it.</summary>
+    public event EventHandler<string>? RowSelected;
+
+
     /// <summary>The sample Control of each cell, by row and state.</summary>
     readonly Dictionary<(string Row, string State), Control> cells = [];
 
@@ -93,12 +97,26 @@ public sealed class ThemeMatrix : Box
         var result = new Box();
 
         result.AddClass("matrix-row");
-        result.Children.Add(Label(row.Name, "row-label"));
+        result.Children.Add(RowButton(row.Name));
 
         foreach (var state in States)
             result.Children.Add(BuildCell(row, state));
 
         return result;
+    }
+
+    /// <summary>Builds the label of a row, which can be clicked.</summary>
+    /// <param name="name">The row name.</param>
+    /// <returns>The button.</returns>
+    Button RowButton(string name)
+    {
+        var button = new Button { Text = name, Name = $"row-{name}" };
+
+        button.AddClass("row-label");
+
+        button.Click += (_, _) => RowSelected?.Invoke(this, name);
+
+        return button;
     }
 
     /// <summary>Builds one cell.</summary>

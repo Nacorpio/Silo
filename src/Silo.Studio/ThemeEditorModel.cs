@@ -39,6 +39,13 @@ public sealed record EditorRule(IReadOnlyList<string> Path, string Selector, IRe
 /// </example>
 public sealed class ThemeEditorModel
 {
+    /// <summary>The name that the editor shows for the top-level Tokens in <see cref="Targets"/>.</summary>
+    public const string TokensName = "Tokens";
+
+
+    /// <summary>The path of the top-level Tokens in <see cref="Targets"/>.</summary>
+    public static readonly IReadOnlyList<string> TokensPath = ["tokens"];
+
     /// <summary>The Stylesheets that the theme is used together with.</summary>
     readonly IReadOnlyList<Stylesheet> context;
 
@@ -99,6 +106,33 @@ public sealed class ThemeEditorModel
             return result;
         }
     }
+
+    /// <summary>
+    /// Gets what the editor can edit: first the top-level Tokens, shown like a Rule named <c>Tokens</c> even when the document
+    /// has none yet, then <see cref="Rules"/>.
+    /// </summary>
+    public IReadOnlyList<EditorRule> Targets
+    {
+        get
+        {
+            var tokens = Document.Find("tokens")?.Value as JsoncObject;
+
+            var declarations = tokens is null
+                ? []
+                : tokens.Members
+                    .Where(m => m.Value is JsoncScalar)
+                    .Select(m => new EditorDeclaration(m.Key, ((JsoncScalar)m.Value).Value))
+                    .ToList();
+
+            return [new(TokensPath, TokensName, declarations), .. Rules];
+        }
+    }
+
+    /// <summary>Finds the first Rule whose Selector ends in a Control type, which is the Rule that styles that type.</summary>
+    /// <param name="type">The type name, such as <c>Button</c>.</param>
+    /// <returns>The Rule, or <see langword="null"/> when the theme has none for the type.</returns>
+    public EditorRule? FindRuleForType(string type)
+        => Rules.FirstOrDefault(r => TypeOf(r.Selector) == type);
 
     /// <summary>Gets what the validator finds in the current text.</summary>
     public IReadOnlyList<ValidationIssue> Issues
@@ -242,6 +276,21 @@ public sealed class ThemeEditorModel
             result.Add(new(rulePath, selector, declarations));
 
             AddRules(result, rule, rulePath, selector);
+        }
+    }
+
+    /// <summary>Gets the type name that a Selector ends in.</summary>
+    /// <param name="selector">The Selector text.</param>
+    /// <returns>The type name, or <see langword="null"/> when there is none or the Selector does not parse.</returns>
+    static string? TypeOf(string selector)
+    {
+        try
+        {
+            return Selector.Parse(selector).Compounds[^1].Type;
+        }
+        catch (FormatException)
+        {
+            return null;
         }
     }
 
