@@ -1,4 +1,4 @@
-using Silo.Studio;
+using Silo;
 using Xunit;
 
 public class TextBufferTests

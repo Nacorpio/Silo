@@ -224,7 +224,7 @@ public class DefaultThemeTests
         var keys = (TextBlock)tip.Children[1];
 
         Assert.Equal(new Color(0xf9, 0xfa, 0xfb), label.GetValue(Control.ColorProperty));
-        Assert.Equal("Segoe UI", label.GetValue(Control.FontFamilyProperty));
+        Assert.Equal("Segoe UI, Inter, Helvetica, Arial, sans-serif", label.GetValue(Control.FontFamilyProperty));
         Assert.StartsWith("Fira Code,", keys.GetValue(Control.FontFamilyProperty));
         Assert.EndsWith("monospace", keys.GetValue(Control.FontFamilyProperty));
         Assert.Equal(new Color(0x9c, 0xa3, 0xaf), keys.GetValue(Control.ColorProperty));

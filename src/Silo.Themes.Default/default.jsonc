@@ -2,7 +2,7 @@
   // The default Silo theme. Everything a Control looks like comes from the Tokens below, so a derived theme can
   // restyle the whole library by overriding them.
   "tokens": {
-    "--font-family": "Segoe UI",
+    "--font-family": "Segoe UI, Inter, Helvetica, Arial, sans-serif",
     "--font-mono": "Fira Code, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace",
     "--font-size": "14px",
     "--surface": "#ffffff",
@@ -162,6 +162,18 @@
       "border-radius": "var(--radius)",
       "caret-color": "var(--text)",
       "placeholder-color": "var(--muted)",
+      "&:hover": { "border-color": "var(--accent-hover)" },
+      "&:focus": { "border-color": "var(--accent)" },
+    },
+    "TextArea": {
+      "background": "var(--surface)",
+      "color": "var(--text)",
+      "padding": "6px 8px",
+      "border-width": "1px",
+      "border-color": "var(--border)",
+      "border-radius": "var(--radius)",
+      "caret-color": "var(--text)",
+      "gutter-color": "var(--muted)",
       "&:hover": { "border-color": "var(--accent-hover)" },
       "&:focus": { "border-color": "var(--accent)" },
     },
