@@ -48,7 +48,20 @@ public sealed class ThemeMatrix : Box
         new("Separator", () => new Separator(), ["normal"]),
         new("Expander", CreateExpander, ["normal"]),
         new("TabView", CreateTabView, ["normal"]),
+        new("Dialog", CreateDialog, ["normal"]),
     ];
+
+    /// <summary>Creates a Dialog that is not shown in a window, so that its title, content and buttons show in the matrix.</summary>
+    /// <returns>The Dialog.</returns>
+    static Dialog CreateDialog()
+    {
+        var dialog = new Dialog { Title = "Dialog", Content = new TextBlock { Text = "Are you sure?" } };
+
+        dialog.AddButton("Cancel");
+        dialog.AddButton("OK");
+
+        return dialog;
+    }
 
     /// <summary>Creates a TabView with two tabs, so that a selected and an unselected header show.</summary>
     /// <returns>The TabView.</returns>

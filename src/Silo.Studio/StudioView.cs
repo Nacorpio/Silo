@@ -46,7 +46,7 @@ public sealed class StudioView : Window
         Name = "studio";
         Title = "Silo Studio";
         InitialWidth = editor is null ? 820 : 1260;
-        InitialHeight = 620;
+        InitialHeight = 720;
 
         var bar = new Box { Name = "bar" };
         var title = new TextBlock { Text = "Theme gallery" };
