@@ -78,6 +78,7 @@ public static class StudioStyles
             ".cell PasswordBox": { "width": "112px" },
             ".cell Toolbar": { "width": "200px", "flex-shrink": "0" },
             ".cell Toolbar Separator": { "width": "1px", "height": "auto" },
+            ".cell TextArea": { "width": "112px", "height": "66px" },
             ".cell Slider": { "width": "112px" },
             ".cell ProgressBar": { "width": "112px" },
             ".cell ComboBox": { "width": "112px" },

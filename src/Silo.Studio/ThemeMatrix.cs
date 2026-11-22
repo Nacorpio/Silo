@@ -49,6 +49,7 @@ public sealed class ThemeMatrix : Box
         new("TextBox", () => new TextBox { Placeholder = "Type here" }, ["normal", "hover", "focus"]),
         new("NumberBox", () => new NumberBox { Minimum = 0, Maximum = 100, Value = 42 }, ["normal", "hover", "focus"]),
         new("PasswordBox", () => new PasswordBox { Text = "secret" }, ["normal", "hover", "focus"]),
+        new("TextArea", CreateTextArea, ["normal", "hover", "focus"]),
         new("Slider", () => new Slider { Value = 0.6 }, ["normal", "hover", "pressed"]),
         new("ProgressBar", () => new ProgressBar { Value = 0.6 }, ["normal"]),
         new("ComboBox", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
@@ -138,6 +139,10 @@ public sealed class ThemeMatrix : Box
 
         return tabs;
     }
+
+    /// <summary>Creates a TextArea with three lines of text.</summary>
+    /// <returns>The TextArea.</returns>
+    static TextArea CreateTextArea() => new(new TextBuffer("First line\nSecond line\nThird line"));
 
     /// <summary>Creates a Toolbar with two buttons, a divider and a third button.</summary>
     /// <returns>The Toolbar.</returns>

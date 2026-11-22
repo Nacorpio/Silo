@@ -1,4 +1,4 @@
-namespace Silo.Studio;
+namespace Silo;
 
 /// <summary>
 /// The text of a code editor with a caret, a selection, editing commands and undo. It has no Controls and no drawing, so the

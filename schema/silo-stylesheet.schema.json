@@ -113,7 +113,7 @@
           ]
         },
         "caret-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextBox.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextArea, TextBox.",
           "$ref": "#/$defs/scalar"
         },
         "color": {
@@ -164,6 +164,10 @@
         },
         "gap": {
           "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "gutter-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextArea.",
           "$ref": "#/$defs/scalar"
         },
         "height": {
@@ -269,7 +273,7 @@
           "$ref": "#/$defs/scalar"
         },
         "selection-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ListView.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ListView, TextArea.",
           "$ref": "#/$defs/scalar"
         },
         "selection-text-color": {

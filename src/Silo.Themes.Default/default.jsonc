@@ -165,6 +165,18 @@
       "&:hover": { "border-color": "var(--accent-hover)" },
       "&:focus": { "border-color": "var(--accent)" },
     },
+    "TextArea": {
+      "background": "var(--surface)",
+      "color": "var(--text)",
+      "padding": "6px 8px",
+      "border-width": "1px",
+      "border-color": "var(--border)",
+      "border-radius": "var(--radius)",
+      "caret-color": "var(--text)",
+      "gutter-color": "var(--muted)",
+      "&:hover": { "border-color": "var(--accent-hover)" },
+      "&:focus": { "border-color": "var(--accent)" },
+    },
     "PasswordBox": {
       "background": "var(--surface)",
       "color": "var(--text)",

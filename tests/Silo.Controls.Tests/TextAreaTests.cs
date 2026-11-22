@@ -1,12 +1,11 @@
 using Silo;
 using Silo.Layout;
 using Silo.Rendering;
-using Silo.Studio;
 using Silo.Styling;
 using Silo.Styling.Values;
 using Xunit;
 
-public class CodeEditorTests
+public class TextAreaTests
 {
     sealed class FakeClipboard : IClipboard
     {
@@ -19,11 +18,11 @@ public class CodeEditorTests
 
     // The fixed measurer makes a character 7 pixels wide and a line 14 high. With fewer than 10 lines the line numbers take
     // 7 pixels for the digit and 16 for the space around it, so the text starts at x = 23.
-    static (Box Root, CodeEditor Editor, PointerRouter Router) Setup(string text)
+    static (Box Root, TextArea Editor, PointerRouter Router) Setup(string text)
     {
-        var editor = new CodeEditor(new TextBuffer(text));
+        var editor = new TextArea(new TextBuffer(text)) { ShowLineNumbers = true };
         var root = new Box { TextMeasurer = new FixedMeasurer() };
-        var sheet = """{ "rules": { "Box": { "align-items": "start" }, "CodeEditor": { "width": "300px", "height": "140px" } } }""";
+        var sheet = """{ "rules": { "Box": { "align-items": "start" }, "TextArea": { "width": "300px", "height": "140px" } } }""";
 
         root.Children.Add(editor);
         root.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read(sheet, "t.jsonc")]));
@@ -282,5 +281,21 @@ public class CodeEditorTests
         editor.KeyDown(Key.PageUp, KeyModifiers.None);
 
         Assert.Equal(0, editor.Buffer.Line);
+    }
+
+    [Fact]
+    public void Line_numbers_are_off_by_default_and_the_text_then_starts_at_the_left_edge()
+    {
+        var (root, editor, _) = Setup("one\ntwo");
+        var builder = new DisplayListBuilder();
+
+        editor.ShowLineNumbers = false;
+        root.Render(builder);
+
+        var texts = builder.Build().Commands.OfType<DrawTextCommand>().ToList();
+
+        Assert.Equal(["one", "two"], texts.Select(t => t.Text));
+        Assert.Equal(0, texts[0].X);
+        Assert.False(new TextArea().ShowLineNumbers);
     }
 }
