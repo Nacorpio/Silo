@@ -39,6 +39,9 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     /// <summary>The Slider that is being dragged.</summary>
     Slider? dragged;
 
+    /// <summary>The Control with its own pointer handling that the button was pressed on, while the button is held.</summary>
+    Control? handling;
+
     /// <summary>Gets the Control that the pointer is currently over.</summary>
     public Control? Hovered => hovered;
 
@@ -49,6 +52,14 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     public bool Move(double x, double y)
     {
         var moved = dragged?.PointerMove(dragged.ToLocal(x, y).X) ?? false;
+
+        if (handling is IPointerHandler handler)
+        {
+            var (hx, hy) = handling.ToLocal(x, y);
+
+            moved |= handler.PointerDrag(hx, hy);
+        }
+
         var hit = Hit(x, y);
         var changed = SetHovered(overlays?.IsBackdrop(hit) == true ? null : hit) | moved;
 
@@ -80,6 +91,19 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
 
         if (Find<TextBox>(hovered) is { } box)
             changed |= box.PointerDown(box.ToLocal(x, y).X);
+
+        handling = null;
+
+        for (var c = hovered; c is not null && handling is null; c = c.Parent as Control)
+            if (c is IPointerHandler)
+                handling = c;
+
+        if (handling is IPointerHandler handler)
+        {
+            var (hx, hy) = handling.ToLocal(x, y);
+
+            changed |= handler.PointerDown(hx, hy);
+        }
 
         if (Find<ComboBox>(hovered) is { } combo)
             changed |= combo.PointerDown();
@@ -120,8 +144,11 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         var button = pressed;
         var slider = dragged;
 
+        (handling as IPointerHandler)?.PointerUp();
+
         pressed = null;
         dragged = null;
+        handling = null;
 
         changed |= slider?.PointerUp() ?? false;
 
