@@ -186,6 +186,12 @@ public abstract class Control : Element, ILayoutNode
     /// </summary>
     public string? Tooltip { get; set; }
 
+    /// <summary>
+    /// Gets or sets the shortcut that the tooltip shows after its text, such as <c>Ctrl+S</c>. It is only shown: it does not
+    /// handle any key. The default is <see langword="null"/>, which shows none.
+    /// </summary>
+    public string? TooltipShortcut { get; set; }
+
     /// <inheritdoc/>
     LayoutStyle ILayoutNode.Style => layoutStyle ??= BuildLayoutStyle();
 

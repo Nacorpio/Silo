@@ -90,7 +90,7 @@ public sealed class TooltipPresenter(OverlayLayer overlays)
         if (target is null || shown is not null || now - since < Delay || overlays.ModalCount > 0)
             return false;
 
-        shown = new Tooltip { Text = target.Tooltip ?? string.Empty };
+        shown = new Tooltip { Text = target.Tooltip ?? string.Empty, Shortcut = target.TooltipShortcut ?? string.Empty };
 
         overlays.Show(shown, pointer.X + OffsetX, pointer.Y + OffsetY, modal: false);
 

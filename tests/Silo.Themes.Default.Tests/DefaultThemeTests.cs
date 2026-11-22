@@ -151,4 +151,21 @@ public class DefaultThemeTests
         Assert.Equal(new Color(0xf9, 0xfa, 0xfb), tip.GetValue(Control.ColorProperty));
         Assert.Equal(12, tip.GetValue(Control.FontSizeProperty));
     }
+
+    [Fact]
+    public void Tooltip_shortcuts_are_muted_and_set_in_a_monospace_stack_that_starts_with_Fira_Code()
+    {
+        var tip = new Tooltip { Text = "Save", Shortcut = "Ctrl+S" };
+
+        Assert.Empty(tip.ApplyStyles(Resolver()));
+
+        var label = (TextBlock)tip.Children[0];
+        var keys = (TextBlock)tip.Children[1];
+
+        Assert.Equal(new Color(0xf9, 0xfa, 0xfb), label.GetValue(Control.ColorProperty));
+        Assert.Equal("Segoe UI", label.GetValue(Control.FontFamilyProperty));
+        Assert.StartsWith("Fira Code,", keys.GetValue(Control.FontFamilyProperty));
+        Assert.EndsWith("monospace", keys.GetValue(Control.FontFamilyProperty));
+        Assert.Equal(new Color(0x9c, 0xa3, 0xaf), keys.GetValue(Control.ColorProperty));
+    }
 }

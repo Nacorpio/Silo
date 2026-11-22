@@ -190,4 +190,33 @@ public class SkiaRendererTests
 
         public int Height => 1;
     }
+
+    [Fact]
+    public void A_font_list_skips_families_that_are_not_installed_and_ends_at_the_platform_default()
+    {
+        var measurer = new SkiaTextMeasurer();
+        var generic = measurer.Measure("Hello, world", new TextStyle("monospace", 14));
+        var listed = measurer.Measure("Hello, world", new TextStyle("\"No Such Family 1\", No Such Family 2, monospace", 14));
+        var none = measurer.Measure("Hello, world", new TextStyle("No Such Family 1, No Such Family 2", 14));
+        var single = measurer.Measure("Hello, world", new TextStyle("No Such Family 1", 14));
+
+        Assert.Equal(generic, listed);
+        Assert.Equal(single, measurer.Measure("Hello, world", new TextStyle("No Such Family 1,", 14)));
+        Assert.True(none.Width > 0);
+    }
+
+    [Fact]
+    public void A_font_list_picks_the_first_installed_family()
+    {
+        using var installed = SKTypeface.FromFamilyName("DejaVu Sans Mono");
+
+        if (installed?.FamilyName != "DejaVu Sans Mono")
+            return;
+
+        var measurer = new SkiaTextMeasurer();
+        var direct = measurer.Measure("Hello, world", new TextStyle("DejaVu Sans Mono", 14));
+        var listed = measurer.Measure("Hello, world", new TextStyle("Fira Code Missing, DejaVu Sans Mono, serif", 14));
+
+        Assert.Equal(direct, listed);
+    }
 }

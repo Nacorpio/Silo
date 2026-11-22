@@ -3,6 +3,7 @@
   // restyle the whole library by overriding them.
   "tokens": {
     "--font-family": "Segoe UI",
+    "--font-mono": "Fira Code, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace",
     "--font-size": "14px",
     "--surface": "#ffffff",
     "--text": "#1f2937",
@@ -15,6 +16,7 @@
     "--track": "#e5e7eb",
     "--tooltip": "#1f2937",
     "--tooltip-text": "#f9fafb",
+    "--tooltip-muted": "#9ca3af",
     "--muted": "#9ca3af",
   },
   "rules": {
@@ -74,10 +76,15 @@
     "Tooltip": {
       "background": "var(--tooltip)",
       "color": "var(--tooltip-text)",
-      "padding": "4px 8px",
-      "border-radius": "var(--radius)",
+      "font-family": "var(--font-family)",
       "font-size": "12px",
+      "padding": "4px 8px",
+      "gap": "10px",
+      "align-items": "center",
+      "border-radius": "var(--radius)",
     },
+    "Tooltip TextBlock": { "color": "var(--tooltip-text)" },
+    "Tooltip .shortcut": { "font-family": "var(--font-mono)", "color": "var(--tooltip-muted)" },
     "ComboBox": {
       "background": "var(--surface)",
       "color": "var(--text)",

@@ -145,4 +145,42 @@ public class TooltipPresenterTests
 
         Assert.True(tooltips.Tick(After(100)));
     }
+
+    [Fact]
+    public void The_shortcut_is_shown_after_the_text_as_a_part_with_the_shortcut_class()
+    {
+        var (_, button, _, layer, tooltips) = Setup();
+
+        button.TooltipShortcut = "Ctrl+S";
+        tooltips.Hover(button, 10, 10, Start);
+        tooltips.Tick(After(500));
+
+        var tip = tooltips.Current!;
+
+        Assert.Equal("Ctrl+S", tip.Shortcut);
+        Assert.Equal(2, tip.Children.Count);
+
+        var keys = Assert.IsType<TextBlock>(tip.Children[1]);
+
+        Assert.Equal("Ctrl+S", keys.Text);
+        Assert.Contains("shortcut", keys.Classes);
+        Assert.Equal(1, layer.Count);
+    }
+
+    [Fact]
+    public void Without_a_shortcut_the_tooltip_is_only_the_text_and_clearing_it_removes_the_part()
+    {
+        var tip = new Tooltip { Text = "Save", Shortcut = "Ctrl+S" };
+
+        Assert.Equal(2, tip.Children.Count);
+
+        tip.Shortcut = string.Empty;
+
+        Assert.Single(tip.Children);
+
+        tip.Shortcut = "Ctrl+S";
+        tip.Shortcut = "Ctrl+Shift+S";
+
+        Assert.Equal(2, tip.Children.Count);
+    }
 }
