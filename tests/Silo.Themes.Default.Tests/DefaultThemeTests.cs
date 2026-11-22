@@ -167,5 +167,7 @@ public class DefaultThemeTests
         Assert.StartsWith("Fira Code,", keys.GetValue(Control.FontFamilyProperty));
         Assert.EndsWith("monospace", keys.GetValue(Control.FontFamilyProperty));
         Assert.Equal(new Color(0x9c, 0xa3, 0xaf), keys.GetValue(Control.ColorProperty));
+        Assert.Equal(12, label.GetValue(Control.FontSizeProperty));
+        Assert.Equal(11, keys.GetValue(Control.FontSizeProperty));
     }
 }
