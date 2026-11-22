@@ -77,6 +77,16 @@ public abstract class StyledProperty
     /// <remarks>Only a small, whitelisted set of properties inherits, such as text color and font settings.</remarks>
     public bool Inherits { get; }
 
+    /// <summary>Tells whether a text is a valid value for the property, so tools can check a Stylesheet without a Control.</summary>
+    /// <param name="text">The Computed text, that is the value with its Token references already replaced.</param>
+    /// <returns><see langword="true"/> when the property's parser accepts the text.</returns>
+    /// <example>
+    /// <code language="csharp">
+    /// StyledProperty.Find(typeof(Button), "background")!.Accepts("#3b82f6");   // true
+    /// </code>
+    /// </example>
+    public bool Accepts(string text) => TryParseObject(text, out _);
+
     /// <summary>Gets the default value as an <see cref="object"/>, boxed when the value type is a struct.</summary>
     internal abstract object? DefaultObject { get; }
 

@@ -9,7 +9,8 @@ namespace Silo.Styling;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The format has two optional top-level keys. <c>tokens</c> is an object of Token names and values. <c>rules</c> is an
+/// The format has two optional top-level keys. A <c>$schema</c> key is also accepted and ignored; editors use it to find
+/// the JSON Schema. <c>tokens</c> is an object of Token names and values. <c>rules</c> is an
 /// object whose keys are Selectors and whose values are Rule bodies. In a body, a key that starts with <c>--</c> declares a
 /// Token, a key whose value is an object is a nested Rule, and every other key is a Styled property. A nested key that
 /// contains <c>&amp;</c> has the parent Selector put in its place; any other nested key becomes a descendant of the parent.
@@ -110,6 +111,7 @@ public static class JsoncStylesheetReader
                 {
                     case "tokens": ReadTokens(_tokens); break;
                     case "rules": ReadRules(); break;
+                    case "$schema": ReadScalar(); break;
                     default: throw Fail(_r.TokenStartIndex, $"Unknown top-level key '{key}'.");
                 }
             }

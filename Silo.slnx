@@ -11,6 +11,7 @@
     <Project Path="src/Silo.Platform.Sdl/Silo.Platform.Sdl.csproj" />
     <Project Path="src/Silo.Rendering/Silo.Rendering.csproj" />
     <Project Path="src/Silo.Rendering.Skia/Silo.Rendering.Skia.csproj" />
+    <Project Path="src/Silo.Schema/Silo.Schema.csproj" />
     <Project Path="src/Silo.Styling/Silo.Styling.csproj" />
     <Project Path="src/Silo.Themes.Default/Silo.Themes.Default.csproj" />
   </Folder>
@@ -23,6 +24,7 @@
     <Project Path="tests/Silo.Platform.Sdl.Tests/Silo.Platform.Sdl.Tests.csproj" />
     <Project Path="tests/Silo.Rendering.Tests/Silo.Rendering.Tests.csproj" />
     <Project Path="tests/Silo.Rendering.Skia.Tests/Silo.Rendering.Skia.Tests.csproj" />
+    <Project Path="tests/Silo.Schema.Tests/Silo.Schema.Tests.csproj" />
     <Project Path="tests/Silo.Styling.Tests/Silo.Styling.Tests.csproj" />
     <Project Path="tests/Silo.Themes.Default.Tests/Silo.Themes.Default.Tests.csproj" />
   </Folder>

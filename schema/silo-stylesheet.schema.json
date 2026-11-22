@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Silo Stylesheet",
+  "description": "A Silo Stylesheet in JSONC: Tokens and Rules written like CSS.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "tokens": {
+      "description": "Tokens, like CSS custom properties. Use them as var(--name).",
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^--": {
+          "$ref": "#/$defs/scalar"
+        }
+      }
+    },
+    "rules": {
+      "description": "Rules by Selector, such as \u0022Button.primary\u0022 or \u0022#save:hover\u0022.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/rule"
+      }
+    }
+  },
+  "$defs": {
+    "scalar": {
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ]
+    },
+    "rule": {
+      "type": "object",
+      "properties": {
+        "align-items": {
+          "description": "One of the keywords. Declared by Control.",
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex-start",
+                "flex-end",
+                "center",
+                "stretch"
+              ]
+            },
+            {
+              "pattern": "^\\s*var\\("
+            }
+          ]
+        },
+        "align-self": {
+          "description": "One of the keywords. Declared by Control.",
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex-start",
+                "flex-end",
+                "center",
+                "stretch",
+                "auto"
+              ]
+            },
+            {
+              "pattern": "^\\s*var\\("
+            }
+          ]
+        },
+        "background": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "bar-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ProgressBar.",
+          "$ref": "#/$defs/scalar"
+        },
+        "border-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "border-radius": {
+          "description": "A number. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "border-width": {
+          "description": "One to four lengths, like CSS padding. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "caret-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextBox.",
+          "$ref": "#/$defs/scalar"
+        },
+        "color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "flex-basis": {
+          "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "flex-direction": {
+          "description": "One of the keywords. Declared by Control.",
+          "anyOf": [
+            {
+              "enum": [
+                "row",
+                "column"
+              ]
+            },
+            {
+              "pattern": "^\\s*var\\("
+            }
+          ]
+        },
+        "flex-grow": {
+          "description": "A number. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "flex-shrink": {
+          "description": "A number. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "font-family": {
+          "description": "Text. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "font-size": {
+          "description": "A number. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "font-weight": {
+          "description": "A flag written as a keyword or number, such as normal, bold or 700 for font-weight. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "gap": {
+          "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "height": {
+          "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "icon-size": {
+          "description": "A number. Declared by ListView.",
+          "$ref": "#/$defs/scalar"
+        },
+        "indicator-background": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ToggleButton.",
+          "$ref": "#/$defs/scalar"
+        },
+        "indicator-border-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ToggleButton.",
+          "$ref": "#/$defs/scalar"
+        },
+        "indicator-mark-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ToggleButton.",
+          "$ref": "#/$defs/scalar"
+        },
+        "item-height": {
+          "description": "A number. Declared by ComboBox, ListView.",
+          "$ref": "#/$defs/scalar"
+        },
+        "justify-content": {
+          "description": "One of the keywords. Declared by Control.",
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex-start",
+                "flex-end",
+                "center",
+                "space-between",
+                "space-around",
+                "space-evenly"
+              ]
+            },
+            {
+              "pattern": "^\\s*var\\("
+            }
+          ]
+        },
+        "margin": {
+          "description": "One to four lengths, like CSS padding. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "max-height": {
+          "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "max-rows": {
+          "description": "A number. Declared by ComboBox.",
+          "$ref": "#/$defs/scalar"
+        },
+        "max-width": {
+          "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "min-height": {
+          "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "min-width": {
+          "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "padding": {
+          "description": "One to four lengths, like CSS padding. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "placeholder-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextBox.",
+          "$ref": "#/$defs/scalar"
+        },
+        "selection-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ListView.",
+          "$ref": "#/$defs/scalar"
+        },
+        "selection-text-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ListView.",
+          "$ref": "#/$defs/scalar"
+        },
+        "slider-fill-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Slider.",
+          "$ref": "#/$defs/scalar"
+        },
+        "slider-thumb-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Slider.",
+          "$ref": "#/$defs/scalar"
+        },
+        "slider-track-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Slider.",
+          "$ref": "#/$defs/scalar"
+        },
+        "text-align": {
+          "description": "One of the keywords. Declared by TextControl.",
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "center",
+                "left",
+                "right"
+              ]
+            },
+            {
+              "pattern": "^\\s*var\\("
+            }
+          ]
+        },
+        "width": {
+          "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        }
+      },
+      "patternProperties": {
+        "^--": {
+          "$ref": "#/$defs/scalar"
+        }
+      },
+      "additionalProperties": {
+        "description": "A nested Rule. A key with \u0026 has the parent Selector put in its place.",
+        "$ref": "#/$defs/rule"
+      }
+    }
+  }
+}
