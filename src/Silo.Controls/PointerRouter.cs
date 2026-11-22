@@ -82,7 +82,7 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         var changed = Move(x, y);
 
         if (overlays?.IsBackdrop(Hit(x, y)) == true)
-            return overlays.CloseTop() | changed;
+            return overlays.PressOutside() | changed;
 
         pressed = Find<Button>(hovered);
         dragged = Find<Slider>(hovered);
@@ -124,7 +124,7 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         var changed = Move(x, y);
 
         if (overlays?.IsBackdrop(Hit(x, y)) == true)
-            return overlays.CloseTop() | changed;
+            return overlays.PressOutside() | changed;
 
         for (var c = hovered; c is not null; c = c.Parent as Control)
             if (c.ContextMenu is { } menu)

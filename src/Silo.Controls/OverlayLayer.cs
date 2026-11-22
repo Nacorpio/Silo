@@ -83,6 +83,26 @@ public sealed class OverlayLayer
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>Shows a Control in the middle of the window with the window dimmed behind it.</summary>
+    /// <param name="dialog">The Dialog to show. It must not be part of another tree.</param>
+    /// <param name="dismiss">
+    /// Runs when Escape is pressed. A press outside the Dialog is swallowed and does nothing, so the Dialog stays until it is
+    /// closed with <see cref="Close"/>.
+    /// </param>
+    /// <exception cref="InvalidOperationException">The Dialog is already shown, or has a parent.</exception>
+    public void ShowDialog(Dialog dialog, Action dismiss)
+    {
+        ArgumentNullException.ThrowIfNull(dialog);
+        ArgumentNullException.ThrowIfNull(dismiss);
+
+        if (Contains(dialog) || dialog.Parent is not null)
+            throw new InvalidOperationException("The Control is already part of a tree.");
+
+        hosts.Add(new OverlayHost(dialog, 0, 0, modal: true, dismiss) { TextMeasurer = TextMeasurer });
+
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
     /// <summary>Closes an overlay.</summary>
     /// <param name="content">The Control that was passed to <see cref="Show"/>.</param>
     /// <returns><see langword="true"/> when it was shown.</returns>
@@ -101,9 +121,25 @@ public sealed class OverlayLayer
         return true;
     }
 
-    /// <summary>Closes the modal overlay that was shown last.</summary>
+    /// <summary>Closes the modal overlay that was shown last, or dismisses it when it is a Dialog.</summary>
     /// <returns><see langword="true"/> when there was one.</returns>
-    public bool CloseTop() => hosts.FindLast(host => host.IsModal) is { } top && Close(top.Content);
+    public bool CloseTop()
+    {
+        if (hosts.FindLast(host => host.IsModal) is not { } top)
+            return false;
+
+        if (top.Dismiss is { } dismiss)
+            dismiss();
+        else
+            Close(top.Content);
+
+        return true;
+    }
+
+    /// <summary>Handles a press on the backdrop behind the top overlay.</summary>
+    /// <returns><see langword="true"/> when an overlay closed. A Dialog stays open, and the press is swallowed.</returns>
+    public bool PressOutside()
+        => hosts.FindLast(host => host.IsModal) is { Dismiss: null } && CloseTop();
 
     /// <summary>Closes every overlay.</summary>
     /// <returns><see langword="true"/> when there was at least one.</returns>
