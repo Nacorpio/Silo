@@ -122,7 +122,7 @@ public abstract class Control : Element, ILayoutNode
 
     /// <summary>The font family. Inherited by descendants.</summary>
     public static readonly StyledProperty<string> FontFamilyProperty =
-        StyledProperty.Register<Control, string>("font-family", "sans-serif", ValueParsers.Text, inherits: true);
+        StyledProperty.Register<Control, string>("font-family", "Segoe UI", ValueParsers.Text, inherits: true);
 
     /// <summary>The font size in pixels. Inherited by descendants.</summary>
     public static readonly StyledProperty<double> FontSizeProperty =
@@ -179,6 +179,18 @@ public abstract class Control : Element, ILayoutNode
     /// descendants that has none. The default is <see langword="null"/>.
     /// </summary>
     public ContextMenu? ContextMenu { get; set; }
+
+    /// <summary>
+    /// Gets or sets the text of the tooltip that appears when the pointer rests on this Control or on one of its descendants
+    /// that has none. The default is <see langword="null"/>, which shows nothing.
+    /// </summary>
+    public string? Tooltip { get; set; }
+
+    /// <summary>
+    /// Gets or sets the shortcut that the tooltip shows after its text, such as <c>Ctrl+S</c>. It is only shown: it does not
+    /// handle any key. The default is <see langword="null"/>, which shows none.
+    /// </summary>
+    public string? TooltipShortcut { get; set; }
 
     /// <inheritdoc/>
     LayoutStyle ILayoutNode.Style => layoutStyle ??= BuildLayoutStyle();

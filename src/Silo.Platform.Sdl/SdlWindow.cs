@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using SDL;
 using SkiaSharp;
@@ -62,6 +63,12 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>The Controls drawn above the root.</summary>
     readonly OverlayLayer overlays;
 
+    /// <summary>Shows the tooltip of the Control that the pointer rests on.</summary>
+    readonly TooltipPresenter tooltips;
+
+    /// <summary>Tells how long the window has been running, for the tooltips' delay.</summary>
+    readonly Stopwatch clock = Stopwatch.StartNew();
+
     /// <summary>Keeps the keyboard focus.</summary>
     readonly FocusManager focus = new();
 
@@ -113,6 +120,7 @@ public sealed unsafe class SdlWindow : IDisposable
         root.TextMeasurer ??= new SkiaTextMeasurer();
         overlays = new OverlayLayer { TextMeasurer = root.TextMeasurer };
         root.Overlays = overlays;
+        tooltips = new TooltipPresenter(overlays);
         overlays.Changed += (_, _) => Restyle();
         router = new PointerRouter(root, overlays);
 
@@ -188,7 +196,9 @@ public sealed unsafe class SdlWindow : IDisposable
     {
         SDL_Event e;
 
-        if (SDL3.SDL_WaitEventTimeout(&e, timeoutMilliseconds))
+        var wait = Open.Select(open => open.TooltipDueMilliseconds()).Prepend(timeoutMilliseconds).Min();
+
+        if (SDL3.SDL_WaitEventTimeout(&e, wait))
             do
                 Dispatch(e);
             while (SDL3.SDL_PollEvent(&e));
@@ -275,9 +285,17 @@ public sealed unsafe class SdlWindow : IDisposable
         while (posted.TryDequeue(out var work))
             work();
 
+        if (tooltips.Tick(clock.Elapsed))
+            dirty = true;
+
         if (dirty && !closed)
             Draw();
     }
+
+    /// <summary>Tells how long until a tooltip is due, so that the event loop wakes up for it.</summary>
+    /// <returns>The time in milliseconds, or <see cref="int.MaxValue"/> when no tooltip is waiting.</returns>
+    int TooltipDueMilliseconds()
+        => tooltips.DueIn(clock.Elapsed) is { } due ? (int)Math.Ceiling(due.TotalMilliseconds) : int.MaxValue;
 
     /// <summary>Applies the Stylesheets to the tree and asks for a frame.</summary>
     void Restyle()
@@ -299,13 +317,13 @@ public sealed unsafe class SdlWindow : IDisposable
         {
             SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED => Close(),
 
-            SDL_EventType.SDL_EVENT_MOUSE_MOTION => router.Move(e.motion.x, e.motion.y),
+            SDL_EventType.SDL_EVENT_MOUSE_MOTION => MovePointer(e.motion.x, e.motion.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 1 => PressPointer(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 3 => router.SecondaryDown(e.button.x, e.button.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP when e.button.button == 1 => router.Up(e.button.x, e.button.y),
-            SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => router.Leave(),
+            SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => router.Leave() | tooltips.Dismiss(),
             SDL_EventType.SDL_EVENT_MOUSE_WHEEL
-                => router.Scroll(e.wheel.mouse_x, e.wheel.mouse_y, -e.wheel.y * WheelStep),
+                => tooltips.Dismiss() | router.Scroll(e.wheel.mouse_x, e.wheel.mouse_y, -e.wheel.y * WheelStep),
 
             SDL_EventType.SDL_EVENT_KEY_DOWN => PressKey(e.key),
             SDL_EventType.SDL_EVENT_TEXT_INPUT => focus.TextInput(Marshal.PtrToStringUTF8((IntPtr)e.text.text) ?? ""),
@@ -319,12 +337,24 @@ public sealed unsafe class SdlWindow : IDisposable
             Restyle();
     }
 
+    /// <summary>Moves the pointer and tells the tooltips where it rests.</summary>
+    /// <param name="x">The horizontal position in logical units.</param>
+    /// <param name="y">The vertical position in logical units.</param>
+    /// <returns><see langword="true"/> when a Pseudo-state changed or a tooltip was hidden.</returns>
+    bool MovePointer(float x, float y)
+    {
+        var changed = router.Move(x, y);
+
+        return tooltips.Hover(router.Hovered, x, y, clock.Elapsed) | changed;
+    }
+
     /// <summary>Raises <see cref="KeyPressed"/> for a key press that is not an auto-repeat.</summary>
     /// <param name="key">The SDL keyboard event.</param>
     /// <returns>Always <see langword="false"/>, since a key press changes nothing by itself.</returns>
     bool PressKey(SDL_KeyboardEvent key)
     {
         var pressed = ToKey(key.key);
+        var hidden = tooltips.Dismiss();
 
         if (!key.repeat)
             KeyPressed?.Invoke(pressed);
@@ -332,7 +362,7 @@ public sealed unsafe class SdlWindow : IDisposable
         if (pressed == Key.Escape && overlays.CloseTop())
             return true;
 
-        return focus.KeyDown(pressed);
+        return focus.KeyDown(pressed) | hidden;
     }
 
     /// <summary>Presses the pointer button and moves the keyboard focus to what was pressed.</summary>
@@ -341,8 +371,8 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
     bool PressPointer(float x, float y)
     {
-        var overlaid = overlays.Count > 0;
-        var changed = router.Down(x, y);
+        var overlaid = overlays.ModalCount > 0;
+        var changed = router.Down(x, y) | tooltips.Dismiss();
 
         return (!overlaid && focus.FocusFrom(router.Hovered)) | changed;
     }

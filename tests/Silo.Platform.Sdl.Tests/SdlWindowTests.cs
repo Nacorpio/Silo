@@ -176,6 +176,36 @@ public class SdlWindowTests
     }
 
     [Fact]
+    public void A_tooltip_shows_after_the_pointer_rests_on_a_Control_and_a_press_hides_it()
+    {
+        var (window, button) = Setup();
+
+        using (window)
+        {
+            button.Tooltip = "Go somewhere";
+            window.Pump(0);
+
+            var x = (float)(button.Bounds.X + 5);
+            var y = (float)(button.Bounds.Y + 5);
+
+            Mouse(SDL_EventType.SDL_EVENT_MOUSE_MOTION, x, y, window.Id);
+            window.Pump(0);
+
+            Assert.Equal(0, window.Overlays.Count);
+
+            window.Pump(700);
+
+            Assert.Equal(1, window.Overlays.Count);
+            Assert.Equal(0, window.Overlays.ModalCount);
+
+            Mouse(SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN, x, y, window.Id);
+            window.Pump(0);
+
+            Assert.Equal(0, window.Overlays.Count);
+        }
+    }
+
+    [Fact]
     public void Closing_one_window_raises_Closed_and_leaves_the_others_running()
     {
         var (first, _) = Setup();

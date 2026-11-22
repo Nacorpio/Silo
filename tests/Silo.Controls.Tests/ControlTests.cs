@@ -116,7 +116,7 @@ public class ControlTests
         root.Arrange(new Size(300, 100));
 
         Assert.Equal(new Rect(0, 0, 43, 22), text.Bounds);
-        var expected = new DrawTextCommand("Hello", 4, 4, new TextStyle("sans-serif", 14), new Color(17, 34, 51));
+        var expected = new DrawTextCommand("Hello", 4, 4, new TextStyle("Segoe UI", 14), new Color(17, 34, 51));
 
         Assert.Contains(expected, Frame(root).Commands);
     }
@@ -146,7 +146,7 @@ public class ControlTests
         root.ApplyStyles(Resolver("""{ "rules": { "TextBlock": { "text-align": "center", "width": "100px", "height": "30px" } } }"""));
         root.Arrange(new Size(200, 100));
 
-        var expected = new DrawTextCommand("Hi", 43, 8, new TextStyle("sans-serif", 14), new Color(0, 0, 0));
+        var expected = new DrawTextCommand("Hi", 43, 8, new TextStyle("Segoe UI", 14), new Color(0, 0, 0));
 
         Assert.Contains(expected, Frame(root).Commands);
     }
