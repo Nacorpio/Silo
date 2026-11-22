@@ -47,6 +47,7 @@ public sealed class ThemeMatrix : Box
         new("RadioButton", () => new RadioButton { Text = "Radio" }, ["normal", "hover", "pressed", "focus", "checked"]),
         new("ToggleSwitch", () => new ToggleSwitch { Text = "Toggle" }, ["normal", "hover", "pressed", "focus", "checked"]),
         new("TextBox", () => new TextBox { Placeholder = "Type here" }, ["normal", "hover", "focus"]),
+        new("NumberBox", () => new NumberBox { Minimum = 0, Maximum = 100, Value = 42 }, ["normal", "hover", "focus"]),
         new("Slider", () => new Slider { Value = 0.6 }, ["normal", "hover", "pressed"]),
         new("ProgressBar", () => new ProgressBar { Value = 0.6 }, ["normal"]),
         new("ComboBox", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
