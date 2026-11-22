@@ -1,5 +1,6 @@
 using Silo;
 using Silo.Layout;
+using Silo.Rendering;
 using Silo.Styling;
 using Xunit;
 
@@ -257,6 +258,29 @@ public class TabViewTests
         }
 
         Assert.Equal(14, widths[1] - widths[0]);
+    }
+
+    [Fact]
+    public void A_mask_icon_follows_the_text_color_of_the_selected_and_the_unselected_header()
+    {
+        var tabs = Create();
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+        var sheet = """
+            { "rules": { "TabHeader": { "color": "#111111", "&:selected": { "color": "#ff0000" } } } }
+            """;
+        var builder = new DisplayListBuilder();
+
+        tabs.GetHeader(0).Icon = new FakeMask(8, 8);
+        tabs.GetHeader(1).Icon = new FakeMask(8, 8);
+
+        root.Children.Add(tabs);
+        root.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read(sheet, "t.jsonc")]));
+        root.Arrange(new Size(300, 200));
+        root.Render(builder);
+
+        var colors = builder.Build().Commands.OfType<DrawMaskCommand>().Select(command => command.Color).ToList();
+
+        Assert.Equal([new Silo.Styling.Values.Color(255, 0, 0), new Silo.Styling.Values.Color(17, 17, 17)], colors);
     }
 
     sealed class FakeImage(int width, int height) : Silo.Rendering.IImage

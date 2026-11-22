@@ -179,6 +179,25 @@ public class ListViewTests
     }
 
     [Fact]
+    public void A_mask_icon_is_drawn_in_the_text_color_of_its_row_and_turns_white_on_the_selected_row()
+    {
+        var (root, list, _) = Setup(2);
+        var mask = new FakeMask(16, 16);
+        var builder = new DisplayListBuilder();
+
+        list.Icons = [mask, mask];
+        list.SelectedIndex = 1;
+        root.Arrange(new Size(300, 300));
+        root.Render(builder);
+
+        var masks = builder.Build().Commands.OfType<DrawMaskCommand>().ToList();
+
+        Assert.Equal(2, masks.Count);
+        Assert.Equal(list.GetValue(Control.ColorProperty), masks[0].Color);
+        Assert.Equal(list.GetValue(ListView.SelectionTextColorProperty), masks[1].Color);
+    }
+
+    [Fact]
     public void Without_icons_the_text_starts_where_it_always_did()
     {
         var (root, list, _) = Setup(2);

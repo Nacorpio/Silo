@@ -23,6 +23,8 @@ public class DisplayListTests
             => Calls.Add($"text {text} {x} {y} {style.Size}");
         public void DrawImage(IImage image, Rect destination)
             => Calls.Add($"image {image.Width}x{image.Height} {destination.X} {destination.Y} {destination.Width}");
+        public void DrawMask(IImage image, Rect destination, Color color)
+            => Calls.Add($"mask {image.Width}x{image.Height} {destination.X} {color.R}");
     }
 
     sealed record Picture(int Width, int Height) : IImage;
@@ -39,6 +41,7 @@ public class DisplayListTests
         builder.StrokeRect(new Rect(0, 0, 10, 4), new Color(0, 0, 0), 1);
         builder.DrawText("Hi", 1, 2, new TextStyle("Inter", 14), new Color(0, 0, 0));
         builder.DrawImage(new Picture(8, 6), new Rect(3, 4, 16, 12));
+        builder.DrawMask(new Picture(8, 6), new Rect(1, 2, 16, 12), new Color(7, 0, 0));
         builder.Restore();
 
         var log = new Log();
@@ -47,7 +50,7 @@ public class DisplayListTests
 
         string[] expected =
         [
-            "save", "translate 5 6", "clip 0 0 10 10", "fill 10x4 9 r2", "stroke 1", "text Hi 1 2 14", "image 8x6 3 4 16", "restore",
+            "save", "translate 5 6", "clip 0 0 10 10", "fill 10x4 9 r2", "stroke 1", "text Hi 1 2 14", "image 8x6 3 4 16", "mask 8x6 1 7", "restore",
         ];
 
         Assert.Equal(expected, log.Calls);

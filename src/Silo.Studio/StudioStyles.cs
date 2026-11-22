@@ -79,7 +79,7 @@ public static class StudioStyles
             ".cell ComboBox": { "width": "112px" },
             ".cell Separator": { "width": "112px" },
             ".cell Expander": { "width": "112px" },
-            ".cell TabView": { "width": "130px" },
+            ".cell TabView": { "width": "170px", "flex-shrink": "0" },
             ".cell Dialog": { "width": "200px", "min-width": "0px", "flex-shrink": "0" },
             ".cell ListView": { "width": "112px", "height": "66px" },
             ".cell TreeView": { "width": "124px", "height": "90px" }

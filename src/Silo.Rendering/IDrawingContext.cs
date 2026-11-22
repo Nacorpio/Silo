@@ -74,4 +74,10 @@ public interface IDrawingContext
     /// <param name="image">The image to draw. It must come from the same backend as the context.</param>
     /// <param name="destination">The rectangle to fill. The image is stretched to it, so pass one with the image's aspect ratio to avoid distortion.</param>
     void DrawImage(IImage image, Rect destination);
+
+    /// <summary>Draws the shape of an image in one color, scaled to fill a rectangle.</summary>
+    /// <param name="image">The image whose transparency is used. Its own colors are ignored. It must come from the same backend as the context.</param>
+    /// <param name="destination">The rectangle to fill.</param>
+    /// <param name="color">The color to fill the opaque parts with. Its alpha is multiplied with the image's.</param>
+    void DrawMask(IImage image, Rect destination, Color color);
 }
