@@ -246,6 +246,7 @@ public class OverlayLayerTests
 
         layer.Show(menu, 10, 10);
         layer.Show(new Box(), 200, 200, modal: false);
+
         Layout(layer, resolver);
 
         Assert.Equal(2, layer.Count);

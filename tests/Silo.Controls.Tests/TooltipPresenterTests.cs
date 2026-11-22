@@ -18,6 +18,7 @@ public class TooltipPresenterTests
         root.Overlays = layer;
         root.Children.Add(button);
         root.Children.Add(plain);
+
         root.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read(sheet, "t.jsonc")]));
         root.Arrange(new Size(300, 200));
 
