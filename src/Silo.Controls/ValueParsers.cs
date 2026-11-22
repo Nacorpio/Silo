@@ -226,6 +226,17 @@ internal static class ValueParsers
         return parsed is not null;
     }
 
+    /// <summary>Parses <c>true</c> or <c>false</c>.</summary>
+    /// <param name="text">The Computed text.</param>
+    /// <param name="value">The flag.</param>
+    /// <returns><see langword="true"/> when the text is one of the two keywords.</returns>
+    public static bool Boolean(string text, out bool value)
+    {
+        value = text.Trim() == "true";
+
+        return text.Trim() is "true" or "false";
+    }
+
     /// <summary>Parses a string value, which is always valid and keeps the text as written.</summary>
     /// <param name="text">The Computed text.</param>
     /// <param name="value">The trimmed text, without surrounding quotes.</param>

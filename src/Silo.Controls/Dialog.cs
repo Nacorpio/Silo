@@ -7,7 +7,7 @@ namespace Silo;
 /// <remarks>
 /// <para>
 /// Open it with <see cref="Show"/>. While it is open the rest of the window is dimmed with <c>backdrop-color</c> and does not
-/// react to the pointer, and a press on the dimmed area does nothing. Pressing a button closes the Dialog and passes the
+/// react to the pointer. A press on the dimmed area does nothing, unless <see cref="DismissOnOutsidePress"/> is set. Pressing a button closes the Dialog and passes the
 /// button's result to <see cref="Closed"/>. Escape dismisses it, which closes it with <see cref="DialogClosedEventArgs.IsDismissed"/>.
 /// </para>
 /// <para>
@@ -20,6 +20,7 @@ namespace Silo;
 /// <code language="csharp">
 /// var dialog = new Dialog { Title = "Delete file", Content = new TextBlock { Text = "This cannot be undone." } };
 ///
+/// dialog.DismissOnOutsidePress = true;
 /// dialog.AddButton("Cancel", "cancel");
 /// dialog.AddButton("Delete", "delete");
 ///
@@ -32,6 +33,10 @@ public class Dialog : Control
     /// <summary>The color that dims the window behind the Dialog.</summary>
     public static readonly StyledProperty<Color> BackdropColorProperty =
         StyledProperty.Register<Dialog, Color>("backdrop-color", new(0, 0, 0, 102), Color.TryParse);
+
+    /// <summary>Whether a press on the dimmed area outside the Dialog dismisses it. The default is <see langword="false"/>.</summary>
+    public static readonly StyledProperty<bool> DismissOnOutsidePressProperty =
+        StyledProperty.Register<Dialog, bool>("dismiss-on-outside-press", false, ValueParsers.Boolean);
 
 
     /// <summary>The title.</summary>
@@ -83,6 +88,14 @@ public class Dialog : Control
 
             Rebuild();
         }
+    }
+
+    /// <summary>Gets or sets whether a press outside the Dialog dismisses it, like Escape. The default is <see langword="false"/>.</summary>
+    /// <remarks>A Stylesheet can set it with <c>dismiss-on-outside-press</c>. A value set here wins over the Stylesheet.</remarks>
+    public bool DismissOnOutsidePress
+    {
+        get => GetValue(DismissOnOutsidePressProperty);
+        set => SetValue(DismissOnOutsidePressProperty, value);
     }
 
     /// <summary>Gets whether the Dialog is shown.</summary>

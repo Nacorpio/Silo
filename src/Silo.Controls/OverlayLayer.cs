@@ -137,9 +137,25 @@ public sealed class OverlayLayer
     }
 
     /// <summary>Handles a press on the backdrop behind the top overlay.</summary>
-    /// <returns><see langword="true"/> when an overlay closed. A Dialog stays open, and the press is swallowed.</returns>
+    /// <returns>
+    /// <see langword="true"/> when an overlay closed or a Dialog was dismissed. A Dialog stays open, and the press is swallowed,
+    /// unless its <see cref="Dialog.DismissOnOutsidePressProperty"/> is set.
+    /// </returns>
     public bool PressOutside()
-        => hosts.FindLast(host => host.IsModal) is { Dismiss: null } && CloseTop();
+    {
+        if (hosts.FindLast(host => host.IsModal) is not { } top)
+            return false;
+
+        if (top.Dismiss is null)
+            return CloseTop();
+
+        if (top.Content is not Dialog dialog || !dialog.GetValue(Dialog.DismissOnOutsidePressProperty))
+            return false;
+
+        top.Dismiss();
+
+        return true;
+    }
 
     /// <summary>Closes every overlay.</summary>
     /// <returns><see langword="true"/> when there was at least one.</returns>

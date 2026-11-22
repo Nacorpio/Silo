@@ -142,6 +142,46 @@ public class DialogTests
     }
 
     [Fact]
+    public void A_press_outside_dismisses_it_when_DismissOnOutsidePress_is_set()
+    {
+        var (root, dialog, layer, router) = Setup();
+        var closed = new List<DialogClosedEventArgs>();
+
+        dialog.Closed += (_, e) => closed.Add(e);
+        dialog.DismissOnOutsidePress = true;
+
+        dialog.Show(root);
+        Layout(layer);
+
+        router.Down(5, 5);
+        router.Up(5, 5);
+
+        Assert.False(dialog.IsOpen);
+        Assert.True(closed[0].IsDismissed);
+    }
+
+    [Fact]
+    public void A_Stylesheet_can_set_dismiss_on_outside_press()
+    {
+        var (root, dialog, layer, router) = Setup();
+        var sheet = """
+            { "rules": { "Dialog": { "dismiss-on-outside-press": "true" } } }
+            """;
+        var resolver = new StyleResolver([JsoncStylesheetReader.Read(sheet, "t.jsonc")]);
+
+        dialog.Show(root);
+        layer.ApplyStyles(resolver);
+        Layout(layer);
+
+        Assert.True(dialog.DismissOnOutsidePress);
+
+        router.Down(5, 5);
+        router.Up(5, 5);
+
+        Assert.False(dialog.IsOpen);
+    }
+
+    [Fact]
     public void Escape_dismisses_it()
     {
         var (root, dialog, layer, _) = Setup();
