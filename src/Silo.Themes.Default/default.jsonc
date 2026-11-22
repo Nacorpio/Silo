@@ -44,6 +44,15 @@
       "&:hover": { "background": "var(--track)" },
       "&:active": { "background": "var(--border)" },
     },
+    "TabView": { "color": "var(--text)", "flex-direction": "column" },
+    "TabStrip": { "flex-direction": "row", "gap": "2px", "background": "var(--border)", "padding": "0 0 1px 0" },
+    "TabHeader": {
+      "background": "var(--track)",
+      "color": "var(--muted)",
+      "padding": "6px 12px",
+      "&:hover": { "background": "var(--border)" },
+      "&:selected": { "color": "var(--text)", "background": "var(--surface)" },
+    },
     "Button": {
       "background": "var(--accent)",
       "color": "var(--accent-text)",
