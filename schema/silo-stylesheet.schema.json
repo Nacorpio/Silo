@@ -192,6 +192,10 @@
           "description": "A number. Declared by ListView, TabHeader.",
           "$ref": "#/$defs/scalar"
         },
+        "indent": {
+          "description": "A number. Declared by TreeView.",
+          "$ref": "#/$defs/scalar"
+        },
         "indicator-background": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ToggleButton.",
           "$ref": "#/$defs/scalar"

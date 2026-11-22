@@ -44,6 +44,7 @@ public sealed class ThemeMatrix : Box
         new("ProgressBar", () => new ProgressBar { Value = 0.6 }, ["normal"]),
         new("ComboBox", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
         new("ListView", () => new ListView { Items = ["Row 1", "Row 2", "Row 3"], SelectedIndex = 1 }, ["normal", "hover"]),
+        new("TreeView", CreateTreeView, ["normal", "hover", "focus"]),
         new("TextBlock", () => new TextBlock { Text = "Some text" }, ["normal"]),
         new("Separator", () => new Separator(), ["normal"]),
         new("Expander", CreateExpander, ["normal"]),
@@ -52,6 +53,23 @@ public sealed class ThemeMatrix : Box
         new("ContextMenu", CreateContextMenu, ["normal"]),
         new("Dialog", CreateDialog, ["normal"]),
     ];
+
+    /// <summary>Creates a TreeView with an expanded node, a collapsed node and a selected leaf.</summary>
+    /// <returns>The TreeView.</returns>
+    static TreeView CreateTreeView()
+    {
+        var tree = new TreeView();
+        var src = tree.Add(new TreeNode("src") { IsExpanded = true });
+
+        src.Add(new TreeNode("Program.cs"));
+        src.Add(new TreeNode("Views")).Add(new TreeNode("Main.cs"));
+
+        tree.Add(new TreeNode("docs")).Add(new TreeNode("index.md"));
+
+        tree.SelectedNode = src.Children[0];
+
+        return tree;
+    }
 
     /// <summary>Creates a ContextMenu that is not shown in a window, with a highlighted entry, a separator and a submenu arrow.</summary>
     /// <returns>The ContextMenu.</returns>

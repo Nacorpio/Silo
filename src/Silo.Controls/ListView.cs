@@ -195,6 +195,11 @@ public class ListView : Control, IScrollable
     /// <returns>The distance from the top of the border box.</returns>
     protected double RowTop(int index) => Viewport.Y + (index * RowHeight) - Offset;
 
+    /// <summary>Gets how far a row's icon and text are moved right, in pixels. A derived class overrides it to indent rows.</summary>
+    /// <param name="index">The row's index.</param>
+    /// <returns>The distance, 0 by default.</returns>
+    protected virtual double RowIndent(int index) => 0;
+
     /// <summary>Tells whether a row can be selected. A row that cannot is skipped by the arrow keys and ignores the pointer.</summary>
     /// <param name="index">The row's index.</param>
     /// <returns><see langword="true"/> unless a derived class says otherwise.</returns>
@@ -280,10 +285,10 @@ public class ListView : Control, IScrollable
         var line = Measurer().Measure(items[index], style);
         var y = top + Math.Max(0, RowHeight - line.Height) / 2;
 
-        context.DrawText(items[index], content.X + TextInset + IconSpace, y, style, color);
+        context.DrawText(items[index], content.X + TextInset + RowIndent(index) + IconSpace, y, style, color);
 
         if (index < icons.Count && icons[index] is { } icon)
-            DrawIcon(context, icon, content.X + TextInset, top);
+            DrawIcon(context, icon, content.X + TextInset + RowIndent(index), top);
     }
 
     /// <summary>Draws a row's icon, centered vertically in the row.</summary>
