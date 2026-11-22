@@ -16,6 +16,7 @@ public class TooltipPresenterTests
         var sheet = """{ "rules": { "Box": { "align-items": "start" }, "#plain": { "width": "50px", "height": "50px" } } }""";
 
         root.Overlays = layer;
+
         root.Children.Add(button);
         root.Children.Add(plain);
 
@@ -50,6 +51,7 @@ public class TooltipPresenterTests
 
         tooltips.Hover(button, 10, 10, Start);
         tooltips.Tick(After(500));
+
         layer.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read("{}", "t.jsonc")]));
         layer.Arrange(new Size(300, 200));
 
