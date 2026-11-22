@@ -5,7 +5,7 @@ using Xunit;
 
 public class ThemeEditorPanelTests
 {
-    const string Source = """
+    const string RawSource = """
         {
           "rules": {
             "Button": { "background": "red", "padding": "4px" },
@@ -13,6 +13,9 @@ public class ThemeEditorPanelTests
           }
         }
         """;
+
+    // A checkout with CRLF line endings turns the line breaks of the raw string into \r\n, which the text buffer would normalize.
+    static readonly string Source = RawSource.ReplaceLineEndings("\n");
 
     static (ThemeEditorModel Model, ThemeEditorPanel Panel) Create()
     {

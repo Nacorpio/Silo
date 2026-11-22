@@ -45,7 +45,14 @@ public sealed class ThemeMatrix : Box
         new("ComboBox", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
         new("ListView", () => new ListView { Items = ["Row 1", "Row 2", "Row 3"], SelectedIndex = 1 }, ["normal", "hover"]),
         new("TextBlock", () => new TextBlock { Text = "Some text" }, ["normal"]),
+        new("Separator", () => new Separator(), ["normal"]),
+        new("Expander", CreateExpander, ["normal"]),
     ];
+
+    /// <summary>Creates an open Expander with some content, so that its header and its content show.</summary>
+    /// <returns>The Expander.</returns>
+    static Expander CreateExpander()
+        => new() { Header = "Expander", Content = new TextBlock { Text = "Content" }, IsExpanded = true };
 
     /// <summary>Raised when the label of a row is clicked, with the row name, so an editor can show the Rule that styles it.</summary>
     public event EventHandler<string>? RowSelected;

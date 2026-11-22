@@ -77,6 +77,8 @@ public static class StudioStyles
             ".cell Slider": { "width": "112px" },
             ".cell ProgressBar": { "width": "112px" },
             ".cell ComboBox": { "width": "112px" },
+            ".cell Separator": { "width": "112px" },
+            ".cell Expander": { "width": "112px" },
             ".cell ListView": { "width": "112px", "height": "66px" }
           }
         }
