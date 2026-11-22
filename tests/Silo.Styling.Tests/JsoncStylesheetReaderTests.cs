@@ -27,6 +27,14 @@ public class JsoncStylesheetReaderTests
     }
 
     [Fact]
+    public void A_schema_key_is_accepted_and_ignored()
+    {
+        var sheet = JsoncStylesheetReader.Read("""{ "$schema": "silo-stylesheet.schema.json", "rules": { "Box": { "gap": "4px" } } }""", "t.jsonc");
+
+        Assert.Single(sheet.Rules);
+    }
+
+    [Fact]
     public void Flattens_nested_rules_in_source_order_and_keeps_duplicate_keys()
     {
         var sheet = JsoncStylesheetReader.Read(Source, "t.jsonc");
