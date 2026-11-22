@@ -160,6 +160,10 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ToggleButton.",
           "$ref": "#/$defs/scalar"
         },
+        "indicator-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ExpanderHeader.",
+          "$ref": "#/$defs/scalar"
+        },
         "indicator-mark-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ToggleButton.",
           "$ref": "#/$defs/scalar"

@@ -33,6 +33,17 @@
       "flex-direction": "column",
     },
     "TextBlock": { "color": "var(--text)" },
+    "Separator": { "background": "var(--border)", "height": "1px", "&.vertical": { "width": "1px", "height": "auto" } },
+    "Expander": { "color": "var(--text)", "flex-direction": "column", "gap": "4px" },
+    "ExpanderHeader": {
+      "background": "var(--surface)",
+      "color": "var(--text)",
+      "padding": "4px 4px 4px 20px",
+      "text-align": "left",
+      "indicator-color": "var(--muted)",
+      "&:hover": { "background": "var(--track)" },
+      "&:active": { "background": "var(--border)" },
+    },
     "Button": {
       "background": "var(--accent)",
       "color": "var(--accent-text)",

@@ -18,6 +18,8 @@ public class ThemeMatrixTests
         Assert.NotNull(matrix.Cell("CheckBox", "checked"));
         Assert.Null(matrix.Cell("ProgressBar", "hover"));
         Assert.Null(matrix.Cell("Missing", "normal"));
+        Assert.NotNull(matrix.Cell("Separator", "normal"));
+        Assert.True(((Expander)matrix.Cell("Expander", "normal")!).IsExpanded);
     }
 
     [Fact]
