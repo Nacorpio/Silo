@@ -58,6 +58,7 @@ public sealed class ThemeMatrix : Box
         new("Separator", () => new Separator(), ["normal"]),
         new("Expander", CreateExpander, ["normal"]),
         new("TabView", CreateTabView, ["normal"]),
+        new("Toolbar", CreateToolbar, ["normal"]),
         new("MenuBar", CreateMenuBar, ["normal"]),
         new("ContextMenu", CreateContextMenu, ["normal"]),
         new("Dialog", CreateDialog, ["normal"]),
@@ -136,6 +137,20 @@ public sealed class ThemeMatrix : Box
         tabs.AddTab("Two", new TextBlock { Text = "Second" }, Dot, closable: true);
 
         return tabs;
+    }
+
+    /// <summary>Creates a Toolbar with two buttons, a divider and a third button.</summary>
+    /// <returns>The Toolbar.</returns>
+    static Toolbar CreateToolbar()
+    {
+        var toolbar = new Toolbar();
+
+        toolbar.AddButton("Cut");
+        toolbar.AddButton("Copy");
+        toolbar.AddSeparator();
+        toolbar.AddButton("Paste");
+
+        return toolbar;
     }
 
     /// <summary>Creates an open Expander with some content, so that its header and its content show.</summary>
