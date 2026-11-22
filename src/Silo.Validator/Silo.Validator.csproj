@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>silo-validate</AssemblyName>
+    <RootNamespace>Silo.Validation</RootNamespace>
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
+  </ItemGroup>
+</Project>
