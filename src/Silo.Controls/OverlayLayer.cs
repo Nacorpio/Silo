@@ -79,6 +79,7 @@ public sealed class OverlayLayer
             throw new InvalidOperationException("The Control is already part of a tree.");
 
         hosts.Add(new OverlayHost(content, x, y, modal) { TextMeasurer = TextMeasurer });
+
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -94,6 +95,7 @@ public sealed class OverlayLayer
 
         host.Children.Clear();
         hosts.Remove(host);
+
         Changed?.Invoke(this, EventArgs.Empty);
 
         return true;
