@@ -140,12 +140,10 @@ public class TextBox : Control
                 break;
 
             case Key.Backspace when caret > 0:
-                Replace(caret - 1, 1, string.Empty);
-                return true;
+                return Replace(caret - 1, 1, string.Empty);
 
             case Key.Delete when caret < text.Length:
-                Replace(caret, 1, string.Empty);
-                return true;
+                return Replace(caret, 1, string.Empty);
 
             case Key.Enter:
                 Submitted?.Invoke(this, EventArgs.Empty);
@@ -165,9 +163,7 @@ public class TextBox : Control
         if (clean.Length == 0)
             return false;
 
-        Replace(caret, 0, clean);
-
-        return true;
+        return Replace(caret, 0, clean);
     }
 
     /// <inheritdoc/>
@@ -208,16 +204,30 @@ public class TextBox : Control
         context.Restore();
     }
 
+    /// <summary>Decides whether an edit by the user may produce a text.</summary>
+    /// <param name="candidate">The text the edit would produce.</param>
+    /// <returns><see langword="true"/> to accept the edit. The default accepts every text.</returns>
+    /// <remarks>Override it to restrict what can be typed, as <see cref="NumberBox"/> does. Setting <see cref="Text"/> is not checked.</remarks>
+    protected virtual bool Accepts(string candidate) => true;
+
     /// <summary>Replaces part of the text and puts the caret after the replacement.</summary>
     /// <param name="start">The index of the first character to replace.</param>
     /// <param name="length">The number of characters to replace.</param>
     /// <param name="replacement">The new text.</param>
-    void Replace(int start, int length, string replacement)
+    /// <returns><see langword="false"/> when <see cref="Accepts"/> refused the edit and nothing changed.</returns>
+    bool Replace(int start, int length, string replacement)
     {
-        text = text[..start] + replacement + text[(start + length)..];
+        var next = text[..start] + replacement + text[(start + length)..];
+
+        if (!Accepts(next))
+            return false;
+
+        text = next;
         caret = start + replacement.Length;
 
         TextChanged?.Invoke(this, EventArgs.Empty);
+
+        return true;
     }
 
     /// <summary>Measures the width of a piece of text.</summary>
