@@ -80,6 +80,25 @@ public class DefaultThemeTests
     }
 
     [Fact]
+    public void The_theme_files_read_as_a_lossless_syntax_tree_and_an_edit_keeps_their_comments()
+    {
+        var light = JsoncDocument.Parse(DefaultTheme.Source(), DefaultTheme.FileName);
+        var dark = JsoncDocument.Parse(DefaultTheme.DarkSource(), DefaultTheme.DarkFileName);
+
+        Assert.Equal(DefaultTheme.Source(), light.Text);
+        Assert.Equal(DefaultTheme.DarkSource(), dark.Text);
+
+        var edited = light.SetValue(["tokens", "--accent"], "#10b981");
+
+        Assert.Equal(DefaultTheme.Source().Replace("\"#3b82f6\"", "\"#10b981\""), edited.Text);
+        var button = new Button { Text = "Ok" };
+
+        button.ApplyStyles(new StyleResolver([edited.ToStylesheet()]));
+
+        Assert.Equal(new Color(0x10, 0xb9, 0x81), button.GetValue(Control.BackgroundProperty));
+    }
+
+    [Fact]
     public void Text_inherits_the_theme_color_and_font_size()
     {
         var root = new Box();
