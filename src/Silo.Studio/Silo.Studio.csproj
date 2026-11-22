@@ -12,5 +12,6 @@
     <ProjectReference Include="../Silo.Inspector/Silo.Inspector.csproj" />
     <ProjectReference Include="../Silo.Platform.Sdl/Silo.Platform.Sdl.csproj" />
     <ProjectReference Include="../Silo.Themes.Default/Silo.Themes.Default.csproj" />
+    <ProjectReference Include="../Silo.Validator/Silo.Validator.csproj" />
   </ItemGroup>
 </Project>
