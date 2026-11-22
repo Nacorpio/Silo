@@ -61,7 +61,13 @@ public sealed class FocusManager
     /// <summary>Sends a key press to the focused Control.</summary>
     /// <param name="key">The key.</param>
     /// <returns><see langword="true"/> when the Control changed.</returns>
-    public bool KeyDown(Key key) => focused?.KeyDown(key) ?? false;
+    public bool KeyDown(Key key) => KeyDown(key, KeyModifiers.None);
+
+    /// <summary>Sends a key press with its modifier keys to the focused Control.</summary>
+    /// <param name="key">The key.</param>
+    /// <param name="modifiers">The modifier keys that were held down.</param>
+    /// <returns><see langword="true"/> when the Control changed.</returns>
+    public bool KeyDown(Key key, KeyModifiers modifiers) => focused?.KeyDown(key, modifiers) ?? false;
 
     /// <summary>Sends typed text to the focused Control.</summary>
     /// <param name="text">The text.</param>

@@ -221,6 +221,13 @@ public abstract class Control : Element, ILayoutNode
     /// <returns><see langword="true"/> when the Control changed, so a new frame is needed. The default is <see langword="false"/>.</returns>
     public virtual bool KeyDown(Key key) => false;
 
+    /// <summary>Handles a key press together with the modifier keys that were held down.</summary>
+    /// <param name="key">The key.</param>
+    /// <param name="modifiers">The modifier keys.</param>
+    /// <returns><see langword="true"/> when the Control changed, so a new frame is needed.</returns>
+    /// <remarks>The default ignores the modifiers and calls <see cref="KeyDown(Key)"/>, so a Control that does not need them overrides only that.</remarks>
+    public virtual bool KeyDown(Key key, KeyModifiers modifiers) => KeyDown(key);
+
     /// <summary>Handles typed text while the Control has the keyboard focus.</summary>
     /// <param name="text">The text, which can be several characters.</param>
     /// <returns><see langword="true"/> when the Control changed, so a new frame is needed. The default is <see langword="false"/>.</returns>
