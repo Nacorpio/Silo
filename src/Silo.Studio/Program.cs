@@ -9,12 +9,21 @@ using Silo.Styling;
 using Silo.Styling.Values;
 
 // Usage: silo-studio [--dark] [--theme <file.jsonc>] [--screenshot <out.png>]
+//        silo-studio --assembly <app.dll> --list-previews
+//        silo-studio --assembly <app.dll> --preview <name> [--dark] [--theme <file.jsonc>] [--screenshot <out.png>]
 // Shows every Control in every Pseudo-state with the default theme. With --theme the file is applied on top of the default
 // theme and opened in the editor beside the gallery: edit a Rule's properties and the gallery restyles as you type, then
 // press Save. The file is watched, so a change made in another editor is loaded unless Studio has unsaved edits. With
 // --screenshot the gallery is drawn to a PNG without opening a window. F12 opens the Inspector in a second window.
+// With --assembly, the methods marked [Preview] in the assembly are listed, or one is shown in its own window with the
+// Default theme and the --theme file on top; Studio runs this mode in a child process so user code stays out of Studio.
 var theme = ArgumentAfter("--theme");
 var screenshot = ArgumentAfter("--screenshot");
+var assembly = ArgumentAfter("--assembly");
+
+if (assembly is not null)
+    return PreviewMode.Run(assembly, args.Contains("--list-previews"), ArgumentAfter("--preview"), theme, screenshot,
+        args.Contains("--dark") ? ThemeVariant.Dark : ThemeVariant.Light);
 
 var model = theme is null ? null : OpenTheme(theme);
 
@@ -41,7 +50,7 @@ if (screenshot is not null)
 {
     SaveScreenshot(screenshot);
 
-    return;
+    return 0;
 }
 
 using var window = new SdlWindow(view) { Styles = Resolve() };
@@ -60,6 +69,8 @@ if (watcher is not null)
 }
 
 window.Run();
+
+return 0;
 
 void Reload(string text)
 {
