@@ -58,6 +58,9 @@ public sealed class ThemeEditorModel
     /// <summary>The text of the document at the last save or load.</summary>
     string savedText;
 
+    /// <summary>Whether the last change of the document was made by <see cref="SetText"/>.</summary>
+    bool lastWasText;
+
     /// <summary>Creates a model.</summary>
     /// <param name="document">The theme.</param>
     /// <param name="context">The Stylesheets that the theme is used together with, whose Tokens count as declared.</param>
@@ -86,6 +89,12 @@ public sealed class ThemeEditorModel
 
     /// <summary>Gets a value indicating whether the document differs from what was last saved or loaded.</summary>
     public bool IsDirty => Document.Text != savedText;
+
+    /// <summary>
+    /// Gets why the text last given to <see cref="SetText"/> could not be read, or <see langword="null"/> when it could, or
+    /// when the document changed in any other way since.
+    /// </summary>
+    public string? TextError { get; private set; }
 
     /// <summary>Gets a value indicating whether <see cref="Undo"/> has an edit to take back.</summary>
     public bool CanUndo => undo.Count > 0;
@@ -170,6 +179,48 @@ public sealed class ThemeEditorModel
     /// <param name="rulePath">The path of the Rule.</param>
     public void RemoveRule(IReadOnlyList<string> rulePath) => Apply(Document.Remove(rulePath));
 
+    /// <summary>Replaces the document with text that was typed in a text editor.</summary>
+    /// <param name="text">The new text of the file.</param>
+    /// <returns><see langword="false"/> when the text is not valid JSONC. The document is kept, and <see cref="TextError"/> says why.</returns>
+    /// <remarks>
+    /// Typing makes many calls, so the calls after the first are merged into the same step of undo, until another kind of
+    /// edit, an undo, a redo, a save or a reload comes in between.
+    /// </remarks>
+    public bool SetText(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        JsoncDocument parsed;
+
+        try
+        {
+            parsed = JsoncDocument.Parse(text, Document.FileName);
+        }
+        catch (StylesheetException e)
+        {
+            TextError = e.Message;
+
+            return false;
+        }
+
+        TextError = null;
+
+        if (parsed.Text == Document.Text)
+            return true;
+
+        if (!lastWasText)
+            undo.Push(Document);
+
+        redo.Clear();
+
+        Document = parsed;
+        lastWasText = true;
+
+        Changed?.Invoke(this, EventArgs.Empty);
+
+        return true;
+    }
+
     /// <summary>Takes back the last edit.</summary>
     /// <returns><see langword="false"/> when there is nothing to take back.</returns>
     public bool Undo()
@@ -180,6 +231,8 @@ public sealed class ThemeEditorModel
         redo.Push(Document);
 
         Document = undo.Pop();
+        TextError = null;
+        lastWasText = false;
 
         Changed?.Invoke(this, EventArgs.Empty);
 
@@ -196,6 +249,8 @@ public sealed class ThemeEditorModel
         undo.Push(Document);
 
         Document = redo.Pop();
+        TextError = null;
+        lastWasText = false;
 
         Changed?.Invoke(this, EventArgs.Empty);
 
@@ -209,6 +264,7 @@ public sealed class ThemeEditorModel
         File.WriteAllText(FilePath ?? throw new InvalidOperationException("The theme has no file."), Document.Text);
 
         savedText = Document.Text;
+        lastWasText = false;
     }
 
     /// <summary>Replaces the document with text that was changed outside the editor, such as in another editor.</summary>
@@ -231,6 +287,8 @@ public sealed class ThemeEditorModel
         }
 
         savedText = text;
+        TextError = null;
+        lastWasText = false;
 
         undo.Clear();
         redo.Clear();
@@ -251,6 +309,8 @@ public sealed class ThemeEditorModel
         redo.Clear();
 
         Document = edited;
+        TextError = null;
+        lastWasText = false;
 
         Changed?.Invoke(this, EventArgs.Empty);
     }

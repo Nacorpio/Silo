@@ -251,4 +251,103 @@ public class ThemeEditorPanelTests
         Assert.NotNull(new StudioView(model).Editor);
         Assert.True(new StudioView(model).InitialWidth > new StudioView().InitialWidth);
     }
+
+    [Fact]
+    public void The_text_view_shows_the_file_and_the_buttons_switch_between_the_views()
+    {
+        var (_, panel) = Create();
+
+        Assert.False(panel.TextMode);
+        Assert.Equal(Source, panel.Source.Buffer.Text);
+
+        Click(Find<Button>(panel, "mode-text"));
+
+        Assert.True(panel.TextMode);
+        Assert.Same(panel.Source, Find<Box>(panel, "editor-content").Children.Single());
+
+        Click(Find<Button>(panel, "mode-visual"));
+
+        Assert.False(panel.TextMode);
+        Assert.Equal("visual-view", Find<Box>(panel, "editor-content").Children.Single().Name);
+    }
+
+    [Fact]
+    public void Typing_in_the_text_view_changes_the_model_and_a_syntax_error_is_shown_without_applying_it()
+    {
+        var (model, panel) = Create();
+
+        panel.TextMode = true;
+
+        panel.Source.Buffer.MoveTo(Source.IndexOf("black", StringComparison.Ordinal), extend: false);
+        panel.Source.TextInput("dark");
+
+        Assert.Contains("darkblack", model.Document.Text);
+        Assert.Equal(Source.Replace("black", "darkblack", StringComparison.Ordinal), model.Document.Text);
+
+        panel.Source.Buffer.MoveToEnd(extend: false);
+        panel.Source.TextInput("}");
+
+        Assert.NotNull(model.TextError);
+        Assert.StartsWith("Syntax error:", Find<TextBlock>(panel, "status").Text);
+        Assert.Contains("darkblack", model.Document.Text);
+    }
+
+    [Fact]
+    public void An_edit_in_the_visual_view_shows_in_the_text_view_and_so_does_undo()
+    {
+        var (model, panel) = Create();
+
+        model.SetDeclaration(["rules", "TextBlock"], "color", "navy");
+
+        Assert.Contains("navy", panel.Source.Buffer.Text);
+
+        model.Undo();
+
+        Assert.Equal(Source, panel.Source.Buffer.Text);
+    }
+
+    [Fact]
+    public void Save_does_nothing_while_the_text_does_not_read()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.jsonc");
+
+        File.WriteAllText(path, Source);
+
+        try
+        {
+            var model = new ThemeEditorModel(JsoncDocument.Parse(Source, path), [DefaultTheme.Load()], path);
+            var panel = new ThemeEditorPanel(model) { TextMode = true };
+
+            panel.Source.Buffer.MoveToEnd(extend: false);
+            panel.Source.TextInput("{");
+
+            Click(Find<Button>(panel, "save"));
+
+            Assert.Equal(Source, File.ReadAllText(path));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void The_clipboard_of_the_panel_is_the_clipboard_of_the_text_view()
+    {
+        var (_, panel) = Create();
+        var clipboard = new Clip();
+
+        panel.Clipboard = clipboard;
+
+        Assert.Same(clipboard, panel.Source.Clipboard);
+    }
+
+    sealed class Clip : IClipboard
+    {
+        public string GetText() => string.Empty;
+
+        public void SetText(string text)
+        {
+        }
+    }
 }

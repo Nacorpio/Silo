@@ -1,13 +1,19 @@
 namespace Silo.Studio;
 
 /// <summary>
-/// The visual theme editor: the Rules of a theme file in a list, the properties of the selected Rule as editable rows, and
-/// buttons for undo, redo and save. Every change goes through a <see cref="ThemeEditorModel"/>, so the file keeps its layout.
+/// The theme editor: the Rules of a theme file in a list, the properties of the selected Rule as editable rows, or the text of
+/// the file in a code editor, and buttons for undo, redo and save. Every change goes through a <see cref="ThemeEditorModel"/>,
+/// so the file keeps its layout.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The panel does not apply the theme. The host listens to <see cref="ThemeEditorModel.Changed"/> and restyles the window, so
 /// what a user types shows up in the gallery as they type.
+/// </para>
+/// <para>
+/// The Visual and Text buttons switch between the two views of the same document. An edit in one shows in the other. Text
+/// that is not valid JSONC is not applied: the status line says what is wrong and the theme keeps its last valid state, and
+/// Save waits until the text reads again.
 /// </para>
 /// <para>
 /// While a value is typed into a row, the rows are left alone so the text box keeps its caret. They are built again when
@@ -29,6 +35,21 @@ public sealed class ThemeEditorPanel : Box
     /// <summary>The title, with a mark while there are unsaved edits.</summary>
     readonly TextBlock title = new();
 
+    /// <summary>The view with the list of Rules and the rows of the selected Rule.</summary>
+    readonly Box visual = new() { Name = "visual-view" };
+
+    /// <summary>The view with the text of the file.</summary>
+    readonly CodeEditor source = new() { Name = "source" };
+
+    /// <summary>Holds the view that is shown.</summary>
+    readonly Box content = new() { Name = "editor-content" };
+
+    /// <summary>The button that shows the visual view.</summary>
+    readonly Button visualButton = new() { Text = "Visual", Name = "mode-visual" };
+
+    /// <summary>The button that shows the text view.</summary>
+    readonly Button textButton = new() { Text = "Text", Name = "mode-text" };
+
     /// <summary>The list of Selectors.</summary>
     readonly ListView rules = new() { Name = "rules" };
 
@@ -47,6 +68,12 @@ public sealed class ThemeEditorPanel : Box
     /// <summary>Whether an edit made in a row is being applied, which keeps the rows from being rebuilt under the caret.</summary>
     bool editingRow;
 
+    /// <summary>Whether text typed in the code editor is being applied, which keeps the text from being set under the caret.</summary>
+    bool editingText;
+
+    /// <summary>Whether the text view is shown.</summary>
+    bool textMode;
+
     /// <summary>Creates the panel for a model.</summary>
     /// <param name="model">The model to edit.</param>
     public ThemeEditorPanel(ThemeEditorModel model)
@@ -61,19 +88,53 @@ public sealed class ThemeEditorPanel : Box
         selected.AddClass("muted");
         status.AddClass("muted");
 
+        visual.Children.Add(rules);
+        visual.Children.Add(selected);
+        visual.Children.Add(declarations);
+        visual.Children.Add(BuildAddRow());
+        visual.Children.Add(BuildAddRuleRow());
+
+        content.Children.Add(visual);
+
         Children.Add(title);
         Children.Add(BuildToolbar());
-        Children.Add(rules);
-        Children.Add(selected);
-        Children.Add(declarations);
-        Children.Add(BuildAddRow());
-        Children.Add(BuildAddRuleRow());
+        Children.Add(BuildModes());
+        Children.Add(content);
         Children.Add(status);
 
         rules.SelectionChanged += (_, _) => SelectFromList();
+        source.TextChanged += (_, _) => EditText();
         model.Changed += (_, _) => OnModelChanged();
 
+        source.Buffer.Reset(model.Document.Text);
+
         Rebuild();
+        ShowMode();
+    }
+
+    /// <summary>Gets or sets whether the text of the file is shown instead of the list of Rules. The default is <see langword="false"/>.</summary>
+    public bool TextMode
+    {
+        get => textMode;
+        set
+        {
+            if (textMode == value)
+                return;
+
+            textMode = value;
+
+            ShowMode();
+        }
+    }
+
+    /// <summary>Gets the code editor of the text view.</summary>
+    public CodeEditor Source => source;
+
+    /// <summary>Gets or sets what copy, cut and paste use in the text view.</summary>
+    public IClipboard? Clipboard
+    {
+        get => source.Clipboard;
+        set => source.Clipboard = value;
     }
 
     /// <summary>Gets the path of the selected Rule, or <see langword="null"/>.</summary>
@@ -86,6 +147,31 @@ public sealed class ThemeEditorPanel : Box
         selectedPath = path;
 
         Rebuild();
+    }
+
+    /// <summary>Builds the row of buttons that switch between the views.</summary>
+    /// <returns>The row.</returns>
+    Box BuildModes()
+    {
+        var bar = new Box { Name = "editor-modes" };
+
+        visualButton.Click += (_, _) => TextMode = false;
+        textButton.Click += (_, _) => TextMode = true;
+
+        bar.Children.Add(visualButton);
+        bar.Children.Add(textButton);
+
+        return bar;
+    }
+
+    /// <summary>Shows the view of the current mode and marks its button.</summary>
+    void ShowMode()
+    {
+        content.Children.Clear();
+        content.Children.Add(textMode ? source : visual);
+
+        _ = textMode ? textButton.AddClass("selected") : textButton.RemoveClass("selected");
+        _ = textMode ? visualButton.RemoveClass("selected") : visualButton.AddClass("selected");
     }
 
     /// <summary>Builds the row of undo, redo and save buttons.</summary>
@@ -197,7 +283,8 @@ public sealed class ThemeEditorPanel : Box
     /// <summary>Writes the theme file.</summary>
     void Save()
     {
-        model.Save();
+        if (model.TextError is null)
+            model.Save();
 
         Refresh();
     }
@@ -223,10 +310,34 @@ public sealed class ThemeEditorPanel : Box
     /// <summary>Reacts to a change of the model.</summary>
     void OnModelChanged()
     {
-        if (editingRow)
+        if (editingRow || editingText)
+        {
             Refresh();
-        else
-            Rebuild();
+
+            return;
+        }
+
+        if (source.Buffer.ToFileText() != model.Document.Text)
+            source.Buffer.Reset(model.Document.Text);
+
+        Rebuild();
+    }
+
+    /// <summary>Applies the text that was typed in the code editor to the model.</summary>
+    void EditText()
+    {
+        editingText = true;
+
+        try
+        {
+            model.SetText(source.Buffer.ToFileText());
+        }
+        finally
+        {
+            editingText = false;
+        }
+
+        Refresh();
     }
 
     /// <summary>Updates the list, the rows and the lines of text.</summary>
@@ -314,6 +425,13 @@ public sealed class ThemeEditorPanel : Box
         var name = model.FilePath is null ? "Theme" : Path.GetFileName(model.FilePath);
 
         title.Text = model.IsDirty ? $"{name} *" : name;
+
+        if (model.TextError is not null)
+        {
+            status.Text = $"Syntax error: {model.TextError}";
+
+            return;
+        }
 
         var issues = model.Issues;
 

@@ -205,4 +205,90 @@ public class ThemeEditorModelTests
         Assert.Contains("\"white\"", model.Document.Text);
         Assert.Equal(2, raised);
     }
+
+    [Fact]
+    public void SetText_replaces_the_document_and_raises_Changed()
+    {
+        var model = Create();
+        var raised = 0;
+
+        model.Changed += (_, _) => raised++;
+
+        var applied = model.SetText(Source.Replace("black", "navy", StringComparison.Ordinal));
+
+        Assert.True(applied);
+        Assert.Contains("navy", model.Document.Text);
+        Assert.Equal(1, raised);
+        Assert.Null(model.TextError);
+    }
+
+    [Fact]
+    public void SetText_with_text_that_does_not_read_keeps_the_document_and_reports_why()
+    {
+        var model = Create();
+        var raised = 0;
+
+        model.Changed += (_, _) => raised++;
+
+        var applied = model.SetText("{ \"rules\": ");
+
+        Assert.False(applied);
+        Assert.Equal(Source, model.Document.Text);
+        Assert.NotNull(model.TextError);
+        Assert.Equal(0, raised);
+
+        Assert.True(model.SetText(Source));
+        Assert.Null(model.TextError);
+    }
+
+    [Fact]
+    public void Typing_in_the_text_view_is_one_step_of_undo()
+    {
+        var model = Create();
+
+        model.SetText(Source.Replace("black", "b", StringComparison.Ordinal));
+        model.SetText(Source.Replace("black", "bl", StringComparison.Ordinal));
+        model.SetText(Source.Replace("black", "blu", StringComparison.Ordinal));
+
+        Assert.True(model.Undo());
+        Assert.Equal(Source, model.Document.Text);
+        Assert.False(model.CanUndo);
+    }
+
+    [Fact]
+    public void A_visual_edit_between_two_text_edits_starts_a_new_step()
+    {
+        var model = Create();
+
+        model.SetText(Source.Replace("black", "navy", StringComparison.Ordinal));
+        model.SetDeclaration(["rules", "TextBlock"], "color", "red");
+        model.SetText(model.Document.Text.Replace("red", "green", StringComparison.Ordinal));
+
+        model.Undo();
+
+        Assert.Contains("red", model.Document.Text);
+
+        model.Undo();
+
+        Assert.Contains("navy", model.Document.Text);
+
+        model.Undo();
+
+        Assert.Equal(Source, model.Document.Text);
+    }
+
+    [Fact]
+    public void A_text_edit_marks_the_document_as_changed_and_clears_the_redo_steps()
+    {
+        var model = Create();
+
+        model.SetText(Source.Replace("black", "navy", StringComparison.Ordinal));
+
+        Assert.True(model.IsDirty);
+
+        model.Undo();
+        model.SetText(Source.Replace("black", "red", StringComparison.Ordinal));
+
+        Assert.False(model.CanRedo);
+    }
 }
