@@ -50,8 +50,12 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     {
         var moved = dragged?.PointerMove(dragged.ToLocal(x, y).X) ?? false;
         var hit = Hit(x, y);
+        var changed = SetHovered(overlays?.IsBackdrop(hit) == true ? null : hit) | moved;
 
-        return SetHovered(overlays?.IsBackdrop(hit) == true ? null : hit) | moved;
+        if (Find<ListView>(hovered) is { HoverSelects: true } list)
+            changed |= list.PointerMove(list.ToLocal(x, y).Y);
+
+        return changed;
     }
 
     /// <summary>Tells the router that the pointer left the window.</summary>
@@ -84,6 +88,25 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
             changed |= list.PointerDown(list.ToLocal(x, y).Y);
 
         return (pressed?.PointerDown() ?? false) | changed;
+    }
+
+    /// <summary>Presses the secondary pointer button, which opens the <see cref="Control.ContextMenu"/> under the pointer.</summary>
+    /// <param name="x">The horizontal position, relative to the root Control.</param>
+    /// <param name="y">The vertical position, relative to the root Control.</param>
+    /// <returns><see langword="true"/> when a menu opened or an overlay closed, so a new frame is needed.</returns>
+    /// <remarks>Like a primary press, a press outside the top overlay closes it and goes no further.</remarks>
+    public bool SecondaryDown(double x, double y)
+    {
+        var changed = Move(x, y);
+
+        if (overlays?.IsBackdrop(Hit(x, y)) == true)
+            return overlays.CloseTop() | changed;
+
+        for (var c = hovered; c is not null; c = c.Parent as Control)
+            if (c.ContextMenu is { } menu)
+                return menu.Show(c, x, y) | changed;
+
+        return changed;
     }
 
     /// <summary>Releases the primary pointer button.</summary>

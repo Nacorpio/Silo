@@ -77,3 +77,12 @@ public sealed record DrawTextCommand(string Text, double X, double Y, TextStyle 
     /// <inheritdoc/>
     public override void Execute(IDrawingContext context) => context.DrawText(Text, X, Y, Style, Color);
 }
+
+/// <summary>Records <see cref="IDrawingContext.DrawImage"/>.</summary>
+/// <param name="Image">The image to draw.</param>
+/// <param name="Destination">The rectangle it fills.</param>
+public sealed record DrawImageCommand(IImage Image, Rect Destination) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.DrawImage(Image, Destination);
+}

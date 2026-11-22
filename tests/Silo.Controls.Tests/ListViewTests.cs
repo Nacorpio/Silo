@@ -120,4 +120,73 @@ public class ListViewTests
 
         return builder.Build().Commands;
     }
+
+    [Fact]
+    public void Hover_selects_the_row_under_the_pointer_only_when_asked_to_and_never_scrolls()
+    {
+        var (_, list, router) = Setup();
+
+        router.Move(20, 10 + 45);
+
+        Assert.Equal(-1, list.SelectedIndex);
+
+        list.HoverSelects = true;
+
+        Assert.True(router.Move(20, 10 + 46));
+        Assert.Equal(2, list.SelectedIndex);
+        Assert.False(router.Move(20, 10 + 50));
+
+        router.Move(20, 10 + 99);
+
+        Assert.Equal(4, list.SelectedIndex);
+        Assert.Equal(0, list.Offset);
+    }
+
+    [Fact]
+    public void Pressing_a_row_or_Enter_raises_Activated_even_for_the_selected_row()
+    {
+        var (_, list, router) = Setup();
+        var activated = new List<int>();
+
+        list.Activated += (_, index) => activated.Add(index);
+
+        router.Down(20, 10 + 45);
+        router.Down(20, 10 + 45);
+        list.KeyDown(Key.Enter);
+
+        Assert.Equal([2, 2, 2], activated);
+    }
+
+    [Fact]
+    public void Icons_are_drawn_in_front_of_the_text_and_every_row_lines_up()
+    {
+        var (root, list, _) = Setup(3);
+        var icon = new FakeImage(32, 32);
+        var builder = new DisplayListBuilder();
+
+        list.Icons = [icon, null, icon];
+        root.Arrange(new Size(300, 300));
+        root.Render(builder);
+
+        var commands = builder.Build().Commands;
+        var images = commands.OfType<DrawImageCommand>().ToList();
+        var texts = commands.OfType<DrawTextCommand>().ToList();
+
+        Assert.Equal(2, images.Count);
+        Assert.Equal(new Rect(8, 2, 16, 16), images[0].Destination);
+        Assert.Equal(8 + 16 + 8, texts[1].X);
+        Assert.Equal(texts[0].X, texts[2].X);
+    }
+
+    [Fact]
+    public void Without_icons_the_text_starts_where_it_always_did()
+    {
+        var (root, list, _) = Setup(2);
+        var builder = new DisplayListBuilder();
+
+        list.Icons = [null, null];
+        root.Render(builder);
+
+        Assert.Equal(8, builder.Build().Commands.OfType<DrawTextCommand>().First().X);
+    }
 }

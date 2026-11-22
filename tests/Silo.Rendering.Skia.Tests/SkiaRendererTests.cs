@@ -145,4 +145,49 @@ public class SkiaRendererTests
 
         Assert.Equal([0x89, 0x50, 0x4E, 0x47], bytes[..4]);
     }
+
+    [Fact]
+    public void A_generated_image_is_drawn_scaled_into_its_destination()
+    {
+        using var image = SkiaImage.Create(2, 2, canvas => canvas.Clear(new SKColor(0, 0, 255)));
+        var builder = new DisplayListBuilder();
+
+        builder.DrawImage(image, new Rect(10, 10, 20, 20));
+
+        using var bitmap = SkiaRenderer.Render(builder.Build(), 50, 50, White);
+
+        Assert.Equal((2, 2), (image.Width, image.Height));
+        Assert.Equal(new SKColor(0, 0, 255), PixelAt(bitmap, 20, 20));
+        Assert.Equal(new SKColor(255, 255, 255), PixelAt(bitmap, 5, 5));
+    }
+
+    [Fact]
+    public void An_encoded_image_round_trips_through_Decode()
+    {
+        using var source = SkiaImage.Create(4, 3, canvas => canvas.Clear(new SKColor(255, 0, 0)));
+        using var data = source.Image.Encode(SKEncodedImageFormat.Png, 100);
+        using var stream = new MemoryStream(data.ToArray());
+        using var decoded = SkiaImage.Decode(stream);
+
+        Assert.Equal((4, 3), (decoded.Width, decoded.Height));
+        Assert.Throws<InvalidDataException>(() => SkiaImage.Decode(new MemoryStream([1, 2, 3])));
+    }
+
+    [Fact]
+    public void Only_Skia_images_can_be_drawn()
+    {
+        using var bitmap = new SKBitmap(10, 10);
+        using var canvas = new SKCanvas(bitmap);
+
+        var context = new SkiaDrawingContext(canvas);
+
+        Assert.Throws<ArgumentException>(() => context.DrawImage(new Foreign(), new Rect(0, 0, 5, 5)));
+    }
+
+    sealed class Foreign : IImage
+    {
+        public int Width => 1;
+
+        public int Height => 1;
+    }
 }

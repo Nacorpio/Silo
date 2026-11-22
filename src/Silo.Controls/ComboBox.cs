@@ -10,7 +10,7 @@ namespace Silo;
 /// <remarks>
 /// <para>
 /// Pressing the ComboBox opens the list in the window's <see cref="OverlayLayer"/>, right below it and as wide as the
-/// ComboBox. A press on a row selects it and closes the list, a press anywhere else or Escape closes it unchanged. With the
+/// ComboBox, with the row under the pointer highlighted. A press on a row selects it and closes the list, a press anywhere else or Escape closes it unchanged. With the
 /// keyboard focus, Enter opens it, Up, Down, Home and End move through the rows, and Enter picks one. While it is closed, Up
 /// and Down change the selection directly.
 /// </para>
@@ -123,7 +123,7 @@ public class ComboBox : Control
         var height = GetValue(ItemHeightProperty);
         var rows = Math.Min(items.Count, Math.Max(1, (int)GetValue(MaxRowsProperty)));
 
-        popup = new DropDownList { Items = items };
+        popup = new DropDownList { Items = items, HoverSelects = true };
         popup.SelectedIndex = selectedIndex;
 
         popup.SetValue(ListView.ItemHeightProperty, height);

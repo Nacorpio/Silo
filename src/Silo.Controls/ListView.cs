@@ -15,8 +15,10 @@ namespace Silo;
 /// down arrows, Home and End. The mouse wheel scrolls it. Give it a <c>height</c>, since it has no content to size itself from.
 /// </para>
 /// <para>
-/// The selected row is painted with <c>selection-color</c> and <c>selection-text-color</c>. Rows are plain text for now. Rows
-/// made of Controls arrive with templates in Silo.Views.
+/// The selected row is painted with <c>selection-color</c> and <c>selection-text-color</c>. Rows are text for now, with an
+/// optional icon in front: set <see cref="Icons"/> to one <see cref="IImage"/> per row, <see langword="null"/> for a row
+/// without. The icons are scaled to fit a square of <c>icon-size</c> (16px by default). Rows made of Controls arrive with
+/// templates in Silo.Views.
 /// </para>
 /// </remarks>
 /// <example>
@@ -24,18 +26,26 @@ namespace Silo;
 /// var files = new ListView { Name = "files" };
 ///
 /// files.Items = Directory.GetFiles(path).Select(Path.GetFileName).ToList();
+/// files.Icons = Directory.GetFiles(path).Select(file => IconFor(file)).ToList();
 /// files.SelectionChanged += (_, _) => Open(files.Items[files.SelectedIndex]);
 /// </code>
 /// </example>
 public class ListView : Control, IScrollable
 {
     /// <summary>The space left of each row's text in pixels.</summary>
-    const double TextInset = 8;
+    internal const double TextInset = 8;
+
+    /// <summary>The space between a row's icon and its text in pixels.</summary>
+    internal const double IconGap = 8;
 
 
     /// <summary>The height of each row in pixels.</summary>
     public static readonly StyledProperty<double> ItemHeightProperty =
         StyledProperty.Register<ListView, double>("item-height", 28, ValueParsers.Pixels);
+
+    /// <summary>The side of the square that each row's icon is scaled to fit, in pixels.</summary>
+    public static readonly StyledProperty<double> IconSizeProperty =
+        StyledProperty.Register<ListView, double>("icon-size", 16, ValueParsers.Pixels);
 
     /// <summary>The background of the selected row.</summary>
     public static readonly StyledProperty<Color> SelectionColorProperty =
@@ -48,6 +58,12 @@ public class ListView : Control, IScrollable
 
     /// <summary>The rows.</summary>
     IReadOnlyList<string> items = [];
+
+    /// <summary>The icons of the rows.</summary>
+    IReadOnlyList<IImage?> icons = [];
+
+    /// <summary>Whether any row has an icon.</summary>
+    bool hasIcons;
 
     /// <summary>The index of the selected row, or -1.</summary>
     int selectedIndex = -1;
@@ -86,24 +102,33 @@ public class ListView : Control, IScrollable
         }
     }
 
+    /// <summary>
+    /// Gets or sets the icons: <c>Icons[i]</c> is shown in front of <c>Items[i]</c>. Rows beyond the end of the list, and
+    /// <see langword="null"/> entries, have no icon. When no row has one, the text starts at the left edge as usual,
+    /// otherwise every row's text is moved right to line up.
+    /// </summary>
+    public IReadOnlyList<IImage?> Icons
+    {
+        get => icons;
+        set
+        {
+            icons = value ?? [];
+            hasIcons = icons.Any(icon => icon is not null);
+        }
+    }
+
     /// <summary>Gets or sets the index of the selected row, or -1 for none. Values outside the list select nothing.</summary>
     public int SelectedIndex
     {
         get => selectedIndex;
-        set
-        {
-            var next = value >= 0 && value < items.Count ? value : -1;
-
-            if (next == selectedIndex)
-                return;
-
-            selectedIndex = next;
-
-            Reveal(next);
-
-            SelectionChanged?.Invoke(this, EventArgs.Empty);
-        }
+        set => Select(value, true);
     }
+
+    /// <summary>
+    /// Gets or sets whether the row under the pointer is selected as the pointer moves over it, the way menus work. The
+    /// default is <see langword="false"/>.
+    /// </summary>
+    public bool HoverSelects { get; set; }
 
     /// <summary>Gets how far the rows are scrolled, in pixels. It is between 0 and <see cref="MaxOffset"/>.</summary>
     public double Offset => Math.Clamp(offset, 0, MaxOffset);
@@ -114,6 +139,12 @@ public class ListView : Control, IScrollable
 
     /// <inheritdoc/>
     public override bool IsFocusable => true;
+
+    /// <summary>Gets the room that the icons take in front of the text in pixels, which is 0 when no row has an icon.</summary>
+    protected double IconSpace => hasIcons ? IconSize + IconGap : 0;
+
+    /// <summary>Gets the side of the square that the icons fit in, in pixels.</summary>
+    double IconSize => Math.Max(0, GetValue(IconSizeProperty));
 
     /// <summary>Gets the height of a row in pixels.</summary>
     double RowHeight => Math.Max(1, GetValue(ItemHeightProperty));
@@ -129,6 +160,19 @@ public class ListView : Control, IScrollable
         offset = Math.Clamp(before + delta, 0, MaxOffset);
 
         return offset != before;
+    }
+
+    /// <summary>Selects the row under a moving pointer when <see cref="HoverSelects"/> is set. The list does not scroll.</summary>
+    /// <param name="y">The vertical position relative to the ListView's border box.</param>
+    /// <returns><see langword="true"/> when the selection changed, so a new frame is needed.</returns>
+    public bool PointerMove(double y)
+    {
+        var before = selectedIndex;
+
+        if (HoverSelects)
+            Select((int)Math.Floor((y - Viewport.Y + Offset) / RowHeight), false);
+
+        return before != selectedIndex;
     }
 
     /// <summary>Selects the row at a pointer position.</summary>
@@ -214,7 +258,42 @@ public class ListView : Control, IScrollable
         var line = Measurer().Measure(items[index], style);
         var y = top + Math.Max(0, RowHeight - line.Height) / 2;
 
-        context.DrawText(items[index], content.X + TextInset, y, style, color);
+        context.DrawText(items[index], content.X + TextInset + IconSpace, y, style, color);
+
+        if (index < icons.Count && icons[index] is { } icon)
+            DrawIcon(context, icon, content.X + TextInset, top);
+    }
+
+    /// <summary>Draws a row's icon, centered vertically in the row.</summary>
+    /// <param name="context">The context to draw on.</param>
+    /// <param name="icon">The icon.</param>
+    /// <param name="x">The left edge of the icon's square.</param>
+    /// <param name="top">The row's top edge.</param>
+    void DrawIcon(IDrawingContext context, IImage icon, double x, double top)
+    {
+        var square = new Rect(x, top + (RowHeight - IconSize) / 2, IconSize, IconSize);
+        var destination = Image.Fit(icon, square);
+
+        if (destination.Width > 0)
+            context.DrawImage(icon, destination);
+    }
+
+    /// <summary>Changes the selection.</summary>
+    /// <param name="value">The row's index. Values outside the list select nothing.</param>
+    /// <param name="reveal">Whether to scroll the row into view.</param>
+    void Select(int value, bool reveal)
+    {
+        var next = value >= 0 && value < items.Count ? value : -1;
+
+        if (next == selectedIndex)
+            return;
+
+        selectedIndex = next;
+
+        if (reveal)
+            Reveal(next);
+
+        SelectionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Scrolls just enough to show a row.</summary>
