@@ -47,7 +47,20 @@ public sealed class ThemeMatrix : Box
         new("TextBlock", () => new TextBlock { Text = "Some text" }, ["normal"]),
         new("Separator", () => new Separator(), ["normal"]),
         new("Expander", CreateExpander, ["normal"]),
+        new("TabView", CreateTabView, ["normal"]),
     ];
+
+    /// <summary>Creates a TabView with two tabs, so that a selected and an unselected header show.</summary>
+    /// <returns>The TabView.</returns>
+    static TabView CreateTabView()
+    {
+        var tabs = new TabView();
+
+        tabs.AddTab("One", new TextBlock { Text = "First" });
+        tabs.AddTab("Two", new TextBlock { Text = "Second" });
+
+        return tabs;
+    }
 
     /// <summary>Creates an open Expander with some content, so that its header and its content show.</summary>
     /// <returns>The Expander.</returns>
