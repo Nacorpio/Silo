@@ -48,8 +48,21 @@ public sealed class ThemeMatrix : Box
         new("Separator", () => new Separator(), ["normal"]),
         new("Expander", CreateExpander, ["normal"]),
         new("TabView", CreateTabView, ["normal"]),
+        new("MenuBar", CreateMenuBar, ["normal"]),
         new("Dialog", CreateDialog, ["normal"]),
     ];
+
+    /// <summary>Creates a MenuBar with two menus.</summary>
+    /// <returns>The MenuBar.</returns>
+    static MenuBar CreateMenuBar()
+    {
+        var bar = new MenuBar();
+
+        bar.AddMenu("File", [new MenuItem("Open"), new MenuItem("Exit")]);
+        bar.AddMenu("Help", [new MenuItem("About")]);
+
+        return bar;
+    }
 
     /// <summary>Creates a Dialog that is not shown in a window, so that its title, content and buttons show in the matrix.</summary>
     /// <returns>The Dialog.</returns>
