@@ -192,7 +192,7 @@ public class TextBox : Control
         if (text.Length == 0)
             context.DrawText(Placeholder, content.X, y, style, GetValue(PlaceholderColorProperty));
         else
-            context.DrawText(text, content.X - scroll, y, style, GetValue(ColorProperty));
+            context.DrawText(Display(text), content.X - scroll, y, style, GetValue(ColorProperty));
 
         if (PseudoStates.Contains("focus"))
         {
@@ -203,6 +203,15 @@ public class TextBox : Control
 
         context.Restore();
     }
+
+    /// <summary>Turns text into what is drawn for it.</summary>
+    /// <param name="value">The text, or the start of it.</param>
+    /// <returns>The text to draw. The default is the text itself.</returns>
+    /// <remarks>
+    /// Override it to draw something else, as <see cref="PasswordBox"/> does. It must map each character on its own, so that the
+    /// caret and the pointer land between the right characters.
+    /// </remarks>
+    protected virtual string Display(string value) => value;
 
     /// <summary>Decides whether an edit by the user may produce a text.</summary>
     /// <param name="candidate">The text the edit would produce.</param>
@@ -233,5 +242,6 @@ public class TextBox : Control
     /// <summary>Measures the width of a piece of text.</summary>
     /// <param name="piece">The text.</param>
     /// <returns>The width in pixels.</returns>
-    double WidthOf(string piece) => piece.Length == 0 ? 0 : Measurer().Measure(piece, CurrentTextStyle()).Width;
+    double WidthOf(string piece) =>
+        piece.Length == 0 ? 0 : Measurer().Measure(Display(piece), CurrentTextStyle()).Width;
 }
