@@ -148,6 +148,9 @@ public sealed class Selector
     /// </summary>
     public string? Part => _compounds[^1].Part;
 
+    /// <summary>Gets the compound Selectors from left to right, so tools can look at each type name, Class and Pseudo-state.</summary>
+    public IReadOnlyList<CompoundSelector> Compounds => _compounds;
+
     /// <summary>
     /// Tests whether the Selector matches an Element, looking at the Element and, for combinators, at its ancestors.
     /// </summary>

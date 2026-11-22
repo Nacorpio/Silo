@@ -1,9 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="../Silo.Styling/Silo.Styling.csproj" />
+    <ProjectReference Include="../Silo.Validator/Silo.Validator.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <SiloStylesheet Include="default.jsonc;dark.jsonc" />
+    <SiloContext Include="default.jsonc" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="default.jsonc" LogicalName="Silo.Themes.Default.default.jsonc" />
     <EmbeddedResource Include="dark.jsonc" LogicalName="Silo.Themes.Default.dark.jsonc" />
   </ItemGroup>
+  <Import Project="../Silo.Validator/build/Silo.Validator.targets" />
 </Project>
