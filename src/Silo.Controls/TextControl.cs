@@ -56,6 +56,16 @@ public abstract class TextControl : Control
         if (Text.Length == 0)
             return;
 
+        var (x, y) = TextPosition(bounds);
+
+        context.DrawText(Text, x, y, CurrentTextStyle(), GetValue(ColorProperty));
+    }
+
+    /// <summary>Finds where the text is drawn.</summary>
+    /// <param name="bounds">The border box in the Control's own coordinates.</param>
+    /// <returns>The top left corner of the text, placed by <c>text-align</c> in the content box and centered vertically.</returns>
+    protected (double X, double Y) TextPosition(Rect bounds)
+    {
         var content = ContentBox(bounds);
         var size = Measurer().Measure(Text, CurrentTextStyle());
 
@@ -69,8 +79,6 @@ public abstract class TextControl : Control
             _ => 0,
         };
 
-        var y = content.Y + Math.Max(0, content.Height - size.Height) / 2;
-
-        context.DrawText(Text, x, y, CurrentTextStyle(), GetValue(ColorProperty));
+        return (x, content.Y + Math.Max(0, content.Height - size.Height) / 2);
     }
 }

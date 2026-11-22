@@ -49,8 +49,24 @@ public sealed class ThemeMatrix : Box
         new("Expander", CreateExpander, ["normal"]),
         new("TabView", CreateTabView, ["normal"]),
         new("MenuBar", CreateMenuBar, ["normal"]),
+        new("ContextMenu", CreateContextMenu, ["normal"]),
         new("Dialog", CreateDialog, ["normal"]),
     ];
+
+    /// <summary>Creates a ContextMenu that is not shown in a window, with a highlighted entry, a separator and a submenu arrow.</summary>
+    /// <returns>The ContextMenu.</returns>
+    static ContextMenu CreateContextMenu()
+    {
+        var entries = new List<MenuItem>
+        {
+            new("&Copy"),
+            new("&Paste"),
+            MenuItem.Separator,
+            new("&Recent") { Children = [new MenuItem("a.txt")] },
+        };
+
+        return new ContextMenu { Entries = entries, SelectedIndex = 1 };
+    }
 
     /// <summary>Creates a MenuBar with two menus.</summary>
     /// <returns>The MenuBar.</returns>
@@ -58,8 +74,8 @@ public sealed class ThemeMatrix : Box
     {
         var bar = new MenuBar();
 
-        bar.AddMenu("File", [new MenuItem("Open"), new MenuItem("Exit")]);
-        bar.AddMenu("Help", [new MenuItem("About")]);
+        bar.AddMenu("&File", [new MenuItem("Open"), new MenuItem("Exit")]);
+        bar.AddMenu("&Help", [new MenuItem("About")]);
 
         return bar;
     }

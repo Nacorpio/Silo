@@ -187,4 +187,106 @@ public class MenuBarTests
         Assert.False(bar.IsOpen);
         Assert.DoesNotContain("open", empty.PseudoStates);
     }
+
+    [Fact]
+    public void A_title_shows_its_text_without_the_ampersand_and_remembers_the_access_key()
+    {
+        var bar = new MenuBar();
+        var title = bar.AddMenu("&File", [new MenuItem("Open")]);
+
+        Assert.Equal("File", title.Text);
+        Assert.Equal('F', title.AccessKey);
+    }
+
+    [Fact]
+    public void Alt_with_the_access_key_opens_the_menu_with_its_first_entry_highlighted()
+    {
+        var (root, bar, layer, _, _) = Setup();
+        var title = bar.AddMenu("E&xtras", [new MenuItem("One"), new MenuItem("Two")]);
+
+        Assert.True(MenuBar.AccessKeyDown(root, Key.X, KeyModifiers.Alt));
+        Layout(layer);
+
+        Assert.Same(title, bar.OpenItem);
+        Assert.Equal(0, title.Menu.SelectedIndex);
+    }
+
+    [Fact]
+    public void Alt_with_the_access_key_of_the_open_title_closes_its_menu()
+    {
+        var (root, bar, _, _, _) = Setup();
+
+        bar.AddMenu("E&xtras", [new MenuItem("One")]);
+
+        MenuBar.AccessKeyDown(root, Key.X, KeyModifiers.Alt);
+
+        Assert.True(MenuBar.AccessKeyDown(root, Key.X, KeyModifiers.Alt));
+        Assert.False(bar.IsOpen);
+    }
+
+    [Fact]
+    public void A_letter_without_Alt_or_without_a_matching_title_is_not_an_access_key()
+    {
+        var (root, bar, _, _, _) = Setup();
+
+        bar.AddMenu("E&xtras", [new MenuItem("One")]);
+
+        Assert.False(MenuBar.AccessKeyDown(root, Key.X, KeyModifiers.None));
+        Assert.False(MenuBar.AccessKeyDown(root, Key.Q, KeyModifiers.Alt));
+        Assert.False(bar.IsOpen);
+    }
+
+    [Fact]
+    public void Right_and_Left_move_to_the_menu_of_the_next_and_previous_title_and_wrap_around()
+    {
+        var (_, bar, layer, router, _) = Setup();
+        var (file, help) = (Title(bar, 0), Title(bar, 1));
+
+        Click(router, file);
+
+        layer.KeyDown(Key.Right, KeyModifiers.None);
+
+        Assert.Same(help, bar.OpenItem);
+        Assert.Equal(0, help.Menu.SelectedIndex);
+
+        layer.KeyDown(Key.Right, KeyModifiers.None);
+
+        Assert.Same(file, bar.OpenItem);
+
+        layer.KeyDown(Key.Left, KeyModifiers.None);
+
+        Assert.Same(help, bar.OpenItem);
+    }
+
+    [Fact]
+    public void Arrow_keys_move_the_highlight_in_the_open_menu_and_Enter_runs_the_entry()
+    {
+        var (_, bar, layer, router, log) = Setup();
+
+        Click(router, Title(bar, 0));
+
+        layer.KeyDown(Key.Down, KeyModifiers.None);
+        layer.KeyDown(Key.Down, KeyModifiers.None);
+        layer.KeyDown(Key.Enter, KeyModifiers.None);
+
+        Assert.Equal(["exit"], log);
+        Assert.False(bar.IsOpen);
+    }
+
+    [Fact]
+    public void A_submenu_of_a_menu_bar_entry_closes_with_its_menu_when_another_title_opens()
+    {
+        var (root, bar, layer, router, _) = Setup();
+        var more = bar.AddMenu("&More", [new MenuItem("Sub") { Children = [new MenuItem("Leaf")] }]);
+
+        MenuBar.AccessKeyDown(root, Key.M, KeyModifiers.Alt);
+
+        more.Menu.KeyDown(Key.Right);
+
+        Assert.Equal(2, layer.Count);
+
+        bar.Open(Title(bar, 0));
+
+        Assert.Equal(1, layer.Count);
+    }
 }

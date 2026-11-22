@@ -272,6 +272,10 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ListView.",
           "$ref": "#/$defs/scalar"
         },
+        "separator-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ContextMenu.",
+          "$ref": "#/$defs/scalar"
+        },
         "slider-fill-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Slider.",
           "$ref": "#/$defs/scalar"

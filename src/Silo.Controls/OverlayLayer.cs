@@ -138,8 +138,9 @@ public sealed class OverlayLayer
 
     /// <summary>Handles a press on the backdrop behind the top overlay.</summary>
     /// <returns>
-    /// <see langword="true"/> when an overlay closed or a Dialog was dismissed. A Dialog stays open, and the press is swallowed,
-    /// unless its <see cref="Dialog.DismissOnOutsidePressProperty"/> is set.
+    /// <see langword="true"/> when overlays closed or a Dialog was dismissed. A press outside menus closes all of them, down to
+    /// a Dialog if there is one. A Dialog stays open, and the press is swallowed, unless its
+    /// <see cref="Dialog.DismissOnOutsidePressProperty"/> is set.
     /// </returns>
     public bool PressOutside()
     {
@@ -147,7 +148,12 @@ public sealed class OverlayLayer
             return false;
 
         if (top.Dismiss is null)
-            return CloseTop();
+        {
+            while (hosts.FindLast(host => host.IsModal) is { Dismiss: null } host)
+                Close(host.Content);
+
+            return true;
+        }
 
         if (top.Content is not Dialog dialog || !dialog.GetValue(Dialog.DismissOnOutsidePressProperty))
             return false;
@@ -156,6 +162,14 @@ public sealed class OverlayLayer
 
         return true;
     }
+
+    /// <summary>Sends a key press to the modal overlay that was shown last.</summary>
+    /// <param name="key">The key.</param>
+    /// <param name="modifiers">The modifier keys that were held down.</param>
+    /// <returns><see langword="true"/> when the overlay changed, so a new frame is needed.</returns>
+    /// <remarks>While a modal overlay is shown it takes the keys, so the Control that has the keyboard focus does not get them.</remarks>
+    public bool KeyDown(Key key, KeyModifiers modifiers)
+        => hosts.FindLast(host => host.IsModal) is { } top && top.Content.KeyDown(key, modifiers);
 
     /// <summary>Closes every overlay.</summary>
     /// <returns><see langword="true"/> when there was at least one.</returns>
@@ -206,8 +220,29 @@ public sealed class OverlayLayer
     /// The Control at the point, the invisible backdrop when the point is outside every overlay (see <see cref="IsBackdrop"/>),
     /// or <see langword="null"/> when no modal overlay is shown.
     /// </returns>
+    /// <remarks>
+    /// A menu opened from another menu does not hide it: a point on a lower menu hits that menu. A Dialog hides everything
+    /// below it.
+    /// </remarks>
     public Control? HitTest(double x, double y)
-        => hosts.FindLast(host => host.IsModal) is { } top ? top.HitTest(x, y) ?? top : null;
+    {
+        if (hosts.FindLast(host => host.IsModal) is not { } top)
+            return null;
+
+        for (var i = hosts.Count - 1; i >= 0; i--)
+        {
+            if (!hosts[i].IsModal)
+                continue;
+
+            if (hosts[i].HitTest(x, y) is { } hit && hit is not OverlayHost)
+                return hit;
+
+            if (hosts[i].Dismiss is not null)
+                break;
+        }
+
+        return top.HitTest(x, y) ?? top;
+    }
 
     /// <summary>Tells whether a hit is the invisible backdrop behind an overlay.</summary>
     /// <param name="hit">A Control returned by <see cref="HitTest"/>.</param>
