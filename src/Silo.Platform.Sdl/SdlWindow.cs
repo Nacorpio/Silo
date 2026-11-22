@@ -285,6 +285,15 @@ public sealed unsafe class SdlWindow : IDisposable
         SDL_Keycode.SDLK_RETURN => Key.Enter,
         SDL_Keycode.SDLK_UP => Key.Up,
         SDL_Keycode.SDLK_DOWN => Key.Down,
+        SDL_Keycode.SDLK_TAB => Key.Tab,
+        SDL_Keycode.SDLK_PAGEUP => Key.PageUp,
+        SDL_Keycode.SDLK_PAGEDOWN => Key.PageDown,
+        SDL_Keycode.SDLK_A => Key.A,
+        SDL_Keycode.SDLK_C => Key.C,
+        SDL_Keycode.SDLK_V => Key.V,
+        SDL_Keycode.SDLK_X => Key.X,
+        SDL_Keycode.SDLK_Y => Key.Y,
+        SDL_Keycode.SDLK_Z => Key.Z,
 
         _ => Key.Unknown,
     };
@@ -371,6 +380,25 @@ public sealed unsafe class SdlWindow : IDisposable
         return tooltips.Hover(router.Hovered, x, y, clock.Elapsed) | changed;
     }
 
+    /// <summary>Converts SDL modifier flags to <see cref="KeyModifiers"/>.</summary>
+    /// <param name="mod">The SDL modifier flags.</param>
+    /// <returns>The modifiers. The Command key of a Mac counts as Control.</returns>
+    static KeyModifiers ToModifiers(SDL_Keymod mod)
+    {
+        var result = KeyModifiers.None;
+
+        if ((mod & SDL_Keymod.SDL_KMOD_SHIFT) != 0)
+            result |= KeyModifiers.Shift;
+
+        if ((mod & (SDL_Keymod.SDL_KMOD_CTRL | SDL_Keymod.SDL_KMOD_GUI)) != 0)
+            result |= KeyModifiers.Control;
+
+        if ((mod & SDL_Keymod.SDL_KMOD_ALT) != 0)
+            result |= KeyModifiers.Alt;
+
+        return result;
+    }
+
     /// <summary>Raises <see cref="KeyPressed"/> for a key press that is not an auto-repeat.</summary>
     /// <param name="key">The SDL keyboard event.</param>
     /// <returns>Always <see langword="false"/>, since a key press changes nothing by itself.</returns>
@@ -385,7 +413,7 @@ public sealed unsafe class SdlWindow : IDisposable
         if (pressed == Key.Escape && overlays.CloseTop())
             return true;
 
-        return focus.KeyDown(pressed) | hidden;
+        return focus.KeyDown(pressed, ToModifiers(key.mod)) | hidden;
     }
 
     /// <summary>Presses the pointer button and moves the keyboard focus to what was pressed.</summary>

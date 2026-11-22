@@ -41,4 +41,31 @@ public enum Key
 
     /// <summary>The down arrow key.</summary>
     Down,
+
+    /// <summary>The Tab key.</summary>
+    Tab,
+
+    /// <summary>The Page Up key.</summary>
+    PageUp,
+
+    /// <summary>The Page Down key.</summary>
+    PageDown,
+
+    /// <summary>The A key, which with Control selects all.</summary>
+    A,
+
+    /// <summary>The C key, which with Control copies.</summary>
+    C,
+
+    /// <summary>The V key, which with Control pastes.</summary>
+    V,
+
+    /// <summary>The X key, which with Control cuts.</summary>
+    X,
+
+    /// <summary>The Y key, which with Control redoes.</summary>
+    Y,
+
+    /// <summary>The Z key, which with Control undoes.</summary>
+    Z,
 }
