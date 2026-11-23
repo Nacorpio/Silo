@@ -437,6 +437,8 @@ public sealed unsafe class SdlWindow : IDisposable
     bool PressPointer(float x, float y)
     {
         var overlaid = overlays.ModalCount > 0;
+        router.Modifiers = ToModifiers(SDL3.SDL_GetModState());
+
         var changed = router.Down(x, y) | tooltips.Dismiss();
 
         return (!overlaid && focus.FocusFrom(router.Hovered)) | changed;

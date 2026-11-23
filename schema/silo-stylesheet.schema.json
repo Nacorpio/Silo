@@ -178,6 +178,14 @@
           "description": "A flag written as a keyword or number, such as normal, bold or 700 for font-weight. Declared by Control.",
           "$ref": "#/$defs/scalar"
         },
+        "gallery-gap": {
+          "description": "A number. Declared by GalleryView.",
+          "$ref": "#/$defs/scalar"
+        },
+        "gallery-padding": {
+          "description": "A number. Declared by GalleryView.",
+          "$ref": "#/$defs/scalar"
+        },
         "gap": {
           "description": "A length such as 12px or 50%. Declared by Control.",
           "$ref": "#/$defs/scalar"
@@ -257,7 +265,11 @@
           "$ref": "#/$defs/scalar"
         },
         "item-height": {
-          "description": "A number. Declared by ComboBox, ListView.",
+          "description": "A number. Declared by ComboBox, GalleryView, ListView.",
+          "$ref": "#/$defs/scalar"
+        },
+        "item-width": {
+          "description": "A number. Declared by GalleryView.",
           "$ref": "#/$defs/scalar"
         },
         "justify-content": {

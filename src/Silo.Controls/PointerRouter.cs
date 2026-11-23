@@ -48,6 +48,9 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     /// <summary>The Control with its own pointer handling that the button was pressed on, while the button is held.</summary>
     Control? handling;
 
+    /// <summary>Gets or sets the modifier keys that are held. The platform sets it before a press, so that Ctrl-click and Shift-click work.</summary>
+    public KeyModifiers Modifiers { get; set; }
+
     /// <summary>Gets the Control that the pointer is currently over.</summary>
     public Control? Hovered => hovered;
 
@@ -167,6 +170,13 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
 
         if (Find<ListView>(hovered) is { } list)
             changed |= list.PointerDown(list.ToLocal(x, y).Y);
+
+        if (Find<GalleryView>(hovered) is { } gallery)
+        {
+            var (gx, gy) = gallery.ToLocal(x, y);
+
+            changed |= gallery.PointerDown(gx, gy, Modifiers);
+        }
 
         return (pressed?.PointerDown() ?? false) | changed;
     }

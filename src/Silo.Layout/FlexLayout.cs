@@ -108,9 +108,6 @@ public static class FlexLayout
     {
         node.SetLayout(rect);
 
-        if (node.Children.Count == 0)
-            return;
-
         var style = node.Style;
         var isRow = style.Direction == FlexDirection.Row;
 
@@ -121,6 +118,9 @@ public static class FlexLayout
 
         var contentWidth = Math.Max(0, rect.Width - left - right);
         var contentHeight = Math.Max(0, rect.Height - top - bottom);
+
+        if (node.PlaceChildren(new Rect(left, top, contentWidth, contentHeight)) || node.Children.Count == 0)
+            return;
 
         var mainSize = isRow ? contentWidth : contentHeight;
         var crossSize = isRow ? contentHeight : contentWidth;

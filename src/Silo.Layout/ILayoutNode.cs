@@ -28,4 +28,11 @@ public interface ILayoutNode
     /// <summary>Receives the final border box of the node, relative to its parent's border box.</summary>
     /// <param name="rect">The position and size assigned by layout.</param>
     void SetLayout(Rect rect);
+
+    /// <summary>
+    /// Lets a node position its own children, for layouts the flex engine does not do, such as a virtualized gallery.
+    /// </summary>
+    /// <param name="content">The node's content box, relative to its border box.</param>
+    /// <returns><see langword="true"/> when the node placed every child itself and the engine must skip them. The default is <see langword="false"/>.</returns>
+    bool PlaceChildren(Rect content) => false;
 }

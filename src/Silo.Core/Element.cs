@@ -224,6 +224,15 @@ public class Element : IStyleNode
     {
     }
 
+    /// <summary>
+    /// Called after this Element's styles were applied and before its children's. A container that creates children later,
+    /// such as a virtualized list, keeps the resolver to style them.
+    /// </summary>
+    /// <param name="resolver">The resolver in use.</param>
+    protected virtual void OnStyled(StyleResolver resolver)
+    {
+    }
+
     /// <summary>Sets the parent, called by <see cref="ElementCollection"/>.</summary>
     /// <param name="parent">The new parent, or <see langword="null"/>.</param>
     internal void SetParent(Element? parent) => Parent = parent;
@@ -284,6 +293,8 @@ public class Element : IStyleNode
         {
             NotifyIfChanged(properties[i], before[i]);
         }
+
+        OnStyled(resolver);
 
         foreach (var child in Children)
         {

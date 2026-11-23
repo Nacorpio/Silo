@@ -446,6 +446,26 @@ public abstract class Control : Element, ILayoutNode
     /// <inheritdoc/>
     void ILayoutNode.SetLayout(Rect rect) => Bounds = rect;
 
+    /// <inheritdoc/>
+    bool ILayoutNode.PlaceChildren(Rect content) => PlaceChildren(content);
+
+    /// <summary>
+    /// Lets a derived class position its children itself instead of the flex engine. Use <see cref="PlaceChild"/> for each one.
+    /// </summary>
+    /// <param name="content">The content box, relative to the border box.</param>
+    /// <returns><see langword="true"/> when every child was placed. The default is <see langword="false"/>.</returns>
+    protected virtual bool PlaceChildren(Rect content) => false;
+
+    /// <summary>Lays a child out inside a rectangle, with its own children flexing within it.</summary>
+    /// <param name="child">The child.</param>
+    /// <param name="rect">The border box, relative to this Control's border box.</param>
+    protected static void PlaceChild(Control child, Rect rect)
+    {
+        child.Arrange(new Size(rect.Width, rect.Height));
+
+        ((ILayoutNode)child).SetLayout(rect);
+    }
+
     /// <summary>Builds the layout view of the current property values.</summary>
     /// <returns>A new style, which the caller caches.</returns>
     LayoutStyle BuildLayoutStyle() => new()
