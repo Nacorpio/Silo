@@ -102,6 +102,7 @@ public sealed class ThemeMatrix : Box
         new("Label", "Display", CreateLabels, ["normal"]),
         new("Badge", "Display", CreateBadges, ["normal"]),
         new("Avatar", "Display", CreateAvatars, ["normal"]),
+        new("Skeleton", "Display", CreateSkeletons, ["normal"]),
         new("StatList", "Display", CreateStatList, ["normal"]),
         new("Icon", "Display", CreateIcons, ["normal"]),
         new("HyperlinkButton", "Display", () => new HyperlinkButton { Text = "Read the docs" }, ["normal", "hover", "pressed", "focus"]),
@@ -340,6 +341,25 @@ public sealed class ThemeMatrix : Box
         row.Children.Add(new Avatar { DisplayName = "Grace Hopper" });
         row.Children.Add(new Avatar { DisplayName = "Linus" });
         row.Children.Add(new Avatar { DisplayName = "Alan Turing" });
+
+        return row;
+    }
+
+    /// <summary>Creates a row of Skeletons: a circle, a line and a block.</summary>
+    static Box CreateSkeletons()
+    {
+        var row = new Box();
+
+        row.AddClass("badges");
+
+        foreach (var shape in new[] { "skeleton-circle", "skeleton-line", "skeleton-block" })
+        {
+            var skeleton = new Skeleton();
+
+            skeleton.AddClass(shape);
+            skeleton.SetValue(Control.FlexShrinkProperty, 0);
+            row.Children.Add(skeleton);
+        }
 
         return row;
     }

@@ -400,6 +400,14 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ContextMenu.",
           "$ref": "#/$defs/scalar"
         },
+        "skeleton-highlight-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Skeleton.",
+          "$ref": "#/$defs/scalar"
+        },
+        "skeleton-period": {
+          "description": "A number. Declared by Skeleton.",
+          "$ref": "#/$defs/scalar"
+        },
         "slider-fill-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by RangeSlider, Slider.",
           "$ref": "#/$defs/scalar"
