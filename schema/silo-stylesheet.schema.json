@@ -432,6 +432,98 @@
           "description": "A number. Declared by StatList.",
           "$ref": "#/$defs/scalar"
         },
+        "terminal-background": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-0": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-1": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-10": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-11": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-12": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-13": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-14": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-15": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-2": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-3": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-4": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-5": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-6": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-7": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-8": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-color-9": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-cursor-blink": {
+          "description": "A number. Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-cursor-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-cursor-style": {
+          "description": "Text. Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-foreground": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-line-height": {
+          "description": "A number. Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
+        "terminal-selection-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Terminal.",
+          "$ref": "#/$defs/scalar"
+        },
         "text-align": {
           "description": "One of the keywords. Declared by TextControl.",
           "anyOf": [
