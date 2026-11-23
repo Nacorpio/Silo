@@ -8,7 +8,7 @@ using Silo.Studio;
 using Silo.Styling;
 using Silo.Styling.Values;
 
-// Usage: silo-studio [--dark] [--text] [--page <category>] [--theme <file.jsonc>] [--screenshot <out.png>]
+// Usage: silo-studio [--dark] [--text] [--custom-titlebar] [--dividers] [--page <category>] [--theme <file.jsonc>] [--screenshot <out.png>]
 //        silo-studio --assembly <app.dll> --list-previews
 //        silo-studio --assembly <app.dll> --preview <name> [--dark] [--theme <file.jsonc>] [--screenshot <out.png>]
 // Shows every Control in every Pseudo-state with the default theme. With --theme the file is applied on top of the default
@@ -39,6 +39,13 @@ if (ArgumentAfter("--page") is { } page)
 
 if (view.Editor is not null)
     view.Editor.TextMode = args.Contains("--text");
+
+view.Categories.ShowDividers = args.Contains("--dividers");
+
+var customTitleBar = args.Contains("--custom-titlebar");
+
+if (customTitleBar)
+    view.ShowTitleBar();
 
 StyleResolver Resolve()
 {
@@ -73,7 +80,7 @@ using var previews = assembly is null
 if (previews is not null)
     view.AddPanel(previews);
 
-using var window = new SdlWindow(view) { Styles = Resolve() };
+using var window = new SdlWindow(view) { Styles = Resolve(), CustomTitleBar = customTitleBar };
 using var attachment = window.AttachDiagnostics();
 using var watcher = theme is null ? null : new StylesheetWatcher(theme);
 

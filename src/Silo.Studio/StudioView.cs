@@ -28,6 +28,9 @@ public sealed class StudioView : Window
     /// <summary>The row that holds the gallery and the panels.</summary>
     readonly Box body = new() { Name = "body" };
 
+    /// <summary>The list of categories, created when it is first needed.</summary>
+    CategoryList? categories;
+
     /// <summary>The variant that the matrix is shown in.</summary>
     ThemeVariant variant;
 
@@ -61,7 +64,7 @@ public sealed class StudioView : Window
         bar.Children.Add(light);
         bar.Children.Add(dark);
 
-        body.Children.Add(new CategoryList(Matrix));
+        body.Children.Add(Categories);
         body.Children.Add(scroll);
 
         if (editor is not null)
@@ -80,11 +83,17 @@ public sealed class StudioView : Window
     /// <summary>Gets <c>Window</c>, so that the theme's Window Rules apply to Studio.</summary>
     public override string TypeName => "Window";
 
+    /// <summary>Gets the title bar that Studio draws itself, or <see langword="null"/> while the native frame is used.</summary>
+    public TitleBar? TitleBar { get; private set; }
+
     /// <summary>Gets the theme editor beside the gallery, or <see langword="null"/> when no theme is being edited.</summary>
     public ThemeEditorPanel? Editor { get; }
 
     /// <summary>Gets the table of Controls in all of their states.</summary>
     public ThemeMatrix Matrix { get; } = new();
+
+    /// <summary>Gets the list of categories beside the table.</summary>
+    public CategoryList Categories => categories ??= new CategoryList(Matrix);
 
     /// <summary>Gets or sets the theme variant that the user has picked. The default is <see cref="ThemeVariant.Light"/>.</summary>
     public ThemeVariant Variant
@@ -101,6 +110,26 @@ public sealed class StudioView : Window
 
             VariantChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    /// <summary>Puts a <see cref="Silo.TitleBar"/> at the top, for a window that has no native frame.</summary>
+    /// <returns>The title bar.</returns>
+    public TitleBar ShowTitleBar()
+    {
+        if (TitleBar is not null)
+            return TitleBar;
+
+        TitleBar = new TitleBar { Title = Title };
+
+        var rest = Children.Cast<Control>().ToList();
+
+        Children.Clear();
+        Children.Add(TitleBar);
+
+        foreach (var child in rest)
+            Children.Add(child);
+
+        return TitleBar;
     }
 
     /// <summary>Adds a panel beside the gallery and the editor, such as the list of Previews.</summary>

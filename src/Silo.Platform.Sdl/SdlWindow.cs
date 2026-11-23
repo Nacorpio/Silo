@@ -91,6 +91,9 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Whether the window was closed.</summary>
     bool closed;
 
+    /// <summary>Whether the window draws its own title bar.</summary>
+    bool customTitleBar;
+
     /// <summary>Whether <see cref="Dispose"/> has run.</summary>
     bool disposed;
 
@@ -138,7 +141,10 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <exception cref="InvalidOperationException">SDL could not start or could not create the window.</exception>
     public SdlWindow(Window content)
         : this(Checked(content).Title, content.InitialWidth, content.InitialHeight, content)
-        => content.TitleChanged += (_, _) => SetTitle(content.Title);
+    {
+        content.TitleChanged += (_, _) => SetTitle(content.Title);
+        content.Host = new Host(this);
+    }
 
     /// <summary>Raised when a key is pressed while this window has the keyboard focus.</summary>
     public event Action<Key>? KeyPressed;
@@ -158,6 +164,31 @@ public sealed unsafe class SdlWindow : IDisposable
 
     /// <summary>Gets the id that SDL puts in the events of this window.</summary>
     public uint Id => id;
+
+    /// <summary>
+    /// Gets or sets whether the window has no native frame and draws its own title bar, for example with a
+    /// <see cref="TitleBar"/>. The operating system still moves and resizes the window: SDL asks which points are drag areas
+    /// and which are resize edges, and <see cref="WindowHitTester"/> answers. The default is <see langword="false"/>.
+    /// </summary>
+    public bool CustomTitleBar
+    {
+        get => customTitleBar;
+        set
+        {
+            if (value == customTitleBar)
+                return;
+
+            customTitleBar = value;
+
+            SDL3.SDL_SetWindowBordered(window, !value);
+            InstallHitTest(value);
+
+            dirty = true;
+        }
+    }
+
+    /// <summary>Gets whether the window is maximized.</summary>
+    public bool IsMaximized => !disposed && !closed && (SDL3.SDL_GetWindowFlags(window) & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
 
     /// <summary>Gets or sets the color that every frame is cleared with. The default is white.</summary>
     public Color Background { get; set; } = new(255, 255, 255);
@@ -367,6 +398,8 @@ public sealed unsafe class SdlWindow : IDisposable
             SDL_EventType.SDL_EVENT_TEXT_INPUT => focus.TextInput(Marshal.PtrToStringUTF8((IntPtr)e.text.text) ?? ""),
 
             SDL_EventType.SDL_EVENT_WINDOW_EXPOSED or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED => true,
+            SDL_EventType.SDL_EVENT_WINDOW_MAXIMIZED or SDL_EventType.SDL_EVENT_WINDOW_RESTORED or SDL_EventType.SDL_EVENT_WINDOW_MINIMIZED
+                => StateChanged(),
 
             _ => false,
         };
@@ -444,6 +477,64 @@ public sealed unsafe class SdlWindow : IDisposable
         return (!overlaid && focus.FocusFrom(router.Hovered)) | changed;
     }
 
+    /// <summary>Turns the callback on or off that tells SDL what the points of the window are.</summary>
+    /// <param name="enabled">Whether SDL should ask.</param>
+    void InstallHitTest(bool enabled)
+    {
+        if (enabled)
+        {
+            SDL3.SDL_SetWindowHitTest(window, &HitTest, IntPtr.Zero);
+
+            return;
+        }
+
+        SDL3.SDL_SetWindowHitTest(window, null, IntPtr.Zero);
+    }
+
+    /// <summary>Tells the Window Control that the native window was maximized, minimized or restored.</summary>
+    /// <returns>Always <see langword="true"/>, so that a frame is drawn with the new button glyph.</returns>
+    bool StateChanged()
+    {
+        (root as Window)?.NotifyStateChanged();
+
+        return true;
+    }
+
+    /// <summary>Answers SDL when it asks what a point of a borderless window is.</summary>
+    /// <param name="win">The SDL window.</param>
+    /// <param name="area">The point.</param>
+    /// <param name="data">Not used.</param>
+    /// <returns>Whether the point drags the window, resizes it, or is an ordinary point.</returns>
+    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    static SDL_HitTestResult HitTest(SDL_Window* win, SDL_Point* area, nint data)
+    {
+        var target = Open.FirstOrDefault(open => open.window == win);
+
+        if (target is null)
+            return SDL_HitTestResult.SDL_HITTEST_NORMAL;
+
+        int width, height;
+
+        SDL3.SDL_GetWindowSize(win, &width, &height);
+
+        var region = WindowHitTester.Test(target.root, area->x, area->y, width, height, !target.IsMaximized);
+
+        return region switch
+        {
+            WindowRegion.Drag => SDL_HitTestResult.SDL_HITTEST_DRAGGABLE,
+            WindowRegion.ResizeTop => SDL_HitTestResult.SDL_HITTEST_RESIZE_TOP,
+            WindowRegion.ResizeBottom => SDL_HitTestResult.SDL_HITTEST_RESIZE_BOTTOM,
+            WindowRegion.ResizeLeft => SDL_HitTestResult.SDL_HITTEST_RESIZE_LEFT,
+            WindowRegion.ResizeRight => SDL_HitTestResult.SDL_HITTEST_RESIZE_RIGHT,
+            WindowRegion.ResizeTopLeft => SDL_HitTestResult.SDL_HITTEST_RESIZE_TOPLEFT,
+            WindowRegion.ResizeTopRight => SDL_HitTestResult.SDL_HITTEST_RESIZE_TOPRIGHT,
+            WindowRegion.ResizeBottomLeft => SDL_HitTestResult.SDL_HITTEST_RESIZE_BOTTOMLEFT,
+            WindowRegion.ResizeBottomRight => SDL_HitTestResult.SDL_HITTEST_RESIZE_BOTTOMRIGHT,
+
+            _ => SDL_HitTestResult.SDL_HITTEST_NORMAL,
+        };
+    }
+
     /// <summary>Marks the window as closed, takes it out of the event loop and raises <see cref="Closed"/>.</summary>
     /// <returns>Always <see langword="false"/>, so that no frame is drawn.</returns>
     bool Close()
@@ -515,5 +606,25 @@ public sealed unsafe class SdlWindow : IDisposable
 
         SDL3.SDL_UnlockSurface(surface);
         SDL3.SDL_UpdateWindowSurface(window);
+    }
+
+    /// <summary>Carries out the state changes that a <see cref="Window"/> Control asks for.</summary>
+    /// <param name="owner">The native window.</param>
+    sealed class Host(SdlWindow owner) : IWindowHost
+    {
+        /// <inheritdoc/>
+        public bool IsMaximized => owner.IsMaximized;
+
+        /// <inheritdoc/>
+        public void Minimize() => SDL3.SDL_MinimizeWindow(owner.window);
+
+        /// <inheritdoc/>
+        public void Maximize() => SDL3.SDL_MaximizeWindow(owner.window);
+
+        /// <inheritdoc/>
+        public void Restore() => SDL3.SDL_RestoreWindow(owner.window);
+
+        /// <inheritdoc/>
+        public void Close() => owner.Close();
     }
 }

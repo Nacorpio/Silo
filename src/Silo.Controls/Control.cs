@@ -237,6 +237,13 @@ public abstract class Control : Element, ILayoutNode
     /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
     public bool SetPressed(bool value) => SetPseudoState("active", value);
 
+    /// <summary>
+    /// Gets or sets whether pressing and dragging on this Control moves a window that has a custom title bar. The
+    /// <see cref="TitleBar"/> sets it on itself and on its icon and title; set it on your own Controls in a title bar to make
+    /// them drag too. Controls that stay clickable, such as buttons and menus, leave it off.
+    /// </summary>
+    public bool IsWindowDragArea { get; set; }
+
     /// <summary>Gets whether the Control can have the keyboard focus. A click on it, or inside it, focuses it.</summary>
     public virtual bool IsFocusable => false;
 

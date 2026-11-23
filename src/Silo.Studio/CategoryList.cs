@@ -12,6 +12,9 @@ public sealed class CategoryList : Control
     /// <summary>The entries, by category.</summary>
     readonly Dictionary<string, CategoryEntry> entries = [];
 
+    /// <summary>Whether dividers separate the entries.</summary>
+    bool showDividers;
+
     /// <summary>Creates the list for a matrix and keeps it in step with it.</summary>
     /// <param name="matrix">The matrix.</param>
     public CategoryList(ThemeMatrix matrix)
@@ -29,12 +32,29 @@ public sealed class CategoryList : Control
             entry.Click += (_, _) => matrix.ShowCategory(category);
 
             entries[category] = entry;
-            Children.Add(entry);
         }
+
+        Rebuild();
 
         matrix.CategoryChanged += (_, _) => Sync();
 
         Sync();
+    }
+
+    /// <summary>Gets or sets whether a divider line is drawn between the entries. The default is <see langword="false"/>.</summary>
+    /// <remarks>The dividers are <see cref="Separator"/>s with the Class <c>category-divider</c>.</remarks>
+    public bool ShowDividers
+    {
+        get => showDividers;
+        set
+        {
+            if (value == showDividers)
+                return;
+
+            showDividers = value;
+
+            Rebuild();
+        }
     }
 
     /// <summary>Gets <c>Box</c>, so that the theme's Box Rules apply.</summary>
@@ -65,6 +85,31 @@ public sealed class CategoryList : Control
         };
 
         return next >= 0 && matrix.ShowCategory(all[next]);
+    }
+
+    /// <summary>Puts the entries in the list, with a divider between each two when <see cref="ShowDividers"/> is set.</summary>
+    void Rebuild()
+    {
+        Children.Clear();
+
+        foreach (var entry in entries.Values)
+        {
+            if (showDividers && Children.Count > 0)
+                Children.Add(Divider());
+
+            Children.Add(entry);
+        }
+    }
+
+    /// <summary>Makes a divider line.</summary>
+    /// <returns>The Separator.</returns>
+    static Separator Divider()
+    {
+        var divider = new Separator();
+
+        divider.AddClass("category-divider");
+
+        return divider;
     }
 
     /// <summary>Marks the entry of the shown category as selected.</summary>

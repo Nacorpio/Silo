@@ -111,6 +111,7 @@ public sealed class ThemeMatrix : Box
         new("Stepper", "Navigation", CreateStepper, ["normal"]),
         new("Carousel", "Navigation", CreateCarousel, ["normal"]),
         new("NavigationView", "Shell", CreateNavigationView, ["normal"]),
+        new("TitleBar", "Shell", () => new TitleBar { Title = "Silo Studio", Icon = Dot }, ["normal"]),
         new("GalleryView grid", "Collections", () => CreateGallery(GalleryLayout.Grid), ["normal"]),
         new("GalleryView justified", "Collections", () => CreateGallery(GalleryLayout.Justified, false), ["normal"]),
         new("GalleryView masonry", "Collections", () => CreateGallery(GalleryLayout.Masonry, false), ["normal"]),

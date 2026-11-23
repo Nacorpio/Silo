@@ -56,6 +56,8 @@ public static class Glyphs
         ["sliders"] = [Open((4, 8), (20, 8)), Open((4, 16), (20, 16)), new Line(Circle(9, 8, 2), Closed: true), new Line(Circle(15, 16, 2), Closed: true)],
         ["layout"] = [new Line([(3, 4), (21, 4), (21, 20), (3, 20)], Closed: true), Open((3, 9), (21, 9)), Open((9, 9), (9, 20))],
         ["pencil"] = [new Line([(4, 20), (5, 15), (16, 4), (20, 8), (9, 19)], Closed: true), Open((14, 6), (18, 10))],
+        ["maximize"] = [new Line([(5, 5), (19, 5), (19, 19), (5, 19)], Closed: true)],
+        ["restore"] = [new Line([(5, 8), (16, 8), (16, 19), (5, 19)], Closed: true), Open((8, 8), (8, 5), (19, 5), (19, 16), (16, 16))],
         ["home"] = [Open((3, 11), (12, 3), (21, 11)), Open((5, 9.5), (5, 21), (19, 21), (19, 9.5))],
     };
 
