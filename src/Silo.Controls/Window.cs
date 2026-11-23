@@ -57,4 +57,28 @@ public class Window : Control
     /// <summary>Gets or sets the height of the client area in logical units when the platform window is opened. The default is 600.</summary>
     /// <remarks>The user can resize the window afterwards, and the Window fills it. Changing this later does nothing.</remarks>
     public int InitialHeight { get; set; } = 600;
+
+    /// <summary>Raised when the window was maximized or restored.</summary>
+    public event EventHandler? StateChanged;
+
+    /// <summary>Gets or sets what carries out the state changes, which the platform window sets when it opens.</summary>
+    public IWindowHost? Host { get; set; }
+
+    /// <summary>Gets whether the window is maximized.</summary>
+    public bool IsMaximized => Host?.IsMaximized ?? false;
+
+    /// <summary>Minimizes the window.</summary>
+    public void Minimize() => Host?.Minimize();
+
+    /// <summary>Maximizes the window.</summary>
+    public void Maximize() => Host?.Maximize();
+
+    /// <summary>Restores the window from the maximized or minimized state.</summary>
+    public void Restore() => Host?.Restore();
+
+    /// <summary>Closes the window.</summary>
+    public void Close() => Host?.Close();
+
+    /// <summary>Raises <see cref="StateChanged"/>. The platform window calls it.</summary>
+    public void NotifyStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
 }

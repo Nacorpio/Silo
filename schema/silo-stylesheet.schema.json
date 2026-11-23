@@ -103,7 +103,7 @@
           "$ref": "#/$defs/scalar"
         },
         "button-position": {
-          "description": "One of the keywords. Declared by TabHeader.",
+          "description": "One of the keywords. Declared by TabHeader, TitleBar.",
           "anyOf": [
             {
               "enum": [

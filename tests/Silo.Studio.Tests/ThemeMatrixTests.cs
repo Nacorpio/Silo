@@ -124,4 +124,23 @@ public class ThemeMatrixTests
         Assert.Equal("Buttons", matrix.SelectedCategory);
         Assert.False(list.KeyDown(Key.Up));
     }
+
+    [Fact]
+    public void Dividers_between_the_entries_are_an_option()
+    {
+        var list = new CategoryList(new ThemeMatrix());
+        var count = ThemeMatrix.Categories.Count();
+
+        Assert.Equal(count, list.Children.Count);
+
+        list.ShowDividers = true;
+
+        Assert.Equal((count * 2) - 1, list.Children.Count);
+        Assert.IsType<Separator>(list.Children[1]);
+        Assert.Contains("category-divider", ((Control)list.Children[1]).Classes);
+
+        list.ShowDividers = false;
+
+        Assert.Equal(count, list.Children.Count);
+    }
 }
