@@ -37,6 +37,10 @@ public sealed class FocusManager
     {
         var next = target;
 
+        // A Label hands the focus on to the Control it names.
+        if (next is Label { For: { } named })
+            next = named;
+
         while (next is not null && !next.IsFocusable)
             next = next.Parent as Control;
 

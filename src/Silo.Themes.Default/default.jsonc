@@ -242,6 +242,7 @@
       "&:hover": { "background": "var(--track)" },
       "&:active": { "background": "var(--border)" },
     },
+    "Label": { "color": "var(--text)" },
     "CheckBox": {
       "color": "var(--text)",
       "padding": "2px 2px 2px 26px",
