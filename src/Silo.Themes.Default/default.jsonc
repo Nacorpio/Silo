@@ -57,6 +57,7 @@
       "icon-size": "16px",
       "icon-gap": "6px",
       "button-position": "right",
+      "max-width": "200px",
       "&:hover": { "background": "var(--border)" },
       "&:selected": { "color": "var(--text)", "background": "var(--surface)" },
     },

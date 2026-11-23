@@ -290,3 +290,43 @@ public class TabViewTests
         public int Height { get; } = height;
     }
 }
+
+public class TabHeaderTrimmingTests
+{
+    static List<string> DrawnTexts(string text, string rules)
+    {
+        var tabs = new TabView { Name = "t" };
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+
+        tabs.AddTab(text, new TextBlock { Text = "x" });
+        root.Children.Add(tabs);
+
+        var sheet = $$"""{ "rules": { "Box": { "align-items": "start" }, "TabView": { "flex-direction": "column" }, "TabStrip": { "flex-direction": "row" }, "TabHeader": { "flex-direction": "row", "padding": "0 10px" {{rules}} } } }""";
+
+        root.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read(sheet, "t.jsonc")]));
+        root.Arrange(new Size(400, 200));
+
+        var builder = new DisplayListBuilder();
+
+        root.Render(builder);
+
+        return [.. builder.Build().Commands.OfType<DrawTextCommand>().Select(c => c.Text)];
+    }
+
+    [Fact]
+    public void A_header_text_that_fits_is_drawn_whole()
+    {
+        Assert.Contains("Short", DrawnTexts("Short", ""));
+    }
+
+    [Fact]
+    public void A_text_too_long_for_the_max_width_is_cut_with_an_ellipsis()
+    {
+        var drawn = DrawnTexts("A very long tab title", """, "max-width": "100px" """);
+
+        var trimmed = Assert.Single(drawn, t => t.EndsWith('…'));
+
+        Assert.True(trimmed.Length * 7 <= 80);
+        Assert.StartsWith("A very", trimmed);
+    }
+}
