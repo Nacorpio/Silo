@@ -1,3 +1,4 @@
+using System.Globalization;
 using Silo.Rendering.Skia;
 using SkiaSharp;
 using UnitsNet;
@@ -62,6 +63,8 @@ public sealed class ThemeMatrix : Box
         new("ComboBox", "Values and lists", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
         new("ListView", "Values and lists", () => new ListView { Items = ["Row 1", "Row 2", "Row 3"], SelectedIndex = 1 }, ["normal", "hover"]),
         new("TreeView", "Values and lists", CreateTreeView, ["normal", "hover", "focus"]),
+        new("DatePicker", "Dates", () => new DatePicker { SelectedDate = new DateOnly(2026, 11, 23) }, ["normal", "hover", "focus"]),
+        new("Calendar", "Dates", CreateCalendar, ["normal"]),
         new("TextBlock", "Layout", () => new TextBlock { Text = "Some text" }, ["normal"]),
         new("Separator", "Layout", () => new Separator(), ["normal"]),
         new("Expander", "Layout", CreateExpander, ["normal"]),
@@ -71,6 +74,23 @@ public sealed class ThemeMatrix : Box
         new("ContextMenu", "Menus and dialogs", CreateContextMenu, ["normal"]),
         new("Dialog", "Menus and dialogs", CreateDialog, ["normal"]),
     ];
+
+    /// <summary>Creates a Calendar that shows a fixed month with a selected date, so the gallery looks the same every day.</summary>
+    static Calendar CreateCalendar()
+    {
+        var calendar = new Calendar
+        {
+            Culture = CultureInfo.InvariantCulture,
+            FirstDayOfWeek = DayOfWeek.Monday,
+            Today = new DateOnly(2026, 11, 23),
+            DisplayedMonth = new DateOnly(2026, 11, 1),
+            IsCursorVisible = false,
+        };
+
+        calendar.SelectedDate = new DateOnly(2026, 11, 12);
+
+        return calendar;
+    }
 
     /// <summary>Creates a TreeView with an expanded node, a collapsed node and a selected leaf.</summary>
     /// <returns>The TreeView.</returns>

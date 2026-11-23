@@ -269,7 +269,7 @@
           "$ref": "#/$defs/scalar"
         },
         "placeholder-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextBox.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DatePicker, TextBox.",
           "$ref": "#/$defs/scalar"
         },
         "selection-color": {
