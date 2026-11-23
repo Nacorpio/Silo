@@ -10,5 +10,6 @@
     "--tooltip": "#374151",
     "--tooltip-text": "#f9fafb",
     "--tooltip-muted": "#9ca3af",
+    "--scrim": "#111827cc",
   },
 }
