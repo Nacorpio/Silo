@@ -42,6 +42,9 @@ if (view.Editor is not null)
 
 view.Categories.ShowDividers = args.Contains("--dividers");
 
+if (int.TryParse(ArgumentAfter("--height"), out var height))
+    view.InitialHeight = height;
+
 var customTitleBar = args.Contains("--custom-titlebar");
 
 if (customTitleBar)

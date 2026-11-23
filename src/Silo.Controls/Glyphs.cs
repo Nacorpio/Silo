@@ -8,7 +8,7 @@ namespace Silo;
 /// Every glyph is a few lines on a 24 by 24 grid, drawn with a round pen, so they scale to any size and take the color of the
 /// text. The names are lower case: <c>check</c>, <c>close</c>, <c>plus</c>, <c>minus</c>, <c>chevron-left</c>,
 /// <c>chevron-right</c>, <c>chevron-up</c>, <c>chevron-down</c>, <c>arrow-left</c>, <c>arrow-right</c>, <c>arrow-up</c>,
-/// <c>arrow-down</c>, <c>search</c>, <c>menu</c>, <c>star</c>, <c>info</c>, <c>warning</c>, <c>error</c>, <c>user</c>,
+/// <c>arrow-down</c>, <c>search</c>, <c>menu</c>, <c>star</c>, <c>info</c>, <c>warning</c>, <c>error</c>, <c>question</c>, <c>user</c>,
 /// <c>calendar</c> and <c>home</c>.
 /// </para>
 /// </remarks>
@@ -44,6 +44,7 @@ public static class Glyphs
         ["star"] = [new Line(Star(12, 12.5, 9, 3.8), Closed: true)],
         ["info"] = [new Line(Circle(12, 12, 9), Closed: true), Open((12, 11), (12, 16.5)), Open((12, 7.5), (12, 7.6))],
         ["warning"] = [new Line([(12, 3.5), (21.5, 20), (2.5, 20)], Closed: true), Open((12, 10), (12, 14.5)), Open((12, 17), (12, 17.1))],
+        ["question"] = [new Line(Circle(12, 12, 9), Closed: true), Open((9.5, 9.5), (10.2, 7.8), (12, 7.2), (13.8, 7.8), (14.5, 9.5), (13.8, 11), (12, 12.3), (12, 13.8)), Open((12, 16.6), (12, 16.7))],
         ["error"] = [new Line(Circle(12, 12, 9), Closed: true), Open((12, 7), (12, 13)), Open((12, 16.4), (12, 16.5))],
         ["user"] = [new Line(Circle(12, 8, 4), Closed: true), Open((4, 21), (5, 17), (8.5, 14.5), (12, 14), (15.5, 14.5), (19, 17), (20, 21))],
         ["calendar"] = [new Line([(4, 6), (20, 6), (20, 20), (4, 20)], Closed: true), Open((4, 11), (20, 11)), Open((8, 3), (8, 8)), Open((16, 3), (16, 8))],
