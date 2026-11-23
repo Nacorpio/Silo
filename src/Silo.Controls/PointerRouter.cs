@@ -39,6 +39,9 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     /// <summary>The Slider that is being dragged.</summary>
     Slider? dragged;
 
+    /// <summary>The DataGrid whose row the pointer is over, so that it can be told when the pointer leaves.</summary>
+    DataGrid? hoveredGrid;
+
     /// <summary>The Control with its own pointer handling that the button was pressed on, while the button is held.</summary>
     Control? handling;
 
@@ -69,12 +72,33 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         if (Find<ListView>(hovered) is { HoverSelects: true } list)
             changed |= list.PointerMove(list.ToLocal(x, y).Y);
 
+        var grid = Find<DataGrid>(hovered);
+
+        if (hoveredGrid != grid)
+            changed |= hoveredGrid?.PointerLeave() ?? false;
+
+        hoveredGrid = grid;
+
+        if (grid is not null)
+        {
+            var (gx, gy) = grid.ToLocal(x, y);
+
+            changed |= grid.PointerMove(gx, gy);
+        }
+
         return changed;
     }
 
     /// <summary>Tells the router that the pointer left the window.</summary>
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
-    public bool Leave() => SetHovered(null);
+    public bool Leave()
+    {
+        var changed = hoveredGrid?.PointerLeave() ?? false;
+
+        hoveredGrid = null;
+
+        return SetHovered(null) | changed;
+    }
 
     /// <summary>Presses the primary pointer button.</summary>
     /// <param name="x">The horizontal position, relative to the root Control.</param>

@@ -62,8 +62,9 @@ public sealed class ThemeMatrix : Box
         new("Slider", "Values and lists", () => new Slider { Value = 0.6 }, ["normal", "hover", "pressed"]),
         new("ProgressBar", "Values and lists", () => new ProgressBar { Value = 0.6 }, ["normal"]),
         new("ComboBox", "Values and lists", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
-        new("ListView", "Values and lists", () => new ListView { Items = ["Row 1", "Row 2", "Row 3"], SelectedIndex = 1 }, ["normal", "hover"]),
-        new("TreeView", "Values and lists", CreateTreeView, ["normal", "hover", "focus"]),
+        new("DataGrid", "Data", CreateDataGrid, ["normal", "focus"]),
+        new("ListView", "Data", () => new ListView { Items = ["Row 1", "Row 2", "Row 3"], SelectedIndex = 1 }, ["normal", "hover"]),
+        new("TreeView", "Data", CreateTreeView, ["normal", "hover", "focus"]),
         new("DatePicker", "Dates", () => new DatePicker { SelectedDate = new DateOnly(2026, 11, 23) }, ["normal", "hover", "focus"]),
         new("Calendar", "Dates", CreateCalendar, ["normal"]),
         new("ColorPicker", "Colors", () => new ColorPicker { Color = new Color(59, 130, 246) }, ["normal", "hover", "focus"]),
@@ -93,6 +94,31 @@ public sealed class ThemeMatrix : Box
         calendar.SelectedDate = new DateOnly(2026, 11, 12);
 
         return calendar;
+    }
+
+    /// <summary>Creates a DataGrid with three columns, a sort and a selected row.</summary>
+    static DataGrid CreateDataGrid()
+    {
+        var grid = new DataGrid
+        {
+            Rows = new (string Name, string Kind, double Size)[]
+            {
+                ("Button", "Buttons", 12.5),
+                ("Slider", "Values", 8),
+                ("TabView", "Layout", 31.25),
+                ("Dialog", "Menus", 20),
+            }.Select(row => (object)row).ToList(),
+        };
+
+        grid.Columns.Add(new DataGridColumn("Name", row => ((ValueTuple<string, string, double>)row).Item1) { Width = 74 });
+        grid.Columns.Add(new DataGridColumn("Kind", row => ((ValueTuple<string, string, double>)row).Item2) { Width = 74 });
+        grid.Columns.Add(new DataGridColumn("Size", row => ((ValueTuple<string, string, double>)row).Item3) { Width = 60, Format = "N1", Alignment = TextAlign.Right });
+
+        grid.SortBy(grid.Columns[2]);
+
+        grid.SelectedIndex = 1;
+
+        return grid;
     }
 
     /// <summary>Creates a TreeView with an expanded node, a collapsed node and a selected leaf.</summary>

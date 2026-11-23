@@ -74,6 +74,10 @@
             }
           ]
         },
+        "alternate-row-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid.",
+          "$ref": "#/$defs/scalar"
+        },
         "backdrop-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Dialog.",
           "$ref": "#/$defs/scalar"
@@ -166,12 +170,32 @@
           "description": "A length such as 12px or 50%. Declared by Control.",
           "$ref": "#/$defs/scalar"
         },
+        "grid-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid.",
+          "$ref": "#/$defs/scalar"
+        },
         "gutter-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextArea.",
           "$ref": "#/$defs/scalar"
         },
+        "header-background": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid.",
+          "$ref": "#/$defs/scalar"
+        },
+        "header-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid.",
+          "$ref": "#/$defs/scalar"
+        },
+        "header-height": {
+          "description": "A number. Declared by DataGrid.",
+          "$ref": "#/$defs/scalar"
+        },
         "height": {
           "description": "A length such as 12px or 50%. Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "hover-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid.",
           "$ref": "#/$defs/scalar"
         },
         "icon-gap": {
@@ -272,12 +296,16 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DatePicker, TextBox.",
           "$ref": "#/$defs/scalar"
         },
+        "row-height": {
+          "description": "A number. Declared by DataGrid.",
+          "$ref": "#/$defs/scalar"
+        },
         "selection-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ListView, TextArea.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid, ListView, TextArea.",
           "$ref": "#/$defs/scalar"
         },
         "selection-text-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ListView.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid, ListView.",
           "$ref": "#/$defs/scalar"
         },
         "separator-color": {
