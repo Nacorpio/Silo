@@ -348,6 +348,10 @@
     "FormField .help": { "color": "var(--muted)", "font-size": "12px" },
     "ValidationMessage": { "color": "#ef4444", "font-size": "12px" },
     "FormField.invalid TextBox": { "border-color": "#ef4444" },
+    "Breadcrumb": { "flex-direction": "row", "align-items": "center", "gap": "4px", "color": "var(--text)" },
+    "Breadcrumb .current": { "font-weight": "bold", "color": "var(--text)" },
+    "Breadcrumb .separator": { "icon-size": "12px", "color": "var(--muted)" },
+    "Breadcrumb .ellipsis": { "color": "var(--muted)" },
     "CheckBox": {
       "color": "var(--text)",
       "padding": "2px 2px 2px 26px",
