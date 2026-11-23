@@ -388,6 +388,14 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ScrollBar.",
           "$ref": "#/$defs/scalar"
         },
+        "scrollbar-visibility": {
+          "description": "Text. Declared by ScrollViewer.",
+          "$ref": "#/$defs/scalar"
+        },
+        "scrollbar-width": {
+          "description": "A number. Declared by ScrollViewer.",
+          "$ref": "#/$defs/scalar"
+        },
         "selection-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid, ListView, TextArea.",
           "$ref": "#/$defs/scalar"

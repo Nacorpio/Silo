@@ -254,7 +254,9 @@ public abstract class Control : Element, ILayoutNode
     LayoutStyle ILayoutNode.Style => layoutStyle ??= BuildLayoutStyle();
 
     /// <inheritdoc/>
-    IReadOnlyList<ILayoutNode> ILayoutNode.Children => new LayoutChildren(Children);
+    IReadOnlyList<ILayoutNode> ILayoutNode.Children => HasOutOfFlowChildren
+        ? Children.Cast<Control>().Where(IsInFlow).Cast<ILayoutNode>().ToArray()
+        : new LayoutChildren(Children);
 
     /// <summary>Sets or clears the <c>hover</c> Pseudo-state. The platform layer calls this as the pointer enters and leaves.</summary>
     /// <param name="value"><see langword="true"/> while the pointer is over the Control.</param>
@@ -345,7 +347,7 @@ public abstract class Control : Element, ILayoutNode
             return (x - Bounds.X, y - Bounds.Y);
 
         var (parentX, parentY) = parent.ToLocal(x, y);
-        var (offsetX, offsetY) = parent.ChildOffset;
+        var (offsetX, offsetY) = parent.ChildOffsetFor(this);
 
         return (parentX - offsetX - Bounds.X, parentY - offsetY - Bounds.Y);
     }
@@ -362,11 +364,10 @@ public abstract class Control : Element, ILayoutNode
         if (ChildClip is { } clip && (x < clip.X || y < clip.Y || x >= clip.Right || y >= clip.Bottom))
             return this;
 
-        var (offsetX, offsetY) = ChildOffset;
-
         for (var i = Children.Count - 1; i >= 0; i--)
         {
             var child = (Control)Children[i];
+            var (offsetX, offsetY) = ChildOffsetFor(child);
 
             var hit = child.HitTest(x - offsetX - child.Bounds.X, y - offsetY - child.Bounds.Y);
 
@@ -411,6 +412,21 @@ public abstract class Control : Element, ILayoutNode
     /// <summary>Gets how far the children are moved from their laid-out position when they are painted and hit-tested.</summary>
     /// <remarks>A scrolling Control overrides it. The default is no offset.</remarks>
     protected virtual (double X, double Y) ChildOffset => default;
+
+    /// <summary>Gets how far one child is moved when it is painted and hit-tested. The default is <see cref="ChildOffset"/> for every child.</summary>
+    /// <param name="child">The child.</param>
+    /// <remarks>A scrolling Control overrides it to keep a child, such as a scroll bar, from moving with the content.</remarks>
+    protected virtual (double X, double Y) ChildOffsetFor(Control child) => ChildOffset;
+
+    /// <summary>
+    /// Gets whether a child takes part in the flex layout. A Control that places a child itself, in <see cref="PlaceChildren"/>, returns
+    /// <see langword="false"/> for it so that the flex engine leaves it alone. The default is <see langword="true"/>.
+    /// </summary>
+    /// <param name="child">The child.</param>
+    protected virtual bool IsInFlow(Control child) => true;
+
+    /// <summary>Gets whether <see cref="IsInFlow"/> can return <see langword="false"/> for some child. The default is <see langword="false"/>.</summary>
+    protected virtual bool HasOutOfFlowChildren => false;
 
     /// <summary>Gets the area, in the Control's own coordinates, that the children are clipped to, or <see langword="null"/> for no clip.</summary>
     protected virtual Rect? ChildClip => null;
@@ -461,17 +477,20 @@ public abstract class Control : Element, ILayoutNode
         if (Children.Count == 0)
             return;
 
-        var (offsetX, offsetY) = ChildOffset;
-
         context.Save();
 
         if (ChildClip is { } clip)
             context.ClipRect(clip);
 
-        context.Translate(offsetX, offsetY);
-
         foreach (var child in Children)
+        {
+            var (offsetX, offsetY) = ChildOffsetFor((Control)child);
+
+            context.Save();
+            context.Translate(offsetX, offsetY);
             ((Control)child).Render(context);
+            context.Restore();
+        }
 
         context.Restore();
     }

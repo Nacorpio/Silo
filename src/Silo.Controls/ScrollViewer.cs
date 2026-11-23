@@ -1,4 +1,5 @@
 using Silo.Layout;
+using Silo.Styling.Values;
 
 namespace Silo;
 
@@ -12,7 +13,11 @@ namespace Silo;
 /// engine does not squeeze it. Give the ScrollViewer a height, or a <c>flex-grow</c> inside a column, so that it has a viewport smaller than its content.
 /// </para>
 /// <para>
-/// The platform layer scrolls it through <see cref="PointerRouter.Scroll"/> when the mouse wheel turns over it.
+/// The platform layer scrolls it through <see cref="PointerRouter.Scroll"/> when the mouse wheel turns over it. A vertical
+/// <see cref="ScrollBar"/> overlays the right edge of the viewport, so the pointer can drag the thumb or press the track. The
+/// <c>scrollbar-visibility</c> property decides when it shows: <c>hover</c> (the default) while the pointer is over the
+/// ScrollViewer or the bar is being dragged, <c>always</c>, or <c>never</c>. The bar is only shown when the content is taller than the
+/// viewport, and <c>scrollbar-width</c> sets its width (12px in the Default theme).
 /// </para>
 /// </remarks>
 /// <example>
@@ -26,23 +31,86 @@ namespace Silo;
 /// </example>
 public class ScrollViewer : Control, IScrollable
 {
+    /// <summary>When the scroll bar shows: <c>hover</c>, <c>always</c> or <c>never</c>.</summary>
+    public static readonly StyledProperty<string> ScrollBarVisibilityProperty =
+        StyledProperty.Register<ScrollViewer, string>("scrollbar-visibility", "hover", ValueParsers.Text);
+
+    /// <summary>The width of the scroll bar in pixels.</summary>
+    public static readonly StyledProperty<double> ScrollBarWidthProperty =
+        StyledProperty.Register<ScrollViewer, double>("scrollbar-width", 12, ValueParsers.Pixels);
+
     /// <summary>How far the content has been scrolled up, in pixels.</summary>
     double offset;
+
+    /// <summary>The Control that is scrolled.</summary>
+    Control? content;
+
+    /// <summary>The overlay bar.</summary>
+    readonly ScrollBar bar = new() { Orientation = Orientation.Vertical };
+
+    /// <summary>Whether the bar is changing <see cref="offset"/> or the offset is changing the bar, so the change is not echoed back.</summary>
+    bool syncing;
+
+    /// <summary>
+    /// Runs before the first ScrollViewer is created, so that the Styled properties above are registered in time.
+    /// See the remarks on <see cref="Element"/>.
+    /// </summary>
+    static ScrollViewer()
+    {
+    }
+
+    /// <summary>Creates a ScrollViewer with no content.</summary>
+    public ScrollViewer()
+    {
+        bar.ValueChanged += (_, _) =>
+        {
+            if (syncing)
+                return;
+
+            offset = bar.Value;
+        };
+
+        Children.Add(bar);
+    }
+
+    /// <summary>Gets the overlay scroll bar.</summary>
+    public ScrollBar ScrollBar => bar;
+
+    /// <summary>Gets whether the scroll bar is shown now: there is something to scroll and the visibility setting allows it.</summary>
+    public bool IsScrollBarVisible
+    {
+        get
+        {
+            if (MaxOffset <= 0)
+                return false;
+
+            return GetValue(ScrollBarVisibilityProperty) switch
+            {
+                "always" => true,
+                "never" => false,
+
+                _ => PseudoStates.Contains("hover") || bar.PseudoStates.Contains("active"),
+            };
+        }
+    }
 
     /// <summary>Gets or sets the Control that is scrolled. Setting it replaces the previous content.</summary>
     public Control? Content
     {
-        get => Children.Count == 0 ? null : (Control)Children[0];
+        get => content;
         set
         {
-            Children.Clear();
+            if (content is not null)
+                Children.Remove(content);
 
-            if (value is null)
+            content = value;
+
+            if (content is null)
                 return;
 
-            value.SetValue(FlexShrinkProperty, 0);
+            content.SetValue(FlexShrinkProperty, 0);
 
-            Children.Add(value);
+            Children.Insert(0, content);
         }
     }
 
@@ -54,7 +122,7 @@ public class ScrollViewer : Control, IScrollable
     public double MaxOffset => Math.Max(0, ContentExtent - Viewport.Height);
 
     /// <summary>Gets the height of the children, from the top of the first to the bottom of the last.</summary>
-    public double ContentExtent => Children.Count == 0 ? 0 : Children.Max(c => ((Control)c).Bounds.Bottom) - Viewport.Y;
+    public double ContentExtent => content is null ? 0 : content.Bounds.Bottom - Viewport.Y;
 
     /// <summary>Gets the visible area in the ScrollViewer's own coordinates.</summary>
     Rect Viewport => ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height));
@@ -63,7 +131,62 @@ public class ScrollViewer : Control, IScrollable
     protected override (double X, double Y) ChildOffset => (0, -Offset);
 
     /// <inheritdoc/>
+    protected override (double X, double Y) ChildOffsetFor(Control child) => child == bar ? default : ChildOffset;
+
+    /// <inheritdoc/>
+    protected override bool IsInFlow(Control child) => child != bar;
+
+    /// <inheritdoc/>
+    protected override bool HasOutOfFlowChildren => true;
+
+    /// <inheritdoc/>
     protected override Rect? ChildClip => Viewport;
+
+    /// <inheritdoc/>
+    protected override bool PlaceChildren(Rect area)
+    {
+        PlaceChild(bar, BarRect(area));
+
+        return false;
+    }
+
+    /// <summary>Finds where the bar is: along the right edge of the viewport when it is shown, and an empty rectangle when it is not.</summary>
+    /// <param name="area">The viewport.</param>
+    /// <returns>The bar's border box.</returns>
+    Rect BarRect(Rect area)
+    {
+        if (!IsScrollBarVisible)
+            return new Rect(area.Right, area.Y, 0, 0);
+
+        var width = Math.Min(area.Width, Math.Max(0, GetValue(ScrollBarWidthProperty)));
+
+        return new Rect(area.Right - width, area.Y, width, area.Height);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnRender(Silo.Rendering.IDrawingContext context, Rect bounds)
+    {
+        base.OnRender(context, bounds);
+
+        // The content has its size now, which the first pass of a layout does not know yet.
+        ((ILayoutNode)bar).SetLayout(BarRect(Viewport));
+
+        SyncBar();
+    }
+
+    /// <summary>Copies the scroll position and extent to the bar.</summary>
+    void SyncBar()
+    {
+        syncing = true;
+
+        bar.Minimum = 0;
+        bar.Maximum = MaxOffset;
+        bar.ViewportSize = Viewport.Height;
+        bar.LargeChange = Viewport.Height;
+        bar.Value = Offset;
+
+        syncing = false;
+    }
 
     /// <inheritdoc/>
     /// <remarks>A ScrollViewer always lays its child out in a column, whatever <c>flex-direction</c> says.</remarks>
@@ -75,6 +198,8 @@ public class ScrollViewer : Control, IScrollable
         var before = Offset;
 
         offset = Math.Clamp(before + delta, 0, MaxOffset);
+
+        SyncBar();
 
         return offset != before;
     }

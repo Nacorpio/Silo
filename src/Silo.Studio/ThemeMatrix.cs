@@ -110,6 +110,7 @@ public sealed class ThemeMatrix : Box
         new("GroupBox", "Panels", () => new GroupBox { Header = "Options", Content = new TextBlock { Text = "Wrap lines" } }, ["normal"]),
         new("Card", "Panels", CreateCard, ["normal"]),
         new("ScrollBar", "Panels", CreateScrollBar, ["normal", "hover", "pressed"]),
+        new("ScrollViewer", "Panels", CreateScrollViewer, ["normal"]),
         new("AspectRatioBox", "Panels", CreateAspectRatioBox, ["normal"]),
         new("BusyIndicator", "Panels", CreateBusyIndicator, ["normal"]),
         new("SplitPane", "Panels", CreateSplitPane, ["normal"]),
@@ -409,6 +410,26 @@ public sealed class ThemeMatrix : Box
             row.Children.Add(new Icon { Glyph = name });
 
         return row;
+    }
+
+    /// <summary>Creates a ScrollViewer with a tall list of lines, scrolled a little, with its bar always shown.</summary>
+    static ScrollViewer CreateScrollViewer()
+    {
+        var lines = new Box();
+
+        lines.SetValue(FlexDirectionProperty, Silo.Layout.FlexDirection.Column);
+
+        for (var i = 1; i <= 12; i++)
+            lines.Children.Add(new TextBlock { Text = $"Line {i}" });
+
+        var viewer = new ScrollViewer { Content = lines };
+
+        viewer.SetValue(ScrollViewer.ScrollBarVisibilityProperty, "always");
+        viewer.SetValue(WidthProperty, new Silo.Styling.Values.Length(160, Silo.Styling.Values.LengthUnit.Px));
+        viewer.SetValue(HeightProperty, new Silo.Styling.Values.Length(100, Silo.Styling.Values.LengthUnit.Px));
+        viewer.SetValue(FlexShrinkProperty, 0);
+
+        return viewer;
     }
 
     /// <summary>Creates a vertical ScrollBar scrolled a third of the way.</summary>
