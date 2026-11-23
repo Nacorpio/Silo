@@ -1,5 +1,6 @@
 using Silo.Rendering.Skia;
 using SkiaSharp;
+using UnitsNet;
 
 namespace Silo.Studio;
 
@@ -49,6 +50,7 @@ public sealed class ThemeMatrix : Box
         new("TextBox", () => new TextBox { Placeholder = "Type here" }, ["normal", "hover", "focus"]),
         new("NumberBox", () => new NumberBox { Minimum = 0, Maximum = 100, Value = 42 }, ["normal", "hover", "focus"]),
         new("PasswordBox", () => new PasswordBox { Text = "secret" }, ["normal", "hover", "focus"]),
+        new("QuantityBox", () => new QuantityBox { QuantityType = "Length", Value = Length.FromMeters(2.5) }, ["normal", "hover", "focus"]),
         new("SearchBox", () => new SearchBox { Text = "button" }, ["normal", "hover", "focus"]),
         new("TextArea", CreateTextArea, ["normal", "hover", "focus"]),
         new("Slider", () => new Slider { Value = 0.6 }, ["normal", "hover", "pressed"]),

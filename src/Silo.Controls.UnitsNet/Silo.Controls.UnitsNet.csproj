@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
+    <ProjectReference Include="../Silo.Styling/Silo.Styling.csproj" />
+    <ProjectReference Include="../Silo.Validator/Silo.Validator.csproj" ReferenceOutputAssembly="false" />
+    <PackageReference Include="UnitsNet" Version="5.75.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <SiloStylesheet Include="quantity.jsonc" />
+    <SiloContext Include="../Silo.Themes.Default/default.jsonc" />
+    <SiloControls Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="quantity.jsonc" LogicalName="Silo.Controls.UnitsNet.quantity.jsonc" />
+  </ItemGroup>
+  <Import Project="../Silo.Validator/build/Silo.Validator.targets" />
+</Project>

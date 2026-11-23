@@ -38,7 +38,7 @@ if (view.Editor is not null)
 
 StyleResolver Resolve()
 {
-    var sheets = new List<Stylesheet>([.. DefaultTheme.Load(view.Variant), StudioStyles.Load()]);
+    var sheets = new List<Stylesheet>([.. DefaultTheme.Load(view.Variant), QuantityTheme.Load(), StudioStyles.Load()]);
 
     try
     {

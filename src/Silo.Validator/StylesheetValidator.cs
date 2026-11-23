@@ -35,25 +35,44 @@ namespace Silo.Validation;
 public static partial class StylesheetValidator
 {
     /// <summary>The Pseudo-states that the Controls set.</summary>
-    static readonly string[] States = ["active", "checked", "expanded", "focus", "hover", "open", "selected"];
+    static readonly string[] States = ["active", "checked", "expanded", "focus", "focus-within", "hover", "open", "selected"];
 
     /// <summary>The Control types by the name that Selectors use.</summary>
-    static readonly Lazy<Dictionary<string, Type>> Types = new(FindTypes);
+    static readonly Lazy<Dictionary<string, Type>> Types = new(() => FindTypes(typeof(Control).Assembly));
 
     /// <summary>Finds the <c>var(--name</c> references in a value.</summary>
     /// <returns>The regular expression.</returns>
     [GeneratedRegex(@"var\(\s*(--[^\s,)]+)")]
     private static partial Regex References();
 
-    /// <summary>Finds the Control types and sets up their Styled properties.</summary>
-    /// <returns>The types by name.</returns>
-    static Dictionary<string, Type> FindTypes()
+    /// <summary>Adds the Controls of another assembly, such as an add-on library, to the types that Selectors may name.</summary>
+    /// <param name="assembly">The assembly. Its public Control types are found by name and their Styled properties are set up.</param>
+    /// <remarks>Call it before validating. A type name that Silo.Controls already has is kept.</remarks>
+    /// <example>
+    /// <code language="csharp">
+    /// StylesheetValidator.AddControls(typeof(QuantityBox).Assembly);
+    /// </code>
+    /// </example>
+    public static void AddControls(System.Reflection.Assembly assembly)
     {
-        var types = typeof(Control).Assembly.GetTypes()
+        ArgumentNullException.ThrowIfNull(assembly);
+
+        var types = Types.Value;
+
+        foreach (var (name, type) in FindTypes(assembly))
+            types.TryAdd(name, type);
+    }
+
+    /// <summary>Finds the Control types of an assembly and sets up their Styled properties.</summary>
+    /// <param name="assembly">The assembly.</param>
+    /// <returns>The types by name.</returns>
+    static Dictionary<string, Type> FindTypes(System.Reflection.Assembly assembly)
+    {
+        var types = assembly.GetTypes()
             .Where(t => typeof(Control).IsAssignableFrom(t) && t.IsPublic && !t.IsAbstract)
             .ToDictionary(t => t.Name, StringComparer.Ordinal);
 
-        foreach (var type in typeof(Control).Assembly.GetTypes().Where(t => typeof(Control).IsAssignableFrom(t)))
+        foreach (var type in assembly.GetTypes().Where(t => typeof(Control).IsAssignableFrom(t)))
             System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 
         types["Control"] = typeof(Control);
