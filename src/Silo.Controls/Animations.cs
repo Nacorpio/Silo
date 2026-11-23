@@ -23,4 +23,19 @@ public static class Animations
 
         return false;
     }
+
+    /// <summary>Lets every Control in a tree act on the passing of time by calling <see cref="Control.OnFrame"/> on it.</summary>
+    /// <param name="root">The root of the tree.</param>
+    /// <returns><see langword="true"/> when any Control changed, so that styles need to be applied again.</returns>
+    public static bool Tick(Control root)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+
+        var changed = root.OnFrame();
+
+        foreach (var child in root.Children.ToArray())
+            changed |= Tick((Control)child);
+
+        return changed;
+    }
 }

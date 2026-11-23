@@ -360,6 +360,9 @@ public sealed unsafe class SdlWindow : IDisposable
         if (animating)
             dirty = true;
 
+        if (animating && Animations.Tick(root))
+            Restyle();
+
         if (dirty && !closed)
             Draw();
     }
