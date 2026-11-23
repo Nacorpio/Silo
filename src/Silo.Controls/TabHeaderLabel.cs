@@ -29,11 +29,15 @@ internal sealed class TabHeaderLabel(TabHeader owner) : Control
         base.OnRender(context, bounds);
 
         var content = ContentBox(bounds);
-        var (icon, text, gap) = Parts();
+        var (icon, natural, gap) = Parts();
 
         var position = owner.GetValue(TabHeader.IconPositionProperty);
         var style = CurrentTextStyle();
         var color = GetValue(ColorProperty);
+
+        var room = position == IconPosition.Top ? content.Width : content.Width - icon.Width - gap;
+        var shown = TextTrimming.Trim(Measurer(), Text, style, Math.Max(0, room));
+        var text = shown == Text ? natural : (shown.Length == 0 ? default : Measurer().Measure(shown, style));
 
         if (position == IconPosition.Top)
         {
@@ -42,8 +46,8 @@ internal sealed class TabHeaderLabel(TabHeader owner) : Control
 
             DrawIcon(context, content.X + ((content.Width - icon.Width) / 2), top, icon);
 
-            if (Text.Length > 0)
-                context.DrawText(Text, content.X + ((content.Width - text.Width) / 2), top + icon.Height + gap, style, color);
+            if (shown.Length > 0)
+                context.DrawText(shown, content.X + ((content.Width - text.Width) / 2), top + icon.Height + gap, style, color);
 
             return;
         }
@@ -55,8 +59,8 @@ internal sealed class TabHeaderLabel(TabHeader owner) : Control
 
         DrawIcon(context, iconX, content.Y + ((content.Height - icon.Height) / 2), icon);
 
-        if (Text.Length > 0)
-            context.DrawText(Text, textX, content.Y + ((content.Height - text.Height) / 2), style, color);
+        if (shown.Length > 0)
+            context.DrawText(shown, textX, content.Y + ((content.Height - text.Height) / 2), style, color);
     }
 
     /// <summary>Draws the icon scaled into a square.</summary>
