@@ -264,6 +264,7 @@
       "font-size": "14px",
       "font-weight": "bold",
     },
+    "Icon": { "color": "var(--text)" },
     "CheckBox": {
       "color": "var(--text)",
       "padding": "2px 2px 2px 26px",
