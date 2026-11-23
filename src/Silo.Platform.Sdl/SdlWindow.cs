@@ -121,6 +121,7 @@ public sealed unsafe class SdlWindow : IDisposable
         overlays = new OverlayLayer { TextMeasurer = root.TextMeasurer };
         root.Overlays = overlays;
         tooltips = new TooltipPresenter(overlays);
+        Toasts = new ToastHost(overlays);
         overlays.Changed += (_, _) => Restyle();
         router = new PointerRouter(root, overlays);
 
@@ -150,6 +151,10 @@ public sealed unsafe class SdlWindow : IDisposable
 
     /// <summary>Gets the layer for menus, drop-down lists and tooltips, which are drawn above the root Control.</summary>
     public OverlayLayer Overlays => overlays;
+
+    /// <summary>Gets the host that shows toasts in a corner of the window.</summary>
+    /// <remarks>Use it from the UI thread, or from <see cref="Post"/>.</remarks>
+    public ToastHost Toasts { get; }
 
     /// <summary>Gets the id that SDL puts in the events of this window.</summary>
     public uint Id => id;
@@ -206,7 +211,7 @@ public sealed unsafe class SdlWindow : IDisposable
     {
         SDL_Event e;
 
-        var wait = Open.Select(open => open.TooltipDueMilliseconds()).Prepend(timeoutMilliseconds).Min();
+        var wait = Open.Select(open => open.DueMilliseconds()).Prepend(timeoutMilliseconds).Min();
 
         if (SDL3.SDL_WaitEventTimeout(&e, wait))
             do
@@ -312,17 +317,23 @@ public sealed unsafe class SdlWindow : IDisposable
         while (posted.TryDequeue(out var work))
             work();
 
-        if (tooltips.Tick(clock.Elapsed))
+        if (tooltips.Tick(clock.Elapsed) | Toasts.Tick(clock.Elapsed))
             dirty = true;
 
         if (dirty && !closed)
             Draw();
     }
 
-    /// <summary>Tells how long until a tooltip is due, so that the event loop wakes up for it.</summary>
-    /// <returns>The time in milliseconds, or <see cref="int.MaxValue"/> when no tooltip is waiting.</returns>
-    int TooltipDueMilliseconds()
-        => tooltips.DueIn(clock.Elapsed) is { } due ? (int)Math.Ceiling(due.TotalMilliseconds) : int.MaxValue;
+    /// <summary>Tells how long until a tooltip is due or a toast runs out, so that the event loop wakes up for it.</summary>
+    /// <returns>The time in milliseconds, or <see cref="int.MaxValue"/> when nothing is waiting.</returns>
+    int DueMilliseconds()
+    {
+        var tooltip = tooltips.DueIn(clock.Elapsed);
+        var toast = Toasts.DueIn();
+        var due = tooltip is null ? toast : toast is null ? tooltip : tooltip < toast ? tooltip : toast;
+
+        return due is { } time ? (int)Math.Ceiling(time.TotalMilliseconds) : int.MaxValue;
+    }
 
     /// <summary>Applies the Stylesheets to the tree and asks for a frame.</summary>
     void Restyle()

@@ -73,6 +73,7 @@ public sealed class ThemeMatrix : Box
         new("Separator", "Layout", () => new Separator(), ["normal"]),
         new("Expander", "Layout", CreateExpander, ["normal"]),
         new("TabView", "Layout", CreateTabView, ["normal"]),
+        new("Toast", "Layout", CreateToasts, ["normal"]),
         new("Toolbar", "Menus and dialogs", CreateToolbar, ["normal"]),
         new("MenuBar", "Menus and dialogs", CreateMenuBar, ["normal"]),
         new("ContextMenu", "Menus and dialogs", CreateContextMenu, ["normal"]),
@@ -175,6 +176,21 @@ public sealed class ThemeMatrix : Box
         dialog.AddButton("OK");
 
         return dialog;
+    }
+
+    /// <summary>Creates a column of one Toast of each severity: a plain one, one with a title, one with an icon and an action, and one that failed.</summary>
+    static Box CreateToasts()
+    {
+        var column = new Box();
+
+        column.AddClass("toasts");
+
+        column.Children.Add(new Toast { Message = "Settings saved", Severity = ToastSeverity.Success });
+        column.Children.Add(new Toast { Message = "3 files changed", Title = "Heads up", Icon = Dot, ActionText = "Undo" });
+        column.Children.Add(new Toast { Message = "Disk almost full", Severity = ToastSeverity.Warning });
+        column.Children.Add(new Toast { Message = "Could not connect", Severity = ToastSeverity.Error });
+
+        return column;
     }
 
     /// <summary>Gets a small round mask icon, which takes the text color of the Control that shows it.</summary>
