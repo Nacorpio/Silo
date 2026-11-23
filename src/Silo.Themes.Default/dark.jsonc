@@ -6,6 +6,7 @@
     "--text": "#f3f4f6",
     "--border": "#4b5563",
     "--track": "#374151",
+    "--skeleton-shine": "#ffffff1a",
     "--muted": "#6b7280",
     "--tooltip": "#374151",
     "--tooltip-text": "#f9fafb",
