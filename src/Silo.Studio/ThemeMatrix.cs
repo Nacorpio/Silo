@@ -106,6 +106,7 @@ public sealed class ThemeMatrix : Box
         new("Card", "Panels", CreateCard, ["normal"]),
         new("ScrollBar", "Panels", CreateScrollBar, ["normal", "hover", "pressed"]),
         new("BusyIndicator", "Panels", CreateBusyIndicator, ["normal"]),
+        new("SplitPane", "Panels", CreateSplitPane, ["normal"]),
         new("InfoBar", "Panels", CreateInfoBars, ["normal"]),
         new("Breadcrumb", "Navigation", () => new Breadcrumb { Items = ["Home", "Projects", "Silo", "Readme"] }, ["normal"]),
         new("Pager", "Navigation", () => new Pager { PageCount = 20, CurrentPage = 10 }, ["normal"]),
@@ -235,6 +236,21 @@ public sealed class ThemeMatrix : Box
         dialog.SetValue(WidthProperty, new Silo.Styling.Values.Length(260, Silo.Styling.Values.LengthUnit.Px));
 
         return dialog;
+    }
+
+    /// <summary>Creates a SplitPane with a narrow pane on the left and a wide one on the right.</summary>
+    static SplitPane CreateSplitPane()
+    {
+        var split = new SplitPane();
+
+        split.SetValue(WidthProperty, new Silo.Styling.Values.Length(300, Silo.Styling.Values.LengthUnit.Px));
+        split.SetValue(HeightProperty, new Silo.Styling.Values.Length(70, Silo.Styling.Values.LengthUnit.Px));
+        split.SetValue(FlexShrinkProperty, 0);
+
+        split.AddPane(new TextBlock { Text = "Files" }, minSize: 60, size: 100);
+        split.AddPane(new TextBlock { Text = "Editor" }, minSize: 80);
+
+        return split;
     }
 
     /// <summary>Creates a busy card: a Card dimmed by a BusyIndicator with a message.</summary>

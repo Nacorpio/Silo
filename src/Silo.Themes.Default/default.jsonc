@@ -739,6 +739,12 @@
       "&:hover": { "scrollbar-thumb-color": "var(--accent-hover)" },
       "&:active": { "scrollbar-thumb-color": "var(--accent-active)" },
     },
+    "SplitPane": {
+      "divider-size": "6px",
+      "divider-color": "var(--track)",
+      "divider-active-color": "var(--accent)",
+      "divider-focus-color": "var(--accent-hover)",
+    },
     "BusyIndicator": { "flex-direction": "column" },
     ".busy-overlay": {
       "flex-direction": "column",
