@@ -94,6 +94,14 @@ public class Terminal : Control, IScrollable, IPointerHandler
 
     readonly TerminalParser parser;
 
+    ITerminalSession? session;
+
+    Action<Action>? dispatcher;
+
+    EventHandler<TerminalOutputEventArgs>? outputHandler;
+
+    EventHandler<TerminalExitedEventArgs>? exitedHandler;
+
     (int Line, int Column)? anchor;
 
     (int Line, int Column) head;
@@ -122,7 +130,7 @@ public class Terminal : Control, IScrollable, IPointerHandler
     public Terminal(int columns = 80, int rows = 24)
     {
         buffer = new TerminalBuffer(columns, rows);
-        parser = new TerminalParser(buffer) { Reply = text => Input?.Invoke(this, new TerminalInputEventArgs(text)) };
+        parser = new TerminalParser(buffer) { Reply = Raise };
         parser.Bell += (_, _) => Bell?.Invoke(this, EventArgs.Empty);
         buffer.TitleChanged += (_, _) => TitleChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -138,6 +146,12 @@ public class Terminal : Control, IScrollable, IPointerHandler
 
     /// <summary>Raised when the program rings the bell.</summary>
     public event EventHandler? Bell;
+
+    /// <summary>Raised, on the dispatcher's thread, when the attached session has ended.</summary>
+    public event EventHandler<TerminalExitedEventArgs>? Exited;
+
+    /// <summary>Gets the attached session, or <see langword="null"/> when there is none.</summary>
+    public ITerminalSession? Session => session;
 
     /// <summary>Gets the screen and scrollback.</summary>
     public TerminalBuffer Buffer => buffer;
@@ -194,6 +208,46 @@ public class Terminal : Control, IScrollable, IPointerHandler
 
             return string.Join('\n', lines);
         }
+    }
+
+    /// <summary>
+    /// Connects a session: its output is written to the terminal, what is typed goes to it, size changes are passed on, and it is started
+    /// with the current size. A session that was attached before is detached.
+    /// </summary>
+    /// <param name="session">The session.</param>
+    /// <param name="dispatcher">
+    /// Runs work on the thread that owns the terminal, since sessions write from other threads. For a window use
+    /// <c>work =&gt; window.Post(work)</c>; without one the work runs on the thread that calls.
+    /// </param>
+    public void Attach(ITerminalSession session, Action<Action>? dispatcher = null)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        Detach();
+
+        this.session = session;
+        this.dispatcher = dispatcher;
+
+        outputHandler = (_, e) => Run(() => Write(e.Data));
+        exitedHandler = (_, e) => Run(() => Exited?.Invoke(this, e));
+
+        session.Output += outputHandler;
+        session.Exited += exitedHandler;
+
+        session.Start(buffer.Columns, buffer.Rows);
+    }
+
+    /// <summary>Disconnects the session, if there is one. The session is not disposed.</summary>
+    public void Detach()
+    {
+        if (session is null)
+            return;
+
+        session.Output -= outputHandler;
+        session.Exited -= exitedHandler;
+
+        session = null;
+        dispatcher = null;
     }
 
     /// <summary>Gives the output of the program to the terminal.</summary>
@@ -309,7 +363,7 @@ public class Terminal : Control, IScrollable, IPointerHandler
         scrollOffset = 0;
         lastInput = AnimationTime;
 
-        Input?.Invoke(this, new TerminalInputEventArgs(text));
+        Raise(text);
 
         return true;
     }
@@ -472,6 +526,7 @@ public class Terminal : Control, IScrollable, IPointerHandler
         scrollOffset = Math.Min(scrollOffset, buffer.ScrollbackCount);
 
         Resized?.Invoke(this, new TerminalResizedEventArgs(columns, rows));
+        session?.Resize(columns, rows);
 
         return false;
     }
@@ -792,6 +847,24 @@ public class Terminal : Control, IScrollable, IPointerHandler
     /// <summary>Puts two cells in reading order.</summary>
     static ((int Line, int Column) From, (int Line, int Column) To) Ordered((int Line, int Column) a, (int Line, int Column) b) =>
         a.Line < b.Line || (a.Line == b.Line && a.Column <= b.Column) ? (a, b) : (b, a);
+
+    /// <summary>Sends text to the program: raises <see cref="Input"/> and gives it to the session.</summary>
+    /// <param name="text">The text.</param>
+    void Raise(string text)
+    {
+        Input?.Invoke(this, new TerminalInputEventArgs(text));
+        session?.Send(text);
+    }
+
+    /// <summary>Runs work on the thread of the terminal, through the dispatcher when there is one.</summary>
+    /// <param name="work">The work.</param>
+    void Run(Action work)
+    {
+        if (dispatcher is { } post)
+            post(work);
+        else
+            work();
+    }
 
     /// <summary>Keeps the view still while new lines go to the scrollback, if the user scrolled back.</summary>
     /// <param name="before">The scrollback count before the output.</param>
