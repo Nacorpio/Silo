@@ -72,6 +72,9 @@ public class ContextMenu : ListView
     /// <summary>The text of each entry without the ampersand, with the index of its access key (or -1) and the key.</summary>
     IReadOnlyList<(string Text, int Index, char? Key)> labels = [];
 
+    /// <summary>Whether any entry has a glyph, which takes the room of an icon.</summary>
+    bool hasGlyphs;
+
     /// <summary>The menu that this menu is a submenu of, or <see langword="null"/>.</summary>
     ContextMenu? parent;
 
@@ -121,6 +124,8 @@ public class ContextMenu : ListView
 
             Items = labels.Select(label => label.Text).ToList();
             Icons = entries.Select(entry => entry.Icon).ToList();
+
+            hasGlyphs = entries.Any(entry => entry.Glyph is not null);
         }
     }
 
@@ -219,6 +224,9 @@ public class ContextMenu : ListView
     protected override bool IsSelectable(int index) => !entries[index].IsSeparator && entries[index].IsEnabled;
 
     /// <inheritdoc/>
+    protected override double IconSpace => hasGlyphs && base.IconSpace == 0 ? IconSize + 6 : base.IconSpace;
+
+    /// <inheritdoc/>
     protected override double RowIndent(int index) => CheckRoom;
 
     /// <inheritdoc/>
@@ -279,6 +287,13 @@ public class ContextMenu : ListView
             context.FillRect(line, GetValue(SeparatorColorProperty));
 
             return;
+        }
+
+        if (entry.Glyph is { } glyph && entry.Icon is null)
+        {
+            var square = new Rect(content.X + TextInset + CheckRoom, top + ((RowHeight - IconSize) / 2), IconSize, IconSize);
+
+            Icon.Draw(context, glyph, square, color, 2);
         }
 
         if (entry.Children is not null)

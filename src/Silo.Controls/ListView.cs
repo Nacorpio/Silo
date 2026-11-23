@@ -142,10 +142,10 @@ public class ListView : Control, IScrollable
     public override bool IsFocusable => true;
 
     /// <summary>Gets the room that the icons take in front of the text in pixels, which is 0 when no row has an icon.</summary>
-    protected double IconSpace => hasIcons ? IconSize + IconGap : 0;
+    protected virtual double IconSpace => hasIcons ? IconSize + IconGap : 0;
 
     /// <summary>Gets the side of the square that the icons fit in, in pixels.</summary>
-    double IconSize => Math.Max(0, GetValue(IconSizeProperty));
+    protected double IconSize => Math.Max(0, GetValue(IconSizeProperty));
 
     /// <summary>Gets the height of a row in pixels.</summary>
     protected double RowHeight => Math.Max(1, GetValue(ItemHeightProperty));

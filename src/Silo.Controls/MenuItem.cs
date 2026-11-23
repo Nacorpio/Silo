@@ -20,6 +20,7 @@ namespace Silo;
 /// Give several entries of one list the same <see cref="GroupName"/> to make them radio items: picking one turns it on and the
 /// others of its group off. <see cref="IsEnabled"/> turns an entry off so that it is dimmed and cannot be picked, and
 /// <see cref="ShortcutText"/> shows a key combination at the right edge. The menu only displays the shortcut; it does not handle the key.
+/// <see cref="Glyph"/> picks a built-in vector glyph as the icon, instead of an image.
 /// </para>
 /// </remarks>
 /// <example>
@@ -49,6 +50,12 @@ public sealed record MenuItem(string Text, Action? Click = null, IImage? Icon = 
 
     /// <summary>Gets whether the entry can be picked. The default is <see langword="true"/>. An entry that is off is dimmed and skipped by the keyboard.</summary>
     public bool IsEnabled { get; init; } = true;
+
+    /// <summary>
+    /// Gets the name of a built-in vector glyph shown in front of the text, such as <c>check</c> or <c>search</c>, or <see langword="null"/>
+    /// for none. See <see cref="Glyphs"/>. It is tinted by the text color. When the entry also has an <c>Icon</c>, the icon is drawn.
+    /// </summary>
+    public string? Glyph { get; init; }
 
     /// <summary>Gets the text of the key combination shown at the right edge, such as <c>Ctrl+C</c>, or <see langword="null"/> for none.</summary>
     public string? ShortcutText { get; init; }

@@ -102,3 +102,24 @@ public class ContextMenuExtrasTests
         Assert.Equal(plain.Bounds.Width + 22 + 6 * 7 + 24, rich.Bounds.Width);
     }
 }
+
+public class ContextMenuGlyphTests
+{
+    [Fact]
+    public void A_glyph_takes_the_room_of_an_icon_and_shifts_the_text()
+    {
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+        var plain = new ContextMenu { Entries = [new MenuItem("Copy")] };
+        var withGlyph = new ContextMenu { Entries = [new MenuItem("Copy") { Glyph = "plus" }] };
+
+        foreach (var menu in new[] { plain, withGlyph })
+        {
+            root.Children.Add(menu);
+        }
+
+        root.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read("""{ "rules": { "Box": { "align-items": "start" } } }""", "t.jsonc")]));
+        root.Arrange(new Size(300, 200));
+
+        Assert.True(withGlyph.Bounds.Width > plain.Bounds.Width);
+    }
+}

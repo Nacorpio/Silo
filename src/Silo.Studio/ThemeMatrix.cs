@@ -194,14 +194,14 @@ public sealed class ThemeMatrix : Box
     {
         var entries = new List<MenuItem>
         {
-            new("&Copy") { ShortcutText = "Ctrl+C" },
-            new("&Paste") { ShortcutText = "Ctrl+V", IsEnabled = false },
+            new("&Copy") { ShortcutText = "Ctrl+C", Glyph = "plus" },
+            new("&Paste") { ShortcutText = "Ctrl+V", IsEnabled = false, Glyph = "list" },
             MenuItem.Separator,
             new("&Word wrap") { IsChecked = true },
             new("&Small") { IsChecked = false, GroupName = "size" },
             new("&Large") { IsChecked = true, GroupName = "size" },
             MenuItem.Separator,
-            new("&Recent") { Children = [new MenuItem("a.txt")] },
+            new("&Recent") { Glyph = "home", Children = [new MenuItem("a.txt")] },
         };
 
         var menu = new ContextMenu { Entries = entries, SelectedIndex = 0 };
