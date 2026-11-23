@@ -110,9 +110,9 @@ public sealed class ThemeMatrix : Box
             }.Select(row => (object)row).ToList(),
         };
 
-        grid.Columns.Add(new DataGridColumn("Name", row => ((ValueTuple<string, string, double>)row).Item1) { Width = 74 });
-        grid.Columns.Add(new DataGridColumn("Kind", row => ((ValueTuple<string, string, double>)row).Item2) { Width = 74 });
-        grid.Columns.Add(new DataGridColumn("Size", row => ((ValueTuple<string, string, double>)row).Item3) { Width = 60, Format = "N1", Alignment = TextAlign.Right });
+        grid.Columns.Add(new DataGridColumn("Name", row => ((ValueTuple<string, string, double>)row).Item1) { Width = 80, Icon = Dot, IconBinding = _ => Dot });
+        grid.Columns.Add(new DataGridColumn("Kind", row => ((ValueTuple<string, string, double>)row).Item2) { Width = 60 });
+        grid.Columns.Add(new DataGridColumn("Size", row => ((ValueTuple<string, string, double>)row).Item3) { Width = 68, Format = "N1", Alignment = TextAlign.Right });
 
         grid.SortBy(grid.Columns[2]);
 

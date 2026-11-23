@@ -1,4 +1,5 @@
 using System.Globalization;
+using Silo.Rendering;
 
 namespace Silo;
 
@@ -42,6 +43,14 @@ public sealed class DataGridColumn
 
     /// <summary>Gets or sets the function that reads the value of a cell from a row.</summary>
     public Func<object, object?> Binding { get; set; }
+
+    /// <summary>Gets or sets the icon in front of the header text. The default is <see langword="null"/>, which shows none.</summary>
+    /// <remarks>An icon that is a mask (<see cref="IImage.IsMask"/>) is drawn in the color of the header text.</remarks>
+    public IImage? Icon { get; set; }
+
+    /// <summary>Gets or sets the function that picks the icon in front of the text of a cell from its row. The default is <see langword="null"/>, which shows none.</summary>
+    /// <remarks>A function that returns <see langword="null"/> for a row leaves that cell without an icon, and the text does not move.</remarks>
+    public Func<object, IImage?>? IconBinding { get; set; }
 
     /// <summary>Gets or sets the format string that is used for values that are <see cref="IFormattable"/>, such as <c>"N2"</c> or <c>"d"</c>. The default is <see langword="null"/>.</summary>
     public string? Format { get; set; }

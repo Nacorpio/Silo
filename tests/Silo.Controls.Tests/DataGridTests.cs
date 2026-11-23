@@ -315,4 +315,47 @@ public class DataGridTests
         Assert.True(router.Leave());
         Assert.False(grid.PointerLeave());
     }
+
+    [Fact]
+    public void A_header_icon_is_drawn_in_front_of_the_header_text()
+    {
+        var (root, grid) = Setup();
+        var icon = new FakeImage(8, 8);
+
+        grid.Columns[0].Icon = icon;
+
+        var commands = Frame(root);
+        var image = commands.OfType<DrawImageCommand>().Single();
+        var header = commands.OfType<DrawTextCommand>().Single(c => c.Text == "Name");
+
+        Assert.Equal(icon, image.Image);
+        Assert.Equal(16, image.Destination.Width);
+        Assert.Equal(image.Destination.X + 16 + 6, header.X);
+    }
+
+    [Fact]
+    public void A_cell_icon_comes_from_the_binding_and_a_mask_takes_the_text_color()
+    {
+        var (root, grid) = Setup();
+        var mask = new FakeMask(8, 8);
+
+        grid.Columns[0].IconBinding = row => ((Person)row).Age > 40 ? mask : null;
+        grid.SelectedIndex = 0;
+
+        var commands = Frame(root);
+        var drawn = commands.OfType<DrawMaskCommand>().ToList();
+
+        Assert.Equal(2, drawn.Count);
+        Assert.Equal(new Silo.Styling.Values.Color(255, 255, 255), drawn[0].Color);
+        Assert.NotEqual(drawn[0].Color, drawn[1].Color);
+    }
+
+    static List<DrawCommand> Frame(Box root)
+    {
+        var builder = new DisplayListBuilder();
+
+        root.Render(builder);
+
+        return [.. builder.Build().Commands];
+    }
 }

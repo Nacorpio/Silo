@@ -22,8 +22,13 @@ namespace Silo;
 /// <para>
 /// The look comes from styled properties, since the grid draws its parts itself: <c>row-height</c>, <c>header-height</c>,
 /// <c>header-background</c>, <c>header-color</c>, <c>grid-color</c> (the lines between rows and columns),
-/// <c>alternate-row-color</c> (zebra stripes, transparent by default), <c>hover-color</c>, <c>selection-color</c> and
-/// <c>selection-text-color</c>. Give it a <c>height</c>, since it has no content to size itself from.
+/// <c>alternate-row-color</c> (zebra stripes, transparent by default), <c>hover-color</c>, <c>selection-color</c>,
+/// <c>selection-text-color</c>, and <c>icon-size</c> and <c>icon-gap</c> for the icons of the columns. Give it a <c>height</c>, since it has no content to size itself from.
+/// </para>
+/// <para>
+/// A column can have an <see cref="DataGridColumn.Icon"/> in its header and an <see cref="DataGridColumn.IconBinding"/> for the
+/// icons in its cells. They stand in front of the text and are scaled to fit a square of <c>icon-size</c>; an icon that is a
+/// mask is drawn in the text color of its cell, so it follows the selection.
 /// </para>
 /// <para>The <see cref="PointerRouter"/> drives it through <see cref="IPointerHandler"/> and <see cref="PointerMove"/>.</para>
 /// </remarks>
@@ -61,6 +66,14 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     /// <summary>The height of the header row in pixels.</summary>
     public static readonly StyledProperty<double> HeaderHeightProperty =
         StyledProperty.Register<DataGrid, double>("header-height", 30, ValueParsers.Pixels);
+
+    /// <summary>The width and height of the icons of the columns in pixels.</summary>
+    public static readonly StyledProperty<double> IconSizeProperty =
+        StyledProperty.Register<DataGrid, double>("icon-size", 16, ValueParsers.Pixels);
+
+    /// <summary>The space between an icon and the text in pixels.</summary>
+    public static readonly StyledProperty<double> IconGapProperty =
+        StyledProperty.Register<DataGrid, double>("icon-gap", 6, ValueParsers.Pixels);
 
     /// <summary>The background of the header row.</summary>
     public static readonly StyledProperty<Color> HeaderBackgroundProperty =
@@ -537,34 +550,50 @@ public class DataGrid : Control, IScrollable, IPointerHandler
 
         for (var i = 0; i < Columns.Count; i++)
         {
-            DrawText(context, Columns[i].TextOf(source), new Rect(x, top, widths[i], RowHeight), Columns[i].Alignment, color, CurrentTextStyle());
+            var icon = Columns[i].IconBinding?.Invoke(source);
+
+            DrawCell(context, Columns[i].TextOf(source), icon, new Rect(x, top, widths[i], RowHeight), Columns[i].Alignment, color, CurrentTextStyle());
 
             x += widths[i];
         }
     }
 
-    /// <summary>Draws the text of a cell or header, clipped to it.</summary>
+    /// <summary>Draws the icon and the text of a cell or header, clipped to it.</summary>
     /// <param name="context">The context to draw on.</param>
     /// <param name="text">The text.</param>
+    /// <param name="icon">The icon in front of the text, or <see langword="null"/>.</param>
     /// <param name="cell">The area of the cell.</param>
-    /// <param name="alignment">Where the text stands in it.</param>
-    /// <param name="color">The text color.</param>
+    /// <param name="alignment">Where the icon and the text stand in it, as one.</param>
+    /// <param name="color">The text color, which also fills a mask icon.</param>
     /// <param name="style">The font.</param>
-    void DrawText(IDrawingContext context, string text, Rect cell, TextAlign alignment, Color color, TextStyle style)
+    void DrawCell(IDrawingContext context, string text, IImage? icon, Rect cell, TextAlign alignment, Color color, TextStyle style)
     {
         var size = Measurer().Measure(text, style);
         var room = Math.Max(0, cell.Width - (2 * CellInset));
+        var iconSize = Math.Max(0, GetValue(IconSizeProperty));
+        var iconSpace = icon is null ? 0 : iconSize + Math.Max(0, GetValue(IconGapProperty));
+        var spare = Math.Max(0, room - iconSpace - size.Width);
 
         var x = alignment switch
         {
-            TextAlign.Right => cell.X + CellInset + Math.Max(0, room - size.Width),
-            TextAlign.Center => cell.X + CellInset + (Math.Max(0, room - size.Width) / 2),
+            TextAlign.Right => cell.X + CellInset + spare,
+            TextAlign.Center => cell.X + CellInset + (spare / 2),
             _ => cell.X + CellInset,
         };
 
         context.Save();
         context.ClipRect(new Rect(cell.X + CellInset, cell.Y, room, cell.Height));
-        context.DrawText(text, x, cell.Y + (Math.Max(0, cell.Height - size.Height) / 2), style, color);
+
+        if (icon is not null)
+        {
+            var square = new Rect(x, cell.Y + ((cell.Height - iconSize) / 2), iconSize, iconSize);
+            var destination = Image.Fit(icon, square);
+
+            if (destination.Width > 0)
+                Image.Draw(context, icon, destination, color);
+        }
+
+        context.DrawText(text, x + iconSpace, cell.Y + (Math.Max(0, cell.Height - size.Height) / 2), style, color);
         context.Restore();
     }
 
@@ -610,7 +639,7 @@ public class DataGrid : Control, IScrollable, IPointerHandler
             var sorted = Columns[i] == sortColumn;
             var label = sorted ? cell with { Width = Math.Max(0, cell.Width - ArrowSpace) } : cell;
 
-            DrawText(context, Columns[i].Header, label, Columns[i].Alignment, color, style);
+            DrawCell(context, Columns[i].Header, Columns[i].Icon, label, Columns[i].Alignment, color, style);
 
             if (sorted)
                 DrawArrow(context, new Rect(cell.Right - ArrowSpace, cell.Y, 12, cell.Height), color, sortDescending);
