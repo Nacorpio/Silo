@@ -62,6 +62,13 @@ public sealed class ThemeMatrix : Box
         new("Slider", "Values and lists", () => new Slider { Value = 0.6 }, ["normal", "hover", "pressed"]),
         new("ProgressBar", "Values and lists", () => new ProgressBar { Value = 0.6 }, ["normal"]),
         new("ComboBox", "Values and lists", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
+        new("CheckedListBox", "Values and lists", CreateCheckedListBox, ["normal", "focus"]),
+        new("SegmentedControl", "Inputs", () => new SegmentedControl { Items = ["Day", "Week", "Month"], SelectedIndex = 1 }, ["normal"]),
+        new("RadioGroup", "Inputs", CreateRadioGroup, ["normal"]),
+        new("Rating", "Inputs", () => new Rating { Value = 3, AllowHalf = true }, ["normal", "hover", "focus"]),
+        new("RangeSlider", "Inputs", () => new RangeSlider { Minimum = 0, Maximum = 100, Lower = 20, Upper = 70 }, ["normal", "hover", "pressed"]),
+        new("TokenBox", "Inputs", CreateTokenBox, ["normal", "focus"]),
+        new("FormField", "Inputs", CreateFormFields, ["normal"]),
         new("DataGrid", "Data", CreateDataGrid, ["normal", "focus"]),
         new("ListView", "Data", () => new ListView { Items = ["Row 1", "Row 2", "Row 3"], SelectedIndex = 1 }, ["normal", "hover"]),
         new("TreeView", "Data", CreateTreeView, ["normal", "hover", "focus"]),
@@ -269,6 +276,56 @@ public sealed class ThemeMatrix : Box
         column.Children.Add(new InfoBar { Title = "Error", Message = "Could not connect", Severity = Severity.Error });
 
         return column;
+    }
+
+    /// <summary>Creates a RadioGroup with three options, the second on.</summary>
+    static RadioGroup CreateRadioGroup()
+    {
+        var group = new RadioGroup();
+
+        group.Add("Small");
+        group.Add("Medium");
+        group.Add("Large");
+
+        group.SelectedIndex = 1;
+
+        return group;
+    }
+
+    /// <summary>Creates a TokenBox with two tokens.</summary>
+    static TokenBox CreateTokenBox()
+    {
+        var box = new TokenBox();
+
+        box.Add("bug");
+        box.Add("docs");
+        box.Entry.Placeholder = "Add";
+
+        return box;
+    }
+
+    /// <summary>Creates a column of a FormField with help text and one with an error.</summary>
+    static Box CreateFormFields()
+    {
+        var column = new Box();
+
+        column.AddClass("forms");
+
+        column.Children.Add(new FormField { Label = "Name", Content = new TextBox { Text = "Ada" }, HelpText = "Your full name", IsRequired = true });
+        column.Children.Add(new FormField { Label = "Age", Content = new TextBox { Text = "12" }, Error = "Must be an adult" });
+
+        return column;
+    }
+
+    /// <summary>Creates a CheckedListBox with two checked rows.</summary>
+    static CheckedListBox CreateCheckedListBox()
+    {
+        var list = new CheckedListBox { Items = ["Cheese", "Olives", "Onions", "Peppers"], SelectedIndex = 1 };
+
+        list.SetChecked(0, true);
+        list.SetChecked(2, true);
+
+        return list;
     }
 
     /// <summary>Creates a column of one Toast of each severity: a plain one, one with a title, one with an icon and an action, and one that failed.</summary>
