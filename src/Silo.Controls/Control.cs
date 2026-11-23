@@ -322,6 +322,15 @@ public abstract class Control : Element, ILayoutNode
         if (background.A > 0)
             context.FillRect(bounds, background, GetValue(BorderRadiusProperty));
 
+        DrawBorder(context, bounds);
+    }
+
+    /// <summary>Draws the border of the Control, in the shape of its <c>border-radius</c>, when it has one.</summary>
+    /// <param name="context">The context to draw on.</param>
+    /// <param name="bounds">The border box in the Control's own coordinates.</param>
+    /// <remarks>A Control that paints its own background, such as a picture, calls this after it to put the border on top.</remarks>
+    protected void DrawBorder(IDrawingContext context, Rect bounds)
+    {
         var border = BorderInsets(bounds.Width);
         var borderColor = GetValue(BorderColorProperty);
 

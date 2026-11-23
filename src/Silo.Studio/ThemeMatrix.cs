@@ -69,6 +69,14 @@ public sealed class ThemeMatrix : Box
         new("Calendar", "Dates", CreateCalendar, ["normal"]),
         new("ColorPicker", "Colors", () => new ColorPicker { Color = new Color(59, 130, 246) }, ["normal", "hover", "focus"]),
         new("ColorPanel", "Colors", () => new ColorPanel { Color = new Color(236, 72, 153), ShowAlpha = true }, ["normal"]),
+        new("Label", "Display", CreateLabels, ["normal"]),
+        new("Badge", "Display", CreateBadges, ["normal"]),
+        new("Avatar", "Display", CreateAvatars, ["normal"]),
+        new("Icon", "Display", CreateIcons, ["normal"]),
+        new("HyperlinkButton", "Display", () => new HyperlinkButton { Text = "Read the docs" }, ["normal", "hover", "pressed", "focus"]),
+        new("GroupBox", "Panels", () => new GroupBox { Header = "Options", Content = new TextBlock { Text = "Wrap lines" } }, ["normal"]),
+        new("Card", "Panels", CreateCard, ["normal"]),
+        new("InfoBar", "Panels", CreateInfoBars, ["normal"]),
         new("TextBlock", "Layout", () => new TextBlock { Text = "Some text" }, ["normal"]),
         new("Separator", "Layout", () => new Separator(), ["normal"]),
         new("Expander", "Layout", CreateExpander, ["normal"]),
@@ -178,6 +186,91 @@ public sealed class ThemeMatrix : Box
         return dialog;
     }
 
+    /// <summary>Creates a column of a plain Label and a required one.</summary>
+    static Box CreateLabels()
+    {
+        var column = new Box();
+
+        column.AddClass("stack");
+
+        column.Children.Add(new Label { Text = "Name" });
+
+        var required = new Label { Text = "Email" };
+
+        required.AddClass("required");
+        column.Children.Add(required);
+
+        return column;
+    }
+
+    /// <summary>Creates a row of Badges: a count, a count above the maximum and one of each severity.</summary>
+    static Box CreateBadges()
+    {
+        var row = new Box();
+
+        row.AddClass("badges");
+
+        row.Children.Add(new Badge { Value = 7 });
+        row.Children.Add(new Badge { Value = 120 });
+        row.Children.Add(new Badge { Text = "New", Severity = Severity.Info });
+        row.Children.Add(new Badge { Text = "OK", Severity = Severity.Success });
+        row.Children.Add(new Badge { Text = "Low", Severity = Severity.Warning });
+        row.Children.Add(new Badge { Text = "Fail", Severity = Severity.Error });
+
+        return row;
+    }
+
+    /// <summary>Creates a row of Avatars with initials, and one with a picture.</summary>
+    static Box CreateAvatars()
+    {
+        var row = new Box();
+
+        row.AddClass("badges");
+
+        row.Children.Add(new Avatar { DisplayName = "Ada Lovelace" });
+        row.Children.Add(new Avatar { DisplayName = "Grace Hopper" });
+        row.Children.Add(new Avatar { DisplayName = "Linus" });
+        row.Children.Add(new Avatar { DisplayName = "Alan Turing" });
+
+        return row;
+    }
+
+    /// <summary>Creates a row with one Icon for each built-in glyph.</summary>
+    static Box CreateIcons()
+    {
+        var row = new Box();
+
+        row.AddClass("icons");
+
+        foreach (var name in Glyphs.Names)
+            row.Children.Add(new Icon { Glyph = name });
+
+        return row;
+    }
+
+    /// <summary>Creates a Card with a header, content and a footer.</summary>
+    static Card CreateCard() => new()
+    {
+        Header = new TextBlock { Text = "Build 42" },
+        Content = new TextBlock { Text = "Passed in 3 minutes" },
+        Footer = new TextBlock { Text = "2 hours ago" },
+    };
+
+    /// <summary>Creates a column of one InfoBar of each severity.</summary>
+    static Box CreateInfoBars()
+    {
+        var column = new Box();
+
+        column.AddClass("infobars");
+
+        column.Children.Add(new InfoBar { Title = "Update", Message = "Version 2 is ready", ActionText = "Restart", IsClosable = true });
+        column.Children.Add(new InfoBar { Message = "Settings saved", Severity = Severity.Success });
+        column.Children.Add(new InfoBar { Message = "Disk almost full", Severity = Severity.Warning, IsClosable = true });
+        column.Children.Add(new InfoBar { Title = "Error", Message = "Could not connect", Severity = Severity.Error });
+
+        return column;
+    }
+
     /// <summary>Creates a column of one Toast of each severity: a plain one, one with a title, one with an icon and an action, and one that failed.</summary>
     static Box CreateToasts()
     {
@@ -185,10 +278,10 @@ public sealed class ThemeMatrix : Box
 
         column.AddClass("toasts");
 
-        column.Children.Add(new Toast { Message = "Settings saved", Severity = ToastSeverity.Success });
+        column.Children.Add(new Toast { Message = "Settings saved", Severity = Severity.Success });
         column.Children.Add(new Toast { Message = "3 files changed", Title = "Heads up", Icon = Dot, ActionText = "Undo" });
-        column.Children.Add(new Toast { Message = "Disk almost full", Severity = ToastSeverity.Warning });
-        column.Children.Add(new Toast { Message = "Could not connect", Severity = ToastSeverity.Error });
+        column.Children.Add(new Toast { Message = "Disk almost full", Severity = Severity.Warning });
+        column.Children.Add(new Toast { Message = "Could not connect", Severity = Severity.Error });
 
         return column;
     }

@@ -217,7 +217,11 @@
           ]
         },
         "icon-size": {
-          "description": "A number. Declared by DataGrid, ListView, TabHeader.",
+          "description": "A number. Declared by DataGrid, Icon, ListView, TabHeader.",
+          "$ref": "#/$defs/scalar"
+        },
+        "icon-stroke": {
+          "description": "A number. Declared by Icon.",
           "$ref": "#/$defs/scalar"
         },
         "indent": {
@@ -294,6 +298,10 @@
         },
         "placeholder-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DatePicker, TextBox.",
+          "$ref": "#/$defs/scalar"
+        },
+        "required-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Label.",
           "$ref": "#/$defs/scalar"
         },
         "row-height": {

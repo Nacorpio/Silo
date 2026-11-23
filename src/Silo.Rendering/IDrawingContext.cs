@@ -55,6 +55,18 @@ public interface IDrawingContext
     /// <param name="cornerRadius">The radius of the corners in pixels. The default is 0 for square corners.</param>
     void FillRect(Rect rect, Color color, double cornerRadius = 0);
 
+    /// <summary>Limits drawing to a rectangle with rounded corners, until the matching <see cref="Restore"/>.</summary>
+    /// <param name="rect">The rectangle.</param>
+    /// <param name="cornerRadius">The radius of the corners in pixels. A radius of half the side or more makes a circle or a pill.</param>
+    void ClipRoundRect(Rect rect, double cornerRadius);
+
+    /// <summary>Draws a line through points, with round ends and joints.</summary>
+    /// <param name="points">The points, in order. Fewer than two draw nothing.</param>
+    /// <param name="color">The line color.</param>
+    /// <param name="width">The line width in pixels.</param>
+    /// <param name="closed"><see langword="true"/> to join the last point to the first.</param>
+    void StrokePolyline(IReadOnlyList<(double X, double Y)> points, Color color, double width, bool closed = false);
+
     /// <summary>Fills a rectangle with a gradient that changes evenly from one color to another along one axis.</summary>
     /// <param name="rect">The rectangle to fill.</param>
     /// <param name="from">The color at the left edge, or at the top edge when <paramref name="vertical"/> is set.</param>

@@ -139,6 +139,9 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
             changed |= handler.PointerDown(hx, hy);
         }
 
+        if (Find<Label>(hovered) is { } label)
+            changed |= label.PointerDown();
+
         if (Find<ComboBox>(hovered) is { } combo)
             changed |= combo.PointerDown();
 

@@ -233,7 +233,7 @@ public class ToastHostTests
     public void The_severity_is_a_class_and_the_parts_follow_what_is_set()
     {
         var (_, _, host, _, _) = Setup();
-        var toast = host.Show("Hi", "Title", ToastSeverity.Error, new FakeImage(8, 8), "Retry");
+        var toast = host.Show("Hi", "Title", Severity.Error, new FakeImage(8, 8), "Retry");
 
         Assert.Contains("error", toast.Classes);
         Assert.DoesNotContain("info", toast.Classes);
