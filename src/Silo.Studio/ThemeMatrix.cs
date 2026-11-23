@@ -84,6 +84,13 @@ public sealed class ThemeMatrix : Box
         new("GroupBox", "Panels", () => new GroupBox { Header = "Options", Content = new TextBlock { Text = "Wrap lines" } }, ["normal"]),
         new("Card", "Panels", CreateCard, ["normal"]),
         new("InfoBar", "Panels", CreateInfoBars, ["normal"]),
+        new("Breadcrumb", "Navigation", () => new Breadcrumb { Items = ["Home", "Projects", "Silo", "Readme"] }, ["normal"]),
+        new("Pager", "Navigation", () => new Pager { PageCount = 20, CurrentPage = 10 }, ["normal"]),
+        new("Accordion", "Navigation", CreateAccordion, ["normal"]),
+        new("StatusBar", "Shell", CreateStatusBar, ["normal"]),
+        new("Stepper", "Navigation", CreateStepper, ["normal"]),
+        new("Carousel", "Navigation", CreateCarousel, ["normal"]),
+        new("NavigationView", "Shell", CreateNavigationView, ["normal"]),
         new("TextBlock", "Layout", () => new TextBlock { Text = "Some text" }, ["normal"]),
         new("Separator", "Layout", () => new Separator(), ["normal"]),
         new("Expander", "Layout", CreateExpander, ["normal"]),
@@ -348,6 +355,53 @@ public sealed class ThemeMatrix : Box
 
         return column;
     }
+
+    /// <summary>Creates an Accordion with three sections, the second open.</summary>
+    static Accordion CreateAccordion()
+    {
+        var accordion = new Accordion();
+
+        accordion.Add("General", new TextBlock { Text = "Name and language" });
+        accordion.Add("Appearance", new TextBlock { Text = "Theme and font" });
+        accordion.Add("Advanced", new TextBlock { Text = "Cache and logs" });
+
+        accordion.ExpandedIndex = 1;
+
+        return accordion;
+    }
+
+    /// <summary>Creates a StatusBar with a text on each side and one in the middle.</summary>
+    static StatusBar CreateStatusBar()
+    {
+        var bar = new StatusBar();
+
+        bar.AddItem("Ready");
+        bar.AddItem("main.cs", bar.Center);
+        bar.AddItem("Ln 12, Col 4", bar.Right);
+
+        return bar;
+    }
+
+    /// <summary>Creates a Stepper at its second step.</summary>
+    static Stepper CreateStepper()
+        => new()
+        {
+            Steps = [new("Account", new TextBlock { Text = "Choose a name" }), new("Plan", new TextBlock { Text = "Pick a plan" }), new("Done", new TextBlock { Text = "All set" })],
+            CurrentStep = 1,
+        };
+
+    /// <summary>Creates a Carousel of three texts at the second one.</summary>
+    static Carousel CreateCarousel()
+        => new() { Items = [new TextBlock { Text = "First slide" }, new TextBlock { Text = "Second slide" }, new TextBlock { Text = "Third slide" }], SelectedIndex = 1 };
+
+    /// <summary>Creates a NavigationView with a header, three destinations and a page.</summary>
+    static NavigationView CreateNavigationView()
+        => new()
+        {
+            Items = [new("Home", "home"), new("Library", IsHeader: true), new("Search", "search"), new("Settings", "menu")],
+            SelectedIndex = 2,
+            Content = new TextBlock { Text = "Search page" },
+        };
 
     /// <summary>Creates a column of one Toast of each severity: a plain one, one with a title, one with an icon and an action, and one that failed.</summary>
     static Box CreateToasts()
