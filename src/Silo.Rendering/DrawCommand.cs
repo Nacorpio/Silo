@@ -75,6 +75,15 @@ public sealed record StrokePolylineCommand(IReadOnlyList<(double X, double Y)> P
     public override void Execute(IDrawingContext context) => context.StrokePolyline(Points, Color, Width, Closed);
 }
 
+/// <summary>Records <see cref="IDrawingContext.FillPolygon"/>.</summary>
+/// <param name="Points">The corners of the polygon.</param>
+/// <param name="Color">The fill color.</param>
+public sealed record FillPolygonCommand(IReadOnlyList<(double X, double Y)> Points, Color Color) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.FillPolygon(Points, Color);
+}
+
 /// <summary>Records <see cref="IDrawingContext.FillGradient"/>.</summary>
 /// <param name="Rect">The rectangle to fill.</param>
 /// <param name="From">The color at the start edge.</param>

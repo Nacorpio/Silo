@@ -59,6 +59,25 @@ public sealed class SkiaDrawingContext(SKCanvas canvas) : IDrawingContext
         => canvas.ClipRoundRect(new SKRoundRect(ToSkia(rect), (float)cornerRadius, (float)cornerRadius), antialias: true);
 
     /// <inheritdoc/>
+    public void FillPolygon(IReadOnlyList<(double X, double Y)> points, Color color)
+    {
+        if (points.Count < 3)
+            return;
+
+        using var path = new SKPath();
+        using var paint = new SKPaint { Color = ToSkia(color), IsAntialias = true, Style = SKPaintStyle.Fill };
+
+        path.MoveTo((float)points[0].X, (float)points[0].Y);
+
+        for (var i = 1; i < points.Count; i++)
+            path.LineTo((float)points[i].X, (float)points[i].Y);
+
+        path.Close();
+
+        canvas.DrawPath(path, paint);
+    }
+
+    /// <inheritdoc/>
     public void StrokePolyline(IReadOnlyList<(double X, double Y)> points, Color color, double width, bool closed = false)
     {
         if (points.Count < 2)

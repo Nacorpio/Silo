@@ -42,6 +42,9 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     /// <summary>The DataGrid whose row the pointer is over, so that it can be told when the pointer leaves.</summary>
     DataGrid? hoveredGrid;
 
+    /// <summary>The Rating that the pointer is over, so that it can be told when the pointer leaves.</summary>
+    Rating? hoveredRating;
+
     /// <summary>The Control with its own pointer handling that the button was pressed on, while the button is held.</summary>
     Control? handling;
 
@@ -86,6 +89,16 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
             changed |= grid.PointerMove(gx, gy);
         }
 
+        var rating = Find<Rating>(hovered);
+
+        if (hoveredRating != rating)
+            changed |= hoveredRating?.PointerLeave() ?? false;
+
+        hoveredRating = rating;
+
+        if (rating is not null)
+            changed |= rating.PointerMove(rating.ToLocal(x, y).X);
+
         return changed;
     }
 
@@ -93,9 +106,10 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
     public bool Leave()
     {
-        var changed = hoveredGrid?.PointerLeave() ?? false;
+        var changed = (hoveredGrid?.PointerLeave() ?? false) | (hoveredRating?.PointerLeave() ?? false);
 
         hoveredGrid = null;
+        hoveredRating = null;
 
         return SetHovered(null) | changed;
     }

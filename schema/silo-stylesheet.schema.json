@@ -217,7 +217,7 @@
           ]
         },
         "icon-size": {
-          "description": "A number. Declared by DataGrid, Icon, ListView, TabHeader.",
+          "description": "A number. Declared by DataGrid, Icon, ListView, Rating, TabHeader.",
           "$ref": "#/$defs/scalar"
         },
         "icon-stroke": {
@@ -298,6 +298,18 @@
         },
         "placeholder-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DatePicker, TextBox.",
+          "$ref": "#/$defs/scalar"
+        },
+        "rating-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Rating.",
+          "$ref": "#/$defs/scalar"
+        },
+        "rating-empty-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Rating.",
+          "$ref": "#/$defs/scalar"
+        },
+        "rating-gap": {
+          "description": "A number. Declared by Rating.",
           "$ref": "#/$defs/scalar"
         },
         "required-color": {
