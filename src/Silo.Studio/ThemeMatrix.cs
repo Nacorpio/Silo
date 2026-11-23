@@ -102,6 +102,7 @@ public sealed class ThemeMatrix : Box
         new("Label", "Display", CreateLabels, ["normal"]),
         new("Badge", "Display", CreateBadges, ["normal"]),
         new("Avatar", "Display", CreateAvatars, ["normal"]),
+        new("EmptyState", "Display", CreateEmptyState, ["normal"]),
         new("Skeleton", "Display", CreateSkeletons, ["normal"]),
         new("StatList", "Display", CreateStatList, ["normal"]),
         new("Icon", "Display", CreateIcons, ["normal"]),
@@ -343,6 +344,22 @@ public sealed class ThemeMatrix : Box
         row.Children.Add(new Avatar { DisplayName = "Alan Turing" });
 
         return row;
+    }
+
+    /// <summary>Creates an EmptyState with an icon, a title, a description and a button.</summary>
+    static EmptyState CreateEmptyState()
+    {
+        var empty = new EmptyState
+        {
+            Glyph = "search",
+            Title = "No results",
+            Description = "Try another search term.",
+            Action = new Button { Text = "Clear search" },
+        };
+
+        empty.SetValue(Control.FlexShrinkProperty, 0);
+
+        return empty;
     }
 
     /// <summary>Creates a row of Skeletons: a circle, a line and a block.</summary>
