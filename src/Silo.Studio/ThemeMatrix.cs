@@ -80,6 +80,7 @@ public sealed class ThemeMatrix : Box
         new("TextArea", "Text input", CreateTextArea, ["normal", "hover", "focus"]),
         new("Slider", "Values and lists", () => new Slider { Value = 0.6 }, ["normal", "hover", "pressed"]),
         new("ProgressBar", "Values and lists", () => new ProgressBar { Value = 0.6 }, ["normal"]),
+        new("ProgressRing", "Values and lists", CreateProgressRings, ["normal"]),
         new("ComboBox", "Values and lists", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
         new("CheckedListBox", "Values and lists", CreateCheckedListBox, ["normal", "focus"]),
         new("SegmentedControl", "Inputs", () => new SegmentedControl { Items = ["Day", "Week", "Month"], SelectedIndex = 1 }, ["normal"]),
@@ -233,6 +234,21 @@ public sealed class ThemeMatrix : Box
         dialog.SetValue(WidthProperty, new Silo.Styling.Values.Length(260, Silo.Styling.Values.LengthUnit.Px));
 
         return dialog;
+    }
+
+    /// <summary>Creates a row of a spinning ring, a ring that is 65 percent full, and a ring that is off.</summary>
+    static Box CreateProgressRings()
+    {
+        var row = new Box();
+
+        row.SetValue(FlexDirectionProperty, Silo.Layout.FlexDirection.Row);
+        row.SetValue(GapProperty, new Silo.Styling.Values.Length(12, Silo.Styling.Values.LengthUnit.Px));
+
+        row.Children.Add(new ProgressRing());
+        row.Children.Add(new ProgressRing { Value = 0.65 });
+        row.Children.Add(new ProgressRing { IsActive = false });
+
+        return row;
     }
 
     /// <summary>Creates a Dialog that is not shown in a window, so that its title, content and buttons show in the matrix.</summary>

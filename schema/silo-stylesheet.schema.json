@@ -344,6 +344,22 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Label.",
           "$ref": "#/$defs/scalar"
         },
+        "ring-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ProgressRing.",
+          "$ref": "#/$defs/scalar"
+        },
+        "ring-period": {
+          "description": "A number. Declared by ProgressRing.",
+          "$ref": "#/$defs/scalar"
+        },
+        "ring-thickness": {
+          "description": "A number. Declared by ProgressRing.",
+          "$ref": "#/$defs/scalar"
+        },
+        "ring-track-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ProgressRing.",
+          "$ref": "#/$defs/scalar"
+        },
         "row-height": {
           "description": "A number. Declared by DataGrid.",
           "$ref": "#/$defs/scalar"

@@ -142,6 +142,9 @@ public abstract class Control : Element, ILayoutNode
     /// <summary>The layer set on this Control, if any.</summary>
     OverlayLayer? overlays;
 
+    /// <summary>The animation clock set on this Control.</summary>
+    IAnimationClock? animationClock;
+
 
     /// <summary>
     /// Runs before the first Control is created, so that the Styled properties above are registered before any Stylesheet
@@ -163,6 +166,25 @@ public abstract class Control : Element, ILayoutNode
         get => textMeasurer ?? (Parent as Control)?.TextMeasurer;
         set => textMeasurer = value;
     }
+
+    /// <summary>
+    /// Gets or sets the clock that animated Controls read. When it is not set, the nearest ancestor's clock is used, so the
+    /// platform window sets it once on the root. Without one, <see cref="AnimationTime"/> is 0.
+    /// </summary>
+    public IAnimationClock? AnimationClock
+    {
+        get => animationClock ?? (Parent as Control)?.AnimationClock;
+        set => animationClock = value;
+    }
+
+    /// <summary>Gets the time on the <see cref="AnimationClock"/>, or 0 when there is none.</summary>
+    public TimeSpan AnimationTime => AnimationClock?.Now ?? TimeSpan.Zero;
+
+    /// <summary>
+    /// Gets whether the Control changes with time, so that the window has to keep drawing frames. The default is <see langword="false"/>.
+    /// A spinning indicator returns <see langword="true"/> while it spins.
+    /// </summary>
+    public virtual bool IsAnimating => false;
 
     /// <summary>
     /// Gets or sets the layer that popups are shown in. When it is not set, the nearest ancestor's layer is used, so the

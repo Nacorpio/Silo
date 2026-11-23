@@ -57,6 +57,12 @@ public sealed class OverlayLayer
     /// <summary>Gets or sets the object that measures text in the overlays.</summary>
     public ITextMeasurer? TextMeasurer { get; set; }
 
+    /// <summary>Gets or sets the clock that animated Controls in the overlays read.</summary>
+    public IAnimationClock? AnimationClock { get; set; }
+
+    /// <summary>Gets whether a Control in the overlays is animating.</summary>
+    public bool IsAnimating => hosts.Any(host => Animations.IsAnimating(host));
+
 
     /// <summary>Tells whether a Control is currently shown as an overlay.</summary>
     /// <param name="content">The Control to look for.</param>
@@ -82,7 +88,7 @@ public sealed class OverlayLayer
         if (Contains(content) || content.Parent is not null)
             throw new InvalidOperationException("The Control is already part of a tree.");
 
-        hosts.Add(new OverlayHost(content, x, y, modal, interactive: interactive) { TextMeasurer = TextMeasurer });
+        hosts.Add(new OverlayHost(content, x, y, modal, interactive: interactive) { TextMeasurer = TextMeasurer, AnimationClock = AnimationClock });
 
         Changed?.Invoke(this, EventArgs.Empty);
     }
@@ -102,7 +108,7 @@ public sealed class OverlayLayer
         if (Contains(dialog) || dialog.Parent is not null)
             throw new InvalidOperationException("The Control is already part of a tree.");
 
-        hosts.Add(new OverlayHost(dialog, 0, 0, modal: true, dismiss) { TextMeasurer = TextMeasurer });
+        hosts.Add(new OverlayHost(dialog, 0, 0, modal: true, dismiss) { TextMeasurer = TextMeasurer, AnimationClock = AnimationClock });
 
         Changed?.Invoke(this, EventArgs.Empty);
     }
