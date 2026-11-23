@@ -192,6 +192,35 @@ public abstract class Control : Element, ILayoutNode
     /// </summary>
     public string? TooltipShortcut { get; set; }
 
+    /// <summary>
+    /// Gets or sets the bold title that the tooltip shows above its text. The default is <see langword="null"/>, which shows none.
+    /// </summary>
+    public string? TooltipHeader { get; set; }
+
+    /// <summary>
+    /// Gets or sets the longer explanation that the tooltip shows below its text, wrapped. The default is <see langword="null"/>,
+    /// which shows none.
+    /// </summary>
+    public string? TooltipDescription { get; set; }
+
+    /// <summary>
+    /// Gets or sets the picture that the tooltip shows on its left. A mask is drawn in the text color. The default is
+    /// <see langword="null"/>, which shows none.
+    /// </summary>
+    public IImage? TooltipIcon { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of a glyph from <see cref="Glyphs"/> that the tooltip shows on its left, when there is no
+    /// <see cref="TooltipIcon"/>. The default is <see langword="null"/>, which shows none.
+    /// </summary>
+    public string? TooltipGlyph { get; set; }
+
+    /// <summary>
+    /// Gets or sets a Control that the tooltip shows instead of all its other parts. It can be shown by one tooltip at a time,
+    /// and must not be part of another tree. The default is <see langword="null"/>.
+    /// </summary>
+    public Control? TooltipContent { get; set; }
+
     /// <inheritdoc/>
     LayoutStyle ILayoutNode.Style => layoutStyle ??= BuildLayoutStyle();
 

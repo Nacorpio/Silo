@@ -89,6 +89,7 @@ public sealed class ThemeMatrix : Box
         new("Expander", "Layout", CreateExpander, ["normal"]),
         new("TabView", "Layout", CreateTabView, ["normal"]),
         new("Toast", "Layout", CreateToasts, ["normal"]),
+        new("Tooltip", "Menus and dialogs", CreateTooltips, ["normal"]),
         new("Toolbar", "Menus and dialogs", CreateToolbar, ["normal"]),
         new("MenuBar", "Menus and dialogs", CreateMenuBar, ["normal"]),
         new("ContextMenu", "Menus and dialogs", CreateContextMenu, ["normal"]),
@@ -326,6 +327,26 @@ public sealed class ThemeMatrix : Box
         list.SetChecked(2, true);
 
         return list;
+    }
+
+    /// <summary>Creates a column of a plain Tooltip and one with an icon, a header, a shortcut and a description.</summary>
+    static Box CreateTooltips()
+    {
+        var column = new Box();
+
+        column.AddClass("tooltips");
+
+        column.Children.Add(new Tooltip { Text = "Save the document", Shortcut = "Ctrl+S" });
+        column.Children.Add(new Tooltip
+        {
+            Glyph = "info",
+            Header = "Save",
+            Shortcut = "Ctrl+S",
+            Text = "Write the document to disk",
+            Description = "Saves to the file the document was opened from. Unsaved changes are kept in a backup.",
+        });
+
+        return column;
     }
 
     /// <summary>Creates a column of one Toast of each severity: a plain one, one with a title, one with an icon and an action, and one that failed.</summary>
