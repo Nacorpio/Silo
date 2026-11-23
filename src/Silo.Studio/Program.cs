@@ -9,6 +9,7 @@ using Silo.Styling;
 using Silo.Styling.Values;
 
 // Usage: silo-studio [--dark] [--text] [--custom-titlebar] [--dividers] [--page <category>] [--theme <file.jsonc>] [--screenshot <out.png>]
+//        silo-studio --terminal [<program>] [--dark]
 //        silo-studio --assembly <app.dll> --list-previews
 //        silo-studio --assembly <app.dll> --preview <name> [--dark] [--theme <file.jsonc>] [--screenshot <out.png>]
 // Shows every Control in every Pseudo-state with the default theme. With --theme the file is applied on top of the default
@@ -29,6 +30,49 @@ var previewMode = args.Contains("--list-previews") || ArgumentAfter("--preview")
 if (assembly is not null && previewMode)
     return PreviewMode.Run(assembly, args.Contains("--list-previews"), ArgumentAfter("--preview"), theme, screenshot,
         args.Contains("--dark") ? ThemeVariant.Dark : ThemeVariant.Light);
+
+// With --terminal Studio opens a terminal window instead of the gallery: a console with a few demo commands, or the program
+// that follows the flag, such as "bash", run in it. It is a quick way to try the Terminal and the sessions in a real window.
+if (args.Contains("--terminal"))
+{
+    var program = ArgumentAfter("--terminal");
+    var variant = args.Contains("--dark") ? ThemeVariant.Dark : ThemeVariant.Light;
+
+    ITerminalSession session;
+
+    if (program is not null && !program.StartsWith("--", StringComparison.Ordinal))
+        session = new ProcessSession(program);
+    else
+    {
+        var console = new CommandSession { Banner = "Silo console. Type help for the commands.\n", Prompt = "\u001b[32msilo\u001b[0m$ " };
+
+        console.Add("hello", "Greets you", context => context.WriteLine($"Hello {string.Join(' ', context.Arguments)}!"));
+        console.Add("colors", "Shows the 16 colors", context =>
+        {
+            for (var i = 0; i < 16; i++)
+                context.Write($"\u001b[{(i < 8 ? 40 + i : 92 + i)}m  \u001b[0m");
+
+            context.WriteLine();
+        });
+        console.Add("count", "Counts up, press Ctrl+C to stop", async context =>
+        {
+            for (var i = 1; i <= 20; i++)
+            {
+                context.WriteLine(i.ToString());
+
+                await Task.Delay(200, context.CancellationToken);
+            }
+        });
+
+        session = console;
+    }
+
+    using var terminalWindow = new TerminalWindow(session, "Silo terminal", styles: new StyleResolver(DefaultTheme.Load(variant)));
+
+    terminalWindow.Run();
+
+    return 0;
+}
 
 var model = theme is null ? null : OpenTheme(theme);
 
