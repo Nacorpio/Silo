@@ -12,6 +12,9 @@ public sealed class CategoryList : Control
     /// <summary>The entries, by category.</summary>
     readonly Dictionary<string, CategoryEntry> entries = [];
 
+    /// <summary>The scrolled column that holds the entries and the dividers.</summary>
+    readonly Box items = new();
+
     /// <summary>Whether dividers separate the entries.</summary>
     bool showDividers;
 
@@ -33,6 +36,15 @@ public sealed class CategoryList : Control
 
             entries[category] = entry;
         }
+
+        items.AddClass("category-items");
+
+        var scroll = new ScrollViewer { Name = "category-scroll" };
+
+        scroll.Content = items;
+        scroll.SetValue(FlexGrowProperty, 1);
+
+        Children.Add(scroll);
 
         Rebuild();
 
@@ -63,6 +75,9 @@ public sealed class CategoryList : Control
     /// <inheritdoc/>
     public override bool IsFocusable => true;
 
+    /// <summary>Gets the column inside the scroll view that holds the entries and the dividers.</summary>
+    public Control Items => items;
+
     /// <summary>Gets the entry of a category.</summary>
     /// <param name="category">One of <see cref="ThemeMatrix.Categories"/>.</param>
     /// <returns>The entry.</returns>
@@ -90,14 +105,14 @@ public sealed class CategoryList : Control
     /// <summary>Puts the entries in the list, with a divider between each two when <see cref="ShowDividers"/> is set.</summary>
     void Rebuild()
     {
-        Children.Clear();
+        items.Children.Clear();
 
         foreach (var entry in entries.Values)
         {
-            if (showDividers && Children.Count > 0)
-                Children.Add(Divider());
+            if (showDividers && items.Children.Count > 0)
+                items.Children.Add(Divider());
 
-            Children.Add(entry);
+            items.Children.Add(entry);
         }
     }
 
@@ -143,7 +158,7 @@ public sealed class CategoryList : Control
             heading.Children.Add(Part(new TextBlock { Text = info.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) }, "category-count"));
 
             text.Children.Add(heading);
-            text.Children.Add(Part(new TextBlock { Text = info.Description }, "category-description"));
+            text.Children.Add(Part(new TrimmedText { Text = info.Description }, "category-description"));
 
             Children.Add(new Icon { Glyph = info.Glyph });
             Children.Add(text);

@@ -3,7 +3,7 @@ using Silo.Rendering;
 namespace Silo;
 
 /// <summary>Shortens text that is too wide for the room it has.</summary>
-internal static class TextTrimming
+public static class TextTrimming
 {
     /// <summary>The character that replaces the end of a trimmed text.</summary>
     const string Ellipsis = "…";

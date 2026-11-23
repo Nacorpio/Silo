@@ -62,14 +62,15 @@ public static class StudioStyles
               "&:hover": { "background": "var(--border)" }
             },
             "#previews": { "height": "200px" },
-            "#categories": { "width": "236px", "flex-shrink": "0", "flex-direction": "column", "gap": "2px", "padding": "12px 8px 16px 16px" },
+            "#categories": { "width": "236px", "flex-shrink": "0", "flex-direction": "column" },
+            ".category-items": { "flex-direction": "column", "gap": "8px", "padding": "12px 8px 16px 16px" },
             ".category": {
-              "flex-direction": "row", "align-items": "center", "gap": "10px", "padding": "6px 8px", "border-radius": "4px",
+              "flex-direction": "row", "align-items": "center", "gap": "16px", "padding": "6px 8px", "border-radius": "4px",
               "background": "var(--surface)", "color": "var(--muted)", "text-align": "left",
               "&:hover": { "background": "var(--track)" },
               "&:selected": { "background": "var(--track)", "color": "var(--text)" }
             },
-            ".category-text": { "flex-direction": "column", "flex-grow": "1", "align-items": "start" },
+            ".category-text": { "flex-direction": "column", "flex-grow": "1", "align-items": "stretch" },
             ".category-heading": { "flex-direction": "row", "gap": "6px" },
             ".category-name": { "color": "var(--text)" },
             ".category-count": { "color": "var(--muted)", "font-size": "12px" },
