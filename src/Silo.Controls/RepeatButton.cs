@@ -13,7 +13,7 @@ namespace Silo;
 /// <para>
 /// A RepeatButton is styled as a <c>Button</c>, so it takes the Button rules of the theme. While it is held it is
 /// <see cref="Control.IsAnimating"/>, so the window draws frames and the button reads the time from
-/// <see cref="Control.AnimationTime"/>. Without an <see cref="Control.AnimationClock"/> it only raises the first Click.
+/// <see cref="Element.AnimationTime"/>. Without an <see cref="Element.AnimationClock"/> it only raises the first Click.
 /// </para>
 /// </remarks>
 /// <example>
