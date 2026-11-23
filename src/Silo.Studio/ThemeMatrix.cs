@@ -79,6 +79,7 @@ public sealed class ThemeMatrix : Box
         new("Label", "Display", CreateLabels, ["normal"]),
         new("Badge", "Display", CreateBadges, ["normal"]),
         new("Avatar", "Display", CreateAvatars, ["normal"]),
+        new("StatList", "Display", CreateStatList, ["normal"]),
         new("Icon", "Display", CreateIcons, ["normal"]),
         new("HyperlinkButton", "Display", () => new HyperlinkButton { Text = "Read the docs" }, ["normal", "hover", "pressed", "focus"]),
         new("GroupBox", "Panels", () => new GroupBox { Header = "Options", Content = new TextBlock { Text = "Wrap lines" } }, ["normal"]),
@@ -397,6 +398,19 @@ public sealed class ThemeMatrix : Box
     /// <summary>Creates a Carousel of three texts at the second one.</summary>
     static Carousel CreateCarousel()
         => new() { Items = [new TextBlock { Text = "First slide" }, new TextBlock { Text = "Second slide" }, new TextBlock { Text = "Third slide" }], SelectedIndex = 1 };
+
+    /// <summary>Creates a StatList with the numbers of a repository.</summary>
+    static StatList CreateStatList()
+        => new()
+        {
+            Items =
+            [
+                new("activity", Label: "Activity"),
+                new("star", "1", "star"),
+                new("eye", "0", "watching"),
+                new("fork", "0", "forks"),
+            ],
+        };
 
     /// <summary>Creates a GalleryView of colored tiles in different shapes, the third one selected.</summary>
     /// <param name="layout">The layout to show them in.</param>

@@ -237,7 +237,7 @@
           ]
         },
         "icon-size": {
-          "description": "A number. Declared by DataGrid, Icon, ListView, Rating, TabHeader.",
+          "description": "A number. Declared by DataGrid, Icon, ListView, Rating, StatList, TabHeader.",
           "$ref": "#/$defs/scalar"
         },
         "icon-stroke": {
@@ -368,6 +368,10 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by RangeSlider, Slider.",
           "$ref": "#/$defs/scalar"
         },
+        "stat-gap": {
+          "description": "A number. Declared by StatList.",
+          "$ref": "#/$defs/scalar"
+        },
         "text-align": {
           "description": "One of the keywords. Declared by TextControl.",
           "anyOf": [
@@ -384,6 +388,10 @@
               "pattern": "^\\s*var\\("
             }
           ]
+        },
+        "value-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by StatList.",
+          "$ref": "#/$defs/scalar"
         },
         "width": {
           "description": "A length such as 12px or 50%. Declared by Control.",

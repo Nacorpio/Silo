@@ -47,6 +47,9 @@ public static class Glyphs
         ["error"] = [new Line(Circle(12, 12, 9), Closed: true), Open((12, 7), (12, 13)), Open((12, 16.4), (12, 16.5))],
         ["user"] = [new Line(Circle(12, 8, 4), Closed: true), Open((4, 21), (5, 17), (8.5, 14.5), (12, 14), (15.5, 14.5), (19, 17), (20, 21))],
         ["calendar"] = [new Line([(4, 6), (20, 6), (20, 20), (4, 20)], Closed: true), Open((4, 11), (20, 11)), Open((8, 3), (8, 8)), Open((16, 3), (16, 8))],
+        ["activity"] = [Open((2, 12), (7, 12), (10, 4), (14, 20), (17, 12), (22, 12))],
+        ["eye"] = [new Line([(2, 12), (7, 7), (12, 5.5), (17, 7), (22, 12), (17, 17), (12, 18.5), (7, 17)], Closed: true), new Line(Circle(12, 12, 3), Closed: true)],
+        ["fork"] = [new Line(Circle(6, 5, 2.5), Closed: true), new Line(Circle(18, 5, 2.5), Closed: true), new Line(Circle(12, 19, 2.5), Closed: true), Open((6, 7.5), (6, 10), (18, 10), (18, 7.5)), Open((12, 10), (12, 16.5))],
         ["home"] = [Open((3, 11), (12, 3), (21, 11)), Open((5, 9.5), (5, 21), (19, 21), (19, 9.5))],
     };
 

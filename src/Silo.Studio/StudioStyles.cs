@@ -94,6 +94,7 @@ public static class StudioStyles
             ".cell .icons": { "flex-direction": "row", "gap": "8px", "width": "560px", "flex-shrink": "0" },
             ".cell .infobars": { "flex-direction": "column", "gap": "6px", "width": "340px", "flex-shrink": "0" },
             ".cell GroupBox": { "width": "150px", "flex-shrink": "0" },
+            ".cell StatList": { "width": "140px", "flex-shrink": "0" },
             ".cell Card": { "width": "200px", "flex-shrink": "0" },
             ".cell SegmentedControl": { "width": "230px", "flex-shrink": "0" },
             ".cell RadioGroup": { "width": "112px" },
