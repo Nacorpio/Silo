@@ -93,7 +93,7 @@ public class TextBox : Control
     /// <summary>Moves the caret to the character boundary nearest to a pointer position.</summary>
     /// <param name="x">The horizontal position relative to the TextBox's border box.</param>
     /// <returns><see langword="true"/> when the caret moved, so a new frame is needed.</returns>
-    public bool PointerDown(double x)
+    public virtual bool PointerDown(double x)
     {
         var target = x - ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height)).X + scroll;
         var before = caret;
