@@ -102,6 +102,7 @@ public static class StudioStyles
             ".cell TokenBox": { "width": "250px", "flex-shrink": "0" },
             ".cell .forms": { "flex-direction": "column", "gap": "6px", "width": "200px", "flex-shrink": "0" },
             ".cell CheckedListBox": { "width": "112px", "height": "90px" },
+            ".cell .tooltips": { "flex-direction": "column", "gap": "6px", "width": "330px", "flex-shrink": "0", "align-items": "start" },
             ".cell DatePicker": { "width": "130px" },
             ".cell Calendar": { "width": "230px", "flex-shrink": "0" },
             ".cell Separator": { "width": "112px" },

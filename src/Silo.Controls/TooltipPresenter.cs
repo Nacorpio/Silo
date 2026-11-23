@@ -90,7 +90,16 @@ public sealed class TooltipPresenter(OverlayLayer overlays)
         if (target is null || shown is not null || now - since < Delay || overlays.ModalCount > 0)
             return false;
 
-        shown = new Tooltip { Text = target.Tooltip ?? string.Empty, Shortcut = target.TooltipShortcut ?? string.Empty };
+        shown = new Tooltip
+        {
+            Text = target.Tooltip ?? string.Empty,
+            Shortcut = target.TooltipShortcut ?? string.Empty,
+            Header = target.TooltipHeader ?? string.Empty,
+            Description = target.TooltipDescription ?? string.Empty,
+            Icon = target.TooltipIcon,
+            Glyph = target.TooltipGlyph ?? string.Empty,
+            Content = target.TooltipContent,
+        };
 
         overlays.Show(shown, pointer.X + OffsetX, pointer.Y + OffsetY, modal: false);
 
@@ -112,7 +121,14 @@ public sealed class TooltipPresenter(OverlayLayer overlays)
         shown = null;
         target = null;
 
-        return tip is not null && overlays.Close(tip);
+        if (tip is null)
+            return false;
+
+        var closed = overlays.Close(tip);
+
+        tip.ReleaseContent();
+
+        return closed;
     }
 
     /// <summary>Finds the nearest Control with a tooltip, starting at a Control and going up.</summary>
@@ -121,9 +137,20 @@ public sealed class TooltipPresenter(OverlayLayer overlays)
     static Control? TooltipOwner(Control? control)
     {
         for (var c = control; c is not null; c = c.Parent as Control)
-            if (!string.IsNullOrEmpty(c.Tooltip))
+            if (HasTooltip(c))
                 return c;
 
         return null;
     }
+
+    /// <summary>Tells whether a Control has anything to show in a tooltip.</summary>
+    /// <param name="control">The Control.</param>
+    /// <returns><see langword="true"/> when it has text, a header, a description, an icon, a glyph or content.</returns>
+    static bool HasTooltip(Control control) =>
+        !string.IsNullOrEmpty(control.Tooltip)
+        || !string.IsNullOrEmpty(control.TooltipHeader)
+        || !string.IsNullOrEmpty(control.TooltipDescription)
+        || control.TooltipIcon is not null
+        || !string.IsNullOrEmpty(control.TooltipGlyph)
+        || control.TooltipContent is not null;
 }
