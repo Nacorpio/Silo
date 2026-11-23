@@ -103,6 +103,7 @@ public sealed class ThemeMatrix : Box
         new("HyperlinkButton", "Display", () => new HyperlinkButton { Text = "Read the docs" }, ["normal", "hover", "pressed", "focus"]),
         new("GroupBox", "Panels", () => new GroupBox { Header = "Options", Content = new TextBlock { Text = "Wrap lines" } }, ["normal"]),
         new("Card", "Panels", CreateCard, ["normal"]),
+        new("ScrollBar", "Panels", CreateScrollBar, ["normal", "hover", "pressed"]),
         new("InfoBar", "Panels", CreateInfoBars, ["normal"]),
         new("Breadcrumb", "Navigation", () => new Breadcrumb { Items = ["Home", "Projects", "Silo", "Readme"] }, ["normal"]),
         new("Pager", "Navigation", () => new Pager { PageCount = 20, CurrentPage = 10 }, ["normal"]),
@@ -286,6 +287,16 @@ public sealed class ThemeMatrix : Box
             row.Children.Add(new Icon { Glyph = name });
 
         return row;
+    }
+
+    /// <summary>Creates a vertical ScrollBar scrolled a third of the way.</summary>
+    static ScrollBar CreateScrollBar()
+    {
+        var bar = new ScrollBar { Maximum = 300, ViewportSize = 100, Value = 100 };
+
+        bar.SetValue(HeightProperty, new Silo.Styling.Values.Length(80, Silo.Styling.Values.LengthUnit.Px));
+
+        return bar;
     }
 
     /// <summary>Creates a Card with a header, content and a footer.</summary>

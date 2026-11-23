@@ -344,6 +344,14 @@
           "description": "A number. Declared by DataGrid.",
           "$ref": "#/$defs/scalar"
         },
+        "scrollbar-thumb-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ScrollBar.",
+          "$ref": "#/$defs/scalar"
+        },
+        "scrollbar-track-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ScrollBar.",
+          "$ref": "#/$defs/scalar"
+        },
         "selection-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid, ListView, TextArea.",
           "$ref": "#/$defs/scalar"
