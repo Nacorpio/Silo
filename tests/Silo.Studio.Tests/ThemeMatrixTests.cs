@@ -131,16 +131,16 @@ public class ThemeMatrixTests
         var list = new CategoryList(new ThemeMatrix());
         var count = ThemeMatrix.Categories.Count();
 
-        Assert.Equal(count, list.Children.Count);
+        Assert.Equal(count, list.Items.Children.Count);
 
         list.ShowDividers = true;
 
-        Assert.Equal((count * 2) - 1, list.Children.Count);
-        Assert.IsType<Separator>(list.Children[1]);
-        Assert.Contains("category-divider", ((Control)list.Children[1]).Classes);
+        Assert.Equal((count * 2) - 1, list.Items.Children.Count);
+        Assert.IsType<Separator>(list.Items.Children[1]);
+        Assert.Contains("category-divider", ((Control)list.Items.Children[1]).Classes);
 
         list.ShowDividers = false;
 
-        Assert.Equal(count, list.Children.Count);
+        Assert.Equal(count, list.Items.Children.Count);
     }
 }
