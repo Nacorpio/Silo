@@ -244,3 +244,80 @@ public class SplitPaneTests
         Assert.False(split.Collapse(0));
     }
 }
+
+public class SplitPaneLockTests
+{
+    static (SplitPane Split, PointerRouter Router, Box Root) Setup()
+    {
+        var split = new SplitPane();
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+
+        split.AddPane(new Box(), minSize: 50);
+        split.AddPane(new Box(), minSize: 50);
+        root.Children.Add(split);
+
+        var sheet = """{ "rules": { "Box": { "align-items": "start" }, "SplitPane": { "width": "300px", "height": "100px", "divider-size": "10px" } } }""";
+
+        root.ApplyStyles(new StyleResolver([JsoncStylesheetReader.Read(sheet, "t.jsonc")]));
+        root.Arrange(new Size(400, 400));
+
+        return (split, new PointerRouter(root), root);
+    }
+
+    [Fact]
+    public void A_locked_SplitPane_ignores_drags_double_presses_and_keys()
+    {
+        var time = 0L;
+        var (split, router, _) = Setup();
+
+        split.Clock = () => time;
+        split.IsLocked = true;
+
+        for (var i = 0; i < 2; i++)
+        {
+            router.Move(147, 50);
+            router.Down(147, 50);
+            router.Move(220, 50);
+            router.Up(220, 50);
+
+            time += 100;
+        }
+
+        Assert.Equal(145, split.SizeOf(0), 3);
+        Assert.False(split.IsCollapsed(0));
+        Assert.Equal(-1, split.FocusedDivider);
+        Assert.False(split.KeyDown(Key.Right, KeyModifiers.None));
+    }
+
+    [Fact]
+    public void Locking_ends_a_drag_and_code_can_still_move_a_locked_divider()
+    {
+        var (split, router, _) = Setup();
+
+        router.Move(147, 50);
+        router.Down(147, 50);
+
+        split.IsLocked = true;
+        router.Move(220, 50);
+
+        Assert.Equal(145, split.SizeOf(0), 3);
+        Assert.True(split.Move(0, 20));
+        Assert.Equal(165, split.SizeOf(0), 3);
+        Assert.True(split.Collapse(0));
+    }
+
+    [Fact]
+    public void Unlocking_makes_the_dividers_work_again()
+    {
+        var (split, router, _) = Setup();
+
+        split.IsLocked = true;
+        split.IsLocked = false;
+
+        router.Move(147, 50);
+        router.Down(147, 50);
+        router.Move(197, 50);
+
+        Assert.Equal(195, split.SizeOf(0), 3);
+    }
+}

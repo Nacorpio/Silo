@@ -21,6 +21,11 @@ namespace Silo;
 /// focused: the arrow keys along the split move it by 10 pixels (50 with Shift), and Enter collapses or restores the pane before it.
 /// </para>
 /// <para>
+/// Set <see cref="IsLocked"/> to fix the layout: the user can then no longer drag a divider, collapse a pane or move a divider with the
+/// keyboard, but the dividers stay where they are and code can still change the sizes with <see cref="Move"/>, <see cref="Collapse"/> and
+/// <see cref="Expand"/>.
+/// </para>
+/// <para>
 /// The <c>divider-size</c> property sets the thickness of the dividers (6px by default), and <c>divider-color</c>,
 /// <c>divider-active-color</c> (while dragged) and <c>divider-focus-color</c> set their colors. Give the SplitPane a size, or a
 /// <c>flex-grow</c> in its parent, since the panes are sized by it.
@@ -91,6 +96,9 @@ public class SplitPane : Control, IPointerHandler
     /// <summary>The divider that has the keyboard focus, or -1.</summary>
     int focused = -1;
 
+    /// <summary>Whether the user is kept from changing the sizes.</summary>
+    bool isLocked;
+
     /// <summary>The divider that was pressed last, and when, for double presses.</summary>
     (int Divider, long Time) lastPress = (-1, 0);
 
@@ -105,6 +113,23 @@ public class SplitPane : Control, IPointerHandler
 
     /// <summary>Gets or sets the direction the panes are placed in. The default is <see cref="Silo.Orientation.Horizontal"/>, side by side.</summary>
     public Orientation Orientation { get; set; } = Orientation.Horizontal;
+
+    /// <summary>Gets or sets whether the user is kept from changing the sizes. The default is <see langword="false"/>.</summary>
+    /// <remarks>A locked SplitPane ignores presses on its dividers and the arrow and Enter keys. Code can still change the sizes.</remarks>
+    public bool IsLocked
+    {
+        get => isLocked;
+        set
+        {
+            isLocked = value;
+
+            if (!value)
+                return;
+
+            dragging = -1;
+            focused = -1;
+        }
+    }
 
     /// <summary>Gets the panes in order, including the collapsed ones.</summary>
     public IReadOnlyList<Control> Panes => panes;
@@ -208,7 +233,7 @@ public class SplitPane : Control, IPointerHandler
     public bool PointerDown(double x, double y)
     {
         var along = Along(x, y);
-        var found = DividerAt(along);
+        var found = isLocked ? -1 : DividerAt(along);
 
         if (found < 0)
             return false;
@@ -256,7 +281,7 @@ public class SplitPane : Control, IPointerHandler
     /// <inheritdoc/>
     public override bool KeyDown(Key key, KeyModifiers modifiers)
     {
-        if (focused < 0 || focused >= panes.Count - 1)
+        if (isLocked || focused < 0 || focused >= panes.Count - 1)
             return false;
 
         var step = modifiers.HasFlag(KeyModifiers.Shift) ? 50 : 10;
