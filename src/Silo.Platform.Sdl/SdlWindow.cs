@@ -88,6 +88,9 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Whether the next <see cref="Pump"/> needs to draw a frame.</summary>
     bool dirty = true;
 
+    /// <summary>Whether a Control was animating when the last frame was drawn, so that more frames are due.</summary>
+    bool animating;
+
     /// <summary>Whether the window was closed.</summary>
     bool closed;
 
@@ -121,7 +124,10 @@ public sealed unsafe class SdlWindow : IDisposable
 
         id = (uint)SDL3.SDL_GetWindowID(window);
         root.TextMeasurer ??= new SkiaTextMeasurer();
-        overlays = new OverlayLayer { TextMeasurer = root.TextMeasurer };
+        var animationClock = new StopwatchClock(clock);
+
+        root.AnimationClock ??= animationClock;
+        overlays = new OverlayLayer { TextMeasurer = root.TextMeasurer, AnimationClock = animationClock };
         root.Overlays = overlays;
         tooltips = new TooltipPresenter(overlays);
         Toasts = new ToastHost(overlays);
@@ -351,6 +357,9 @@ public sealed unsafe class SdlWindow : IDisposable
         if (tooltips.Tick(clock.Elapsed) | Toasts.Tick(clock.Elapsed))
             dirty = true;
 
+        if (animating)
+            dirty = true;
+
         if (dirty && !closed)
             Draw();
     }
@@ -363,7 +372,9 @@ public sealed unsafe class SdlWindow : IDisposable
         var toast = Toasts.DueIn();
         var due = tooltip is null ? toast : toast is null ? tooltip : tooltip < toast ? tooltip : toast;
 
-        return due is { } time ? (int)Math.Ceiling(time.TotalMilliseconds) : int.MaxValue;
+        var wait = due is { } time ? (int)Math.Ceiling(time.TotalMilliseconds) : int.MaxValue;
+
+        return animating ? Math.Min(wait, Animations.FrameMilliseconds) : wait;
     }
 
     /// <summary>Applies the Stylesheets to the tree and asks for a frame.</summary>
@@ -584,6 +595,8 @@ public sealed unsafe class SdlWindow : IDisposable
 
         Present(bitmap);
 
+        animating = Animations.IsAnimating(root) || overlays.IsAnimating;
+
         Frames++;
     }
 
@@ -606,6 +619,14 @@ public sealed unsafe class SdlWindow : IDisposable
 
         SDL3.SDL_UnlockSurface(surface);
         SDL3.SDL_UpdateWindowSurface(window);
+    }
+
+    /// <summary>Gives the time of the window's stopwatch to animated Controls.</summary>
+    /// <param name="stopwatch">The window's stopwatch.</param>
+    sealed class StopwatchClock(Stopwatch stopwatch) : IAnimationClock
+    {
+        /// <inheritdoc/>
+        public TimeSpan Now => stopwatch.Elapsed;
     }
 
     /// <summary>Carries out the state changes that a <see cref="Window"/> Control asks for.</summary>

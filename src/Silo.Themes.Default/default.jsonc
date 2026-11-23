@@ -738,6 +738,13 @@
       "&:hover": { "scrollbar-thumb-color": "var(--accent-hover)" },
       "&:active": { "scrollbar-thumb-color": "var(--accent-active)" },
     },
+    "ProgressRing": {
+      "width": "24px",
+      "height": "24px",
+      "ring-color": "var(--accent)",
+      "ring-track-color": "var(--track)",
+      "ring-thickness": "3px",
+    },
     "ProgressBar": {
       "height": "8px",
       "background": "var(--track)",
