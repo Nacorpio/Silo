@@ -3,13 +3,14 @@
     Validates the Stylesheets that a project lists as <SiloStylesheet Include="theme.jsonc" /> after every build, so a wrong
     property name, a bad value or a missing Token fails the build with its position instead of showing up at run time.
     Set SiloValidatorDll when the validator is not built next to this file, and add <SiloContext Include="..." /> items for
-    Stylesheets that the listed ones are used together with.
+    Stylesheets that the listed ones are used together with, and <SiloControls Include="Addon.dll" /> items for assemblies with
+    more Controls that the Stylesheets name.
   -->
   <PropertyGroup>
     <SiloValidatorDll Condition="'$(SiloValidatorDll)' == ''">$(MSBuildThisFileDirectory)../bin/$(Configuration)/net11.0/silo-validate.dll</SiloValidatorDll>
   </PropertyGroup>
 
   <Target Name="ValidateSiloStylesheets" AfterTargets="Build" Condition="'@(SiloStylesheet)' != ''">
-    <Exec Command="dotnet &quot;$(SiloValidatorDll)&quot; @(SiloContext->'--context &quot;%(FullPath)&quot;', ' ') @(SiloStylesheet->'&quot;%(FullPath)&quot;', ' ')" />
+    <Exec Command="dotnet &quot;$(SiloValidatorDll)&quot; @(SiloControls->'--controls &quot;%(FullPath)&quot;', ' ') @(SiloContext->'--context &quot;%(FullPath)&quot;', ' ') @(SiloStylesheet->'&quot;%(FullPath)&quot;', ' ')" />
   </Target>
 </Project>

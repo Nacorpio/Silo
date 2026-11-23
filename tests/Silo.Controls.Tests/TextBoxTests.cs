@@ -175,4 +175,18 @@ public class TextBoxTests
 
         return builder.Build().Commands;
     }
+
+    [Fact]
+    public void The_ancestors_of_the_focused_Control_have_the_focus_within_pseudo_state()
+    {
+        var (root, box, focus, _) = Setup();
+
+        Assert.True(focus.Focus(box));
+        Assert.Contains("focus-within", root.PseudoStates);
+        Assert.Contains("focus", box.PseudoStates);
+        Assert.DoesNotContain("focus-within", box.PseudoStates);
+
+        Assert.True(focus.Focus(null));
+        Assert.DoesNotContain("focus-within", root.PseudoStates);
+    }
 }

@@ -211,10 +211,25 @@ public abstract class Control : Element, ILayoutNode
     /// <summary>Gets whether the Control can have the keyboard focus. A click on it, or inside it, focuses it.</summary>
     public virtual bool IsFocusable => false;
 
-    /// <summary>Sets or clears the <c>focus</c> Pseudo-state. The <see cref="FocusManager"/> calls this.</summary>
+    /// <summary>
+    /// Sets or clears the <c>focus</c> Pseudo-state, and the <c>focus-within</c> Pseudo-state of every ancestor Control.
+    /// The <see cref="FocusManager"/> calls this.
+    /// </summary>
     /// <param name="value"><see langword="true"/> while the Control has the keyboard focus.</param>
     /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
-    public bool SetFocused(bool value) => SetPseudoState("focus", value);
+    /// <remarks>
+    /// <c>focus-within</c> lets a Control that is made of other Controls, such as a field with a button inside, show that
+    /// one of its parts has the focus: <c>"&amp;:focus-within": { "border-color": "var(--accent)" }</c>.
+    /// </remarks>
+    public bool SetFocused(bool value)
+    {
+        var changed = SetPseudoState("focus", value);
+
+        for (var ancestor = Parent; ancestor is Control control; ancestor = control.Parent)
+            changed |= control.SetPseudoState("focus-within", value);
+
+        return changed;
+    }
 
     /// <summary>Handles a key press while the Control has the keyboard focus.</summary>
     /// <param name="key">The key.</param>

@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
+    <ProjectReference Include="../Silo.Controls.UnitsNet/Silo.Controls.UnitsNet.csproj" />
     <ProjectReference Include="../Silo.Inspector/Silo.Inspector.csproj" />
     <ProjectReference Include="../Silo.Platform.Sdl/Silo.Platform.Sdl.csproj" />
     <ProjectReference Include="../Silo.Themes.Default/Silo.Themes.Default.csproj" />

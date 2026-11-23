@@ -1,0 +1,27 @@
+{
+  // The look of QuantityBox: one bordered field with the unit dropdown inside it. Load it after the default theme.
+  "rules": {
+    "QuantityBox": {
+      "flex-direction": "row",
+      "align-items": "stretch",
+      "background": "var(--surface)",
+      "border-width": "1px",
+      "border-color": "var(--border)",
+      "border-radius": "var(--radius)",
+      "&:focus-within": { "border-color": "var(--accent)" },
+      "&:focus": { "border-color": "var(--accent)" },
+    },
+    "QuantityBox Separator": { "margin": "4px 0px" },
+    "QuantityBox NumberBox": {
+      "flex-grow": "1",
+      "background": "transparent",
+      "border-width": "0px",
+      "border-radius": "0px",
+    },
+    "QuantityBox ComboBox": {
+      "background": "transparent",
+      "border-width": "0px",
+      "border-radius": "0px",
+    },
+  },
+}
