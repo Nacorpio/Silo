@@ -723,6 +723,13 @@
       "&:hover": { "slider-fill-color": "var(--accent-hover)" },
       "&:active": { "slider-fill-color": "var(--accent-active)" },
     },
+    "ScrollBar": {
+      "width": "12px",
+      "scrollbar-track-color": "var(--track)",
+      "scrollbar-thumb-color": "var(--muted)",
+      "&:hover": { "scrollbar-thumb-color": "var(--accent-hover)" },
+      "&:active": { "scrollbar-thumb-color": "var(--accent-active)" },
+    },
     "ProgressBar": {
       "height": "8px",
       "background": "var(--track)",
