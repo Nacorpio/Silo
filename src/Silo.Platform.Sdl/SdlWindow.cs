@@ -94,6 +94,9 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Whether the window was closed.</summary>
     bool closed;
 
+    /// <summary>Whether the window was asked to be shown above the others.</summary>
+    bool alwaysOnTop;
+
     /// <summary>Whether the window draws its own title bar.</summary>
     bool customTitleBar;
 
@@ -195,6 +198,22 @@ public sealed unsafe class SdlWindow : IDisposable
 
     /// <summary>Gets whether the window is maximized.</summary>
     public bool IsMaximized => !disposed && !closed && (SDL3.SDL_GetWindowFlags(window) & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
+
+    /// <summary>
+    /// Gets or sets whether the window is shown above all other windows, also while another application has the focus. The default
+    /// is <see langword="false"/>. How a window manager treats it can differ, and some ignore it.
+    /// </summary>
+    public bool AlwaysOnTop
+    {
+        get => alwaysOnTop;
+        set
+        {
+            alwaysOnTop = value;
+
+            if (!disposed && !closed)
+                SDL3.SDL_SetWindowAlwaysOnTop(window, value);
+        }
+    }
 
     /// <summary>Gets or sets the color that every frame is cleared with. The default is white.</summary>
     public Color Background { get; set; } = new(255, 255, 255);
@@ -670,6 +689,13 @@ public sealed unsafe class SdlWindow : IDisposable
     {
         /// <inheritdoc/>
         public bool IsMaximized => owner.IsMaximized;
+
+        /// <inheritdoc/>
+        public bool AlwaysOnTop
+        {
+            get => owner.AlwaysOnTop;
+            set => owner.AlwaysOnTop = value;
+        }
 
         /// <inheritdoc/>
         public void Minimize() => SDL3.SDL_MinimizeWindow(owner.window);

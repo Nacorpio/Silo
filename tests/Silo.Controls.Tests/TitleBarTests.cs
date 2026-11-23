@@ -9,6 +9,8 @@ public class TitleBarTests
     {
         public bool IsMaximized { get; set; }
 
+        public bool AlwaysOnTop { get; set; }
+
         public List<string> Calls { get; } = [];
 
         public void Minimize() => Calls.Add("minimize");

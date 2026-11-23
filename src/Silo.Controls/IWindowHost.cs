@@ -6,6 +6,9 @@ public interface IWindowHost
     /// <summary>Gets whether the window is maximized.</summary>
     bool IsMaximized { get; }
 
+    /// <summary>Gets or sets whether the window is shown above all other windows, also while another application has the focus.</summary>
+    bool AlwaysOnTop { get; set; }
+
     /// <summary>Minimizes the window.</summary>
     void Minimize();
 
