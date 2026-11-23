@@ -70,15 +70,19 @@ public sealed class OverlayLayer
     /// <param name="modal">
     /// <see langword="true"/> (the default) to take the pointer and close on a press outside. <see langword="false"/> to only draw it.
     /// </param>
+    /// <param name="interactive">
+    /// <see langword="true"/> to let the pointer reach the Controls inside <paramref name="content"/> although the overlay is not
+    /// modal, as for a toast. A press outside them goes through to what is below. It has no effect on a modal overlay.
+    /// </param>
     /// <exception cref="InvalidOperationException">The Control is already shown, or has a parent.</exception>
-    public void Show(Control content, double x, double y, bool modal = true)
+    public void Show(Control content, double x, double y, bool modal = true, bool interactive = false)
     {
         ArgumentNullException.ThrowIfNull(content);
 
         if (Contains(content) || content.Parent is not null)
             throw new InvalidOperationException("The Control is already part of a tree.");
 
-        hosts.Add(new OverlayHost(content, x, y, modal) { TextMeasurer = TextMeasurer });
+        hosts.Add(new OverlayHost(content, x, y, modal, interactive: interactive) { TextMeasurer = TextMeasurer });
 
         Changed?.Invoke(this, EventArgs.Empty);
     }
@@ -227,7 +231,7 @@ public sealed class OverlayLayer
     public Control? HitTest(double x, double y)
     {
         if (hosts.FindLast(host => host.IsModal) is not { } top)
-            return null;
+            return HitInteractive(x, y);
 
         for (var i = hosts.Count - 1; i >= 0; i--)
         {
@@ -242,6 +246,19 @@ public sealed class OverlayLayer
         }
 
         return top.HitTest(x, y) ?? top;
+    }
+
+    /// <summary>Finds the Control of an interactive overlay at a point.</summary>
+    /// <param name="x">The horizontal position, relative to the window.</param>
+    /// <param name="y">The vertical position, relative to the window.</param>
+    /// <returns>The Control inside the content, or <see langword="null"/> when the point is not on one, so that it goes to what is below.</returns>
+    Control? HitInteractive(double x, double y)
+    {
+        for (var i = hosts.Count - 1; i >= 0; i--)
+            if (hosts[i].IsInteractive && hosts[i].HitTest(x, y) is { } hit && hit != hosts[i] && hit != hosts[i].Content)
+                return hit;
+
+        return null;
     }
 
     /// <summary>Tells whether a hit is the invisible backdrop behind an overlay.</summary>

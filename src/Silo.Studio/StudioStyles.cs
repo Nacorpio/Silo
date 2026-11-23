@@ -88,6 +88,7 @@ public static class StudioStyles
             ".cell ComboBox": { "width": "112px" },
             ".cell ColorPicker": { "width": "130px" },
             ".cell ColorPanel": { "flex-shrink": "0" },
+            ".cell .toasts": { "flex-direction": "column", "gap": "6px", "width": "330px", "height": "176px", "flex-shrink": "0" },
             ".cell DatePicker": { "width": "130px" },
             ".cell Calendar": { "width": "230px", "flex-shrink": "0" },
             ".cell Separator": { "width": "112px" },

@@ -24,10 +24,12 @@ sealed class OverlayHost : Control
     /// <param name="dismiss">
     /// For a Dialog, which is centered and dims the window: what to run when it is dismissed. Otherwise <see langword="null"/>.
     /// </param>
-    public OverlayHost(Control content, double x, double y, bool modal, Action? dismiss = null)
+    /// <param name="interactive">Whether the pointer reaches the content although the overlay is not modal.</param>
+    public OverlayHost(Control content, double x, double y, bool modal, Action? dismiss = null, bool interactive = false)
     {
         Content = content;
         IsModal = modal;
+        IsInteractive = interactive;
         Dismiss = dismiss;
 
         SetValue(AlignItemsProperty, dismiss is null ? AlignItems.Start : AlignItems.Center);
@@ -55,6 +57,9 @@ sealed class OverlayHost : Control
 
     /// <summary>Gets whether the overlay takes the pointer. A passive overlay, such as a tooltip, is only drawn.</summary>
     public bool IsModal { get; }
+
+    /// <summary>Gets whether the pointer reaches the content although the overlay is not modal, as for a toast.</summary>
+    public bool IsInteractive { get; }
 
     /// <inheritdoc/>
     protected override FlexDirection LayoutDirection => FlexDirection.Column;
