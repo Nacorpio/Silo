@@ -44,6 +44,15 @@ public interface IDrawingContext
     /// <param name="dy">The vertical offset.</param>
     void Translate(double dx, double dy);
 
+    /// <summary>Scales all later drawing around the current origin.</summary>
+    /// <param name="sx">The horizontal factor.</param>
+    /// <param name="sy">The vertical factor.</param>
+    void Scale(double sx, double sy);
+
+    /// <summary>Rotates all later drawing clockwise around the current origin.</summary>
+    /// <param name="degrees">The angle in degrees.</param>
+    void Rotate(double degrees);
+
     /// <summary>Limits all later drawing to the intersection of the current clip and a rectangle.</summary>
     /// <param name="rect">The rectangle, in the current coordinate system.</param>
     void ClipRect(Rect rect);

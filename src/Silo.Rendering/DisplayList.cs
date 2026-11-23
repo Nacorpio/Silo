@@ -90,6 +90,12 @@ public sealed class DisplayListBuilder : IDrawingContext
     public void Translate(double dx, double dy) => commands.Add(new TranslateCommand(dx, dy));
 
     /// <inheritdoc/>
+    public void Scale(double sx, double sy) => commands.Add(new ScaleCommand(sx, sy));
+
+    /// <inheritdoc/>
+    public void Rotate(double degrees) => commands.Add(new RotateCommand(degrees));
+
+    /// <inheritdoc/>
     public void ClipRect(Rect rect) => commands.Add(new ClipRectCommand(rect));
 
     /// <inheritdoc/>

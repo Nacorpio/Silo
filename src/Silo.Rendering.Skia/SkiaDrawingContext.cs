@@ -44,6 +44,12 @@ public sealed class SkiaDrawingContext(SKCanvas canvas) : IDrawingContext
     public void Translate(double dx, double dy) => canvas.Translate((float)dx, (float)dy);
 
     /// <inheritdoc/>
+    public void Scale(double sx, double sy) => canvas.Scale((float)sx, (float)sy);
+
+    /// <inheritdoc/>
+    public void Rotate(double degrees) => canvas.RotateDegrees((float)degrees);
+
+    /// <inheritdoc/>
     public void ClipRect(Rect rect) => canvas.ClipRect(ToSkia(rect), antialias: true);
 
     /// <inheritdoc/>

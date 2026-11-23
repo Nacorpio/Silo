@@ -37,6 +37,23 @@ public sealed record TranslateCommand(double Dx, double Dy) : DrawCommand
     public override void Execute(IDrawingContext context) => context.Translate(Dx, Dy);
 }
 
+/// <summary>Records <see cref="IDrawingContext.Scale"/>.</summary>
+/// <param name="Sx">The horizontal factor.</param>
+/// <param name="Sy">The vertical factor.</param>
+public sealed record ScaleCommand(double Sx, double Sy) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.Scale(Sx, Sy);
+}
+
+/// <summary>Records <see cref="IDrawingContext.Rotate"/>.</summary>
+/// <param name="Degrees">The angle in degrees.</param>
+public sealed record RotateCommand(double Degrees) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.Rotate(Degrees);
+}
+
 /// <summary>Records <see cref="IDrawingContext.ClipRect"/>.</summary>
 /// <param name="Rect">The clip rectangle.</param>
 public sealed record ClipRectCommand(Rect Rect) : DrawCommand
