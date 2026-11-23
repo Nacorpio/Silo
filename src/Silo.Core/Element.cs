@@ -1,4 +1,5 @@
 using Silo.Styling;
+using Silo.Styling.Values;
 
 namespace Silo;
 
@@ -33,11 +34,15 @@ namespace Silo;
 /// var diagnostics = root.ApplyStyles(new StyleResolver([sheet]));
 /// </code>
 /// </example>
-public class Element : IStyleNode
+public partial class Element : IStyleNode
 {
     /// <summary>The opacity of the Element and its subtree, from 0 (transparent) to 1 (opaque).</summary>
     public static readonly StyledProperty<double> OpacityProperty =
         StyledProperty.Register<Element, double>("opacity", 1, TryParseOpacity);
+
+    /// <summary>Which properties change smoothly when their value changes, and how. The default is <c>none</c>: changes are instant.</summary>
+    public static readonly StyledProperty<TransitionList> TransitionProperty =
+        StyledProperty.Register<Element, TransitionList>("transition", TransitionList.None, TransitionList.TryParse);
 
     /// <summary>The Classes of this Element.</summary>
     readonly HashSet<string> classes = new(StringComparer.Ordinal);
@@ -166,7 +171,7 @@ public class Element : IStyleNode
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var before = GetObject(property);
+        var before = GetTargetObject(property);
 
         localValues[property] = value;
 
@@ -182,7 +187,7 @@ public class Element : IStyleNode
     {
         ArgumentNullException.ThrowIfNull(property);
 
-        var before = GetObject(property);
+        var before = GetTargetObject(property);
         var removed = localValues.Remove(property);
 
         NotifyIfChanged(property, before);
@@ -249,7 +254,7 @@ public class Element : IStyleNode
 
         for (var i = 0; i < properties.Count; i++)
         {
-            before[i] = GetObject(properties[i]);
+            before[i] = GetTargetObject(properties[i]);
         }
 
         styledValues.Clear();
@@ -294,6 +299,8 @@ public class Element : IStyleNode
             NotifyIfChanged(properties[i], before[i]);
         }
 
+        hasBeenStyled = true;
+
         OnStyled(resolver);
 
         foreach (var child in Children)
@@ -306,6 +313,19 @@ public class Element : IStyleNode
     /// <param name="property">The property to read.</param>
     /// <returns>The value after Local value, Stylesheet value, inheritance and default are considered.</returns>
     object? GetObject(StyledProperty property)
+    {
+        if (animatedValues is { Count: > 0 } && animatedValues.TryGetValue(property, out var animated))
+        {
+            return animated;
+        }
+
+        return GetTargetObject(property);
+    }
+
+    /// <summary>Gets the value that a property is heading for: the effective value without a transition that is still running.</summary>
+    /// <param name="property">The property to read.</param>
+    /// <returns>The value after Local value, Stylesheet value, inheritance and default are considered.</returns>
+    object? GetTargetObject(StyledProperty property)
     {
         if (localValues.TryGetValue(property, out var local))
         {
@@ -330,8 +350,11 @@ public class Element : IStyleNode
     /// <param name="before">The effective value before the change.</param>
     void NotifyIfChanged(StyledProperty property, object? before)
     {
-        if (!Equals(before, GetObject(property)))
+        var after = GetTargetObject(property);
+
+        if (!Equals(before, after))
         {
+            BeginTransition(property, before, after);
             OnPropertyChanged(property);
         }
     }

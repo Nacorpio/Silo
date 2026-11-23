@@ -60,6 +60,18 @@ public sealed class OverlayLayer
     /// <summary>Gets or sets the clock that animated Controls in the overlays read.</summary>
     public IAnimationClock? AnimationClock { get; set; }
 
+    /// <summary>Lets the Controls in the overlays act on the passing of time, like <see cref="Animations.Tick"/> does for the root.</summary>
+    /// <returns><see langword="true"/> when a Control asked for styles to be applied again.</returns>
+    public bool Tick()
+    {
+        var changed = false;
+
+        foreach (var host in hosts.ToArray())
+            changed |= Animations.Tick(host);
+
+        return changed;
+    }
+
     /// <summary>Gets whether a Control in the overlays is animating.</summary>
     public bool IsAnimating => hosts.Any(host => Animations.IsAnimating(host));
 

@@ -69,6 +69,9 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Tells how long the window has been running, for the tooltips' delay.</summary>
     readonly Stopwatch clock = Stopwatch.StartNew();
 
+    /// <summary>Runs the animations of the Controls and the overlays.</summary>
+    readonly AnimationScheduler scheduler;
+
     /// <summary>Keeps the keyboard focus.</summary>
     readonly FocusManager focus = new();
 
@@ -136,6 +139,7 @@ public sealed unsafe class SdlWindow : IDisposable
         Toasts = new ToastHost(overlays);
         overlays.Changed += (_, _) => Restyle();
         router = new PointerRouter(root, overlays);
+        scheduler = new AnimationScheduler(root, overlays) { FrameMilliseconds = FrameTime(window) };
 
         SDL3.SDL_StartTextInput(window);
 
@@ -213,6 +217,16 @@ public sealed unsafe class SdlWindow : IDisposable
             if (!disposed && !closed)
                 SDL3.SDL_SetWindowAlwaysOnTop(window, value);
         }
+    }
+
+    /// <summary>
+    /// Gets or sets whether the user prefers little motion, so that transitions other than those of <c>opacity</c> are skipped. Set it from
+    /// the operating system's accessibility setting. The default is <see langword="false"/>.
+    /// </summary>
+    public bool ReducedMotion
+    {
+        get => scheduler.ReducedMotion;
+        set => scheduler.ReducedMotion = value;
     }
 
     /// <summary>Gets or sets the color that every frame is cleared with. The default is white.</summary>
@@ -350,6 +364,19 @@ public sealed unsafe class SdlWindow : IDisposable
         _ => 0,
     };
 
+    /// <summary>Works out the time between two frames from the refresh rate of the display that a window is on.</summary>
+    /// <param name="target">The window.</param>
+    /// <returns>The time in milliseconds, between 4 and 33, or the default when the rate is not known.</returns>
+    static int FrameTime(SDL_Window* target)
+    {
+        var mode = SDL3.SDL_GetDesktopDisplayMode(SDL3.SDL_GetDisplayForWindow(target));
+
+        if (mode is null || mode->refresh_rate < 20)
+            return Animations.FrameMilliseconds;
+
+        return Math.Clamp((int)Math.Round(1000 / mode->refresh_rate), 4, 33);
+    }
+
     /// <summary>Converts an SDL key code to a <see cref="Key"/>.</summary>
     /// <param name="code">The SDL key code.</param>
     /// <returns>The key, or <see cref="Key.Unknown"/>.</returns>
@@ -411,7 +438,7 @@ public sealed unsafe class SdlWindow : IDisposable
         if (animating)
             dirty = true;
 
-        if (animating && Animations.Tick(root))
+        if (animating && scheduler.Tick())
             Restyle();
 
         if (dirty && !closed)
@@ -428,7 +455,7 @@ public sealed unsafe class SdlWindow : IDisposable
 
         var wait = due is { } time ? (int)Math.Ceiling(time.TotalMilliseconds) : int.MaxValue;
 
-        return animating ? Math.Min(wait, Animations.FrameMilliseconds) : wait;
+        return animating ? Math.Min(wait, scheduler.FrameMilliseconds) : wait;
     }
 
     /// <summary>Applies the Stylesheets to the tree and asks for a frame.</summary>
@@ -649,7 +676,7 @@ public sealed unsafe class SdlWindow : IDisposable
 
         Present(bitmap);
 
-        animating = Animations.IsAnimating(root) || overlays.IsAnimating;
+        animating = scheduler.IsAnimating;
 
         Frames++;
     }

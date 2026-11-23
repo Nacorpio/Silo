@@ -266,6 +266,51 @@ public class SdlWindowTests
     }
 
     [Fact]
+    public void A_transition_runs_on_the_real_clock_and_the_window_keeps_drawing_until_it_ends()
+    {
+        SDL3.SDL_SetHint("SDL_VIDEO_DRIVER", "dummy");
+
+        const string sheet = """
+            { "rules": {
+              "#root": { "width": "200px", "height": "100px", "align-items": "flex-start" },
+              "#box": { "width": "50px", "height": "20px", "background": "#000000", "transition": "background 120ms linear" },
+              "#box.on": { "background": "#ffffff" }
+            } }
+            """;
+
+        var root = new Box { Name = "root" };
+        var box = new Box { Name = "box" };
+
+        root.Children.Add(box);
+
+        using var window = new SdlWindow("test", 200, 100, root) { Styles = new StyleResolver([JsoncStylesheetReader.Read(sheet, "t.jsonc")]) };
+
+        window.Pump(0);
+
+        Assert.False(window.ReducedMotion);
+
+        box.AddClass("on");
+        window.Styles = window.Styles;
+
+        var frames = window.Frames;
+        var seen = new List<byte>();
+
+        for (var i = 0; i < 60 && box.GetValue(Control.BackgroundProperty).R < 255; i++)
+        {
+            window.Pump(20);
+            seen.Add(box.GetValue(Control.BackgroundProperty).R);
+        }
+
+        Assert.Equal(255, box.GetValue(Control.BackgroundProperty).R);
+        Assert.Contains(seen, value => value is > 0 and < 255);
+        Assert.True(window.Frames - frames >= 3);
+
+        window.ReducedMotion = true;
+
+        Assert.True(root.ReducedMotion);
+    }
+
+    [Fact]
     public async Task Posted_work_runs_on_the_pumping_thread_and_a_quit_event_ends_the_loop()
     {
         var (window, _) = Setup();
