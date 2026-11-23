@@ -57,13 +57,13 @@ public class ThemeMatrixTests
     }
 
     [Fact]
-    public void The_rows_are_grouped_into_one_tab_page_for_each_category()
+    public void The_rows_are_grouped_into_one_page_for_each_category()
     {
         var matrix = new ThemeMatrix();
 
         Assert.Equal(["Buttons", "Text input", "Values and lists", "Inputs", "Data", "Dates", "Colors", "Display", "Panels", "Navigation", "Shell", "Collections", "Layout", "Menus and dialogs"], ThemeMatrix.Categories);
-        Assert.Equal(ThemeMatrix.Categories.Count(), matrix.Tabs.Count);
-        Assert.Equal(0, matrix.Tabs.SelectedIndex);
+        Assert.Equal("Buttons", matrix.SelectedCategory);
+        Assert.Single(matrix.Children);
         Assert.NotNull(matrix.Cell("QuantityBox", "focus"));
     }
 
@@ -74,8 +74,9 @@ public class ThemeMatrixTests
 
         Assert.True(matrix.ShowCategory("Text input"));
         Assert.False(matrix.ShowCategory("Text input"));
-        Assert.Equal(1, matrix.Tabs.SelectedIndex);
-        Assert.Equal("page-Text input", matrix.Tabs.SelectedContent!.Name);
+        Assert.Equal("Text input", matrix.SelectedCategory);
+        Assert.Equal("page-Text input", matrix.Page.Name);
+        Assert.Same(matrix.Page, Assert.Single(matrix.Children));
         Assert.Throws<ArgumentException>(() => matrix.ShowCategory("Nope"));
     }
 
@@ -90,5 +91,37 @@ public class ThemeMatrixTests
 
             Assert.Empty(matrix.ApplyStyles(Resolver(ThemeVariant.Light)));
         }
+    }
+
+    [Fact]
+    public void Every_category_has_a_glyph_a_description_and_a_count_that_adds_up_to_the_rows()
+    {
+        var infos = ThemeMatrix.Categories.Select(ThemeMatrix.Describe).ToList();
+
+        Assert.All(infos, i => Assert.True(Silo.Glyphs.TryGet(i.Glyph, out _)));
+        Assert.All(infos, i => Assert.NotEmpty(i.Description));
+        Assert.Equal(ThemeMatrix.RowNames.Count(), infos.Sum(i => i.Count));
+    }
+
+    [Fact]
+    public void The_category_list_shows_the_selected_category_and_picks_one_on_a_press_or_a_key()
+    {
+        var matrix = new ThemeMatrix();
+        var list = new CategoryList(matrix);
+
+        Assert.Contains("selected", list.Entry("Buttons").PseudoStates);
+
+        list.Entry("Dates").PointerDown();
+        list.Entry("Dates").PointerUp(inside: true);
+
+        Assert.Equal("Dates", matrix.SelectedCategory);
+        Assert.Contains("selected", list.Entry("Dates").PseudoStates);
+        Assert.DoesNotContain("selected", list.Entry("Buttons").PseudoStates);
+
+        Assert.True(list.KeyDown(Key.Down));
+        Assert.Equal("Colors", matrix.SelectedCategory);
+        Assert.True(list.KeyDown(Key.Home));
+        Assert.Equal("Buttons", matrix.SelectedCategory);
+        Assert.False(list.KeyDown(Key.Up));
     }
 }
