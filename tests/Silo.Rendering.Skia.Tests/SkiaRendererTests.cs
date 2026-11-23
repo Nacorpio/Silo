@@ -45,6 +45,30 @@ public class SkiaRendererTests
     }
 
     [Fact]
+    public void Scale_and_rotate_transform_later_drawing()
+    {
+        var builder = new DisplayListBuilder();
+
+        builder.Save();
+        builder.Translate(25, 25);
+        builder.Rotate(90);
+        builder.FillRect(new Rect(0, -5, 20, 10), Blue);
+        builder.Restore();
+        builder.Save();
+        builder.Scale(2, 2);
+        builder.FillRect(new Rect(0, 0, 5, 5), new Color(255, 0, 0));
+        builder.Restore();
+
+        using var bitmap = SkiaRenderer.Render(builder.Build(), 50, 50, White);
+
+        // A quarter turn makes the 20x10 bar point down from (25, 25).
+        Assert.Equal(new SKColor(0, 0, 255), PixelAt(bitmap, 25, 40));
+        Assert.Equal(new SKColor(255, 255, 255), PixelAt(bitmap, 40, 25));
+        Assert.Equal(new SKColor(255, 0, 0), PixelAt(bitmap, 8, 8));
+        Assert.Equal(new SKColor(255, 255, 255), PixelAt(bitmap, 12, 12));
+    }
+
+    [Fact]
     public void A_mask_is_drawn_in_one_color_where_it_is_opaque_and_leaves_the_rest_alone()
     {
         using var mask = SkiaImage.Create(

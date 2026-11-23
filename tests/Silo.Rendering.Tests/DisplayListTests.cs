@@ -14,6 +14,8 @@ public class DisplayListTests
         public void Restore() => Calls.Add("restore");
 
         public void Translate(double dx, double dy) => Calls.Add($"translate {dx} {dy}");
+        public void Scale(double sx, double sy) => Calls.Add($"scale {sx} {sy}");
+        public void Rotate(double degrees) => Calls.Add($"rotate {degrees}");
         public void ClipRect(Rect rect) => Calls.Add($"clip {rect.X} {rect.Y} {rect.Width} {rect.Height}");
         public void FillRect(Rect rect, Color color, double cornerRadius = 0)
             => Calls.Add($"fill {rect.Width}x{rect.Height} {color.R} r{cornerRadius}");
@@ -43,6 +45,8 @@ public class DisplayListTests
 
         builder.Save();
         builder.Translate(5, 6);
+        builder.Scale(2, 3);
+        builder.Rotate(45);
         builder.ClipRect(new Rect(0, 0, 10, 10));
         builder.FillRect(new Rect(0, 0, 10, 4), new Color(9, 0, 0), 2);
         builder.FillGradient(new Rect(0, 0, 10, 4), new Color(1, 0, 0), new Color(2, 0, 0), vertical: true);
@@ -61,7 +65,7 @@ public class DisplayListTests
 
         string[] expected =
         [
-            "save", "translate 5 6", "clip 0 0 10 10", "fill 10x4 9 r2", "gradient 10 1 2 True", "roundclip 10 2", "polyline 3 3 2 True", "polygon 3 4", "stroke 1", "text Hi 1 2 14", "image 8x6 3 4 16", "mask 8x6 1 7", "restore",
+            "save", "translate 5 6", "scale 2 3", "rotate 45", "clip 0 0 10 10", "fill 10x4 9 r2", "gradient 10 1 2 True", "roundclip 10 2", "polyline 3 3 2 True", "polygon 3 4", "stroke 1", "text Hi 1 2 14", "image 8x6 3 4 16", "mask 8x6 1 7", "restore",
         ];
 
         Assert.Equal(expected, log.Calls);

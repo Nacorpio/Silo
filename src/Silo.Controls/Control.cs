@@ -96,6 +96,14 @@ public abstract class Control : Element, ILayoutNode
     public static readonly StyledProperty<Thickness> PaddingProperty =
         StyledProperty.Register<Control, Thickness>("padding", default, Thickness.TryParse);
 
+    /// <summary>The move, rotation and scale that the Control and its children are painted and hit-tested with. Layout is not affected.</summary>
+    public static readonly StyledProperty<Transform> TransformProperty =
+        StyledProperty.Register<Control, Transform>("transform", Transform.None, Transform.TryParse);
+
+    /// <summary>The point that <see cref="TransformProperty"/> rotates and scales around. The default is the center of the border box.</summary>
+    public static readonly StyledProperty<TransformOrigin> TransformOriginProperty =
+        StyledProperty.Register<Control, TransformOrigin>("transform-origin", TransformOrigin.Center, TransformOrigin.TryParse);
+
     /// <summary>The space around the Control, outside its border.</summary>
     public static readonly StyledProperty<Thickness> MarginProperty =
         StyledProperty.Register<Control, Thickness>("margin", default, Thickness.TryParse);
@@ -329,6 +337,23 @@ public abstract class Control : Element, ILayoutNode
         context.Save();
         context.Translate(Bounds.X, Bounds.Y);
 
+        var transform = GetValue(TransformProperty);
+
+        if (!transform.IsNone)
+        {
+            var (originX, originY) = GetValue(TransformOriginProperty).Resolve(Bounds.Width, Bounds.Height);
+
+            context.Translate(originX + transform.TranslateX, originY + transform.TranslateY);
+
+            if (transform.Rotate != 0)
+                context.Rotate(transform.Rotate);
+
+            if (transform.ScaleX != 1 || transform.ScaleY != 1)
+                context.Scale(transform.ScaleX, transform.ScaleY);
+
+            context.Translate(-originX, -originY);
+        }
+
         OnRender(context, new Rect(0, 0, Bounds.Width, Bounds.Height));
 
         RenderChildren(context);
@@ -344,12 +369,28 @@ public abstract class Control : Element, ILayoutNode
     public (double X, double Y) ToLocal(double x, double y)
     {
         if (Parent is not Control parent)
-            return (x - Bounds.X, y - Bounds.Y);
+            return Untransform(x - Bounds.X, y - Bounds.Y);
 
         var (parentX, parentY) = parent.ToLocal(x, y);
         var (offsetX, offsetY) = parent.ChildOffsetFor(this);
 
-        return (parentX - offsetX - Bounds.X, parentY - offsetY - Bounds.Y);
+        return Untransform(parentX - offsetX - Bounds.X, parentY - offsetY - Bounds.Y);
+    }
+
+    /// <summary>Undoes the <c>transform</c> of this Control for a point.</summary>
+    /// <param name="x">The horizontal position, relative to the untransformed border box.</param>
+    /// <param name="y">The vertical position, relative to the untransformed border box.</param>
+    /// <returns>The position in the Control's own coordinates. A transform that cannot be undone leaves the point as it is.</returns>
+    (double X, double Y) Untransform(double x, double y)
+    {
+        var transform = GetValue(TransformProperty);
+
+        if (transform.IsNone)
+            return (x, y);
+
+        var (originX, originY) = GetValue(TransformOriginProperty).Resolve(Bounds.Width, Bounds.Height);
+
+        return transform.ToMatrix(originX, originY).TryInvert(out var inverse) ? inverse.Apply(x, y) : (x, y);
     }
 
     /// <summary>Finds the topmost Control at a point.</summary>
@@ -358,6 +399,19 @@ public abstract class Control : Element, ILayoutNode
     /// <returns>The deepest Control that contains the point, or <see langword="null"/> when the point is outside this Control.</returns>
     public Control? HitTest(double x, double y)
     {
+        var transform = GetValue(TransformProperty);
+
+        if (!transform.IsNone)
+        {
+            var (originX, originY) = GetValue(TransformOriginProperty).Resolve(Bounds.Width, Bounds.Height);
+
+            // A Control that is scaled to nothing cannot be pointed at.
+            if (!transform.ToMatrix(originX, originY).TryInvert(out var inverse))
+                return null;
+
+            (x, y) = inverse.Apply(x, y);
+        }
+
         if (x < 0 || y < 0 || x >= Bounds.Width || y >= Bounds.Height)
             return null;
 

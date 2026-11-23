@@ -113,6 +113,7 @@ public sealed class ThemeMatrix : Box
         new("ScrollViewer", "Panels", CreateScrollViewer, ["normal"]),
         new("AspectRatioBox", "Panels", CreateAspectRatioBox, ["normal"]),
         new("Terminal", "Panels", CreateTerminal, ["normal"]),
+        new("Transform", "Panels", CreateTransforms, ["normal"]),
         new("BusyIndicator", "Panels", CreateBusyIndicator, ["normal"]),
         new("SplitPane", "Panels", CreateSplitPane, ["normal"]),
         new("InfoBar", "Panels", CreateInfoBars, ["normal"]),
@@ -425,6 +426,34 @@ public sealed class ThemeMatrix : Box
             skeleton.AddClass(shape);
             skeleton.SetValue(Control.FlexShrinkProperty, 0);
             row.Children.Add(skeleton);
+        }
+
+        return row;
+    }
+
+    /// <summary>Creates a row of buttons that are moved, rotated and scaled with the <c>transform</c> property.</summary>
+    static Box CreateTransforms()
+    {
+        var row = new Box();
+
+        row.AddClass("badges");
+
+        var transforms = new (string Text, Silo.Styling.Values.Transform Transform)[]
+        {
+            ("none", Silo.Styling.Values.Transform.None),
+            ("rotate 12", new(0, 0, 12, 1, 1)),
+            ("scale 1.25", new(0, 0, 0, 1.25, 1.25)),
+            ("move 0 -6", new(0, -6, 0, 1, 1)),
+            ("all", new(4, 4, -8, 1.15, 1.15)),
+        };
+
+        foreach (var (text, transform) in transforms)
+        {
+            var button = new Button { Text = text };
+
+            button.SetValue(Control.TransformProperty, transform);
+            button.SetValue(Control.FlexShrinkProperty, 0);
+            row.Children.Add(button);
         }
 
         return row;
