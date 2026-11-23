@@ -50,6 +50,12 @@ public static class Glyphs
         ["activity"] = [Open((2, 12), (7, 12), (10, 4), (14, 20), (17, 12), (22, 12))],
         ["eye"] = [new Line([(2, 12), (7, 7), (12, 5.5), (17, 7), (22, 12), (17, 17), (12, 18.5), (7, 17)], Closed: true), new Line(Circle(12, 12, 3), Closed: true)],
         ["fork"] = [new Line(Circle(6, 5, 2.5), Closed: true), new Line(Circle(18, 5, 2.5), Closed: true), new Line(Circle(12, 19, 2.5), Closed: true), Open((6, 7.5), (6, 10), (18, 10), (18, 7.5)), Open((12, 10), (12, 16.5))],
+        ["list"] = [Open((9, 6), (20, 6)), Open((9, 12), (20, 12)), Open((9, 18), (20, 18)), Open((4, 6), (4.1, 6)), Open((4, 12), (4.1, 12)), Open((4, 18), (4.1, 18))],
+        ["grid"] = [new Line([(4, 4), (10.5, 4), (10.5, 10.5), (4, 10.5)], Closed: true), new Line([(13.5, 4), (20, 4), (20, 10.5), (13.5, 10.5)], Closed: true), new Line([(4, 13.5), (10.5, 13.5), (10.5, 20), (4, 20)], Closed: true), new Line([(13.5, 13.5), (20, 13.5), (20, 20), (13.5, 20)], Closed: true)],
+        ["image"] = [new Line([(3, 5), (21, 5), (21, 19), (3, 19)], Closed: true), Open((3, 16), (9, 10), (14, 15), (17, 12), (21, 16)), new Line(Circle(8, 9, 1.5), Closed: true)],
+        ["sliders"] = [Open((4, 8), (20, 8)), Open((4, 16), (20, 16)), new Line(Circle(9, 8, 2), Closed: true), new Line(Circle(15, 16, 2), Closed: true)],
+        ["layout"] = [new Line([(3, 4), (21, 4), (21, 20), (3, 20)], Closed: true), Open((3, 9), (21, 9)), Open((9, 9), (9, 20))],
+        ["pencil"] = [new Line([(4, 20), (5, 15), (16, 4), (20, 8), (9, 19)], Closed: true), Open((14, 6), (18, 10))],
         ["home"] = [Open((3, 11), (12, 3), (21, 11)), Open((5, 9.5), (5, 21), (19, 21), (19, 9.5))],
     };
 

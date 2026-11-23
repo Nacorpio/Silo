@@ -35,6 +35,25 @@ public sealed class ThemeMatrix : Box
     /// <summary>The columns, in order. The names are the Pseudo-states that the matrix sets, with <c>normal</c> for none.</summary>
     public static readonly IReadOnlyList<string> States = ["normal", "hover", "pressed", "focus", "checked"];
 
+    /// <summary>The glyph and the description of each category.</summary>
+    static readonly Dictionary<string, (string Glyph, string Description)> Details = new()
+    {
+        ["Buttons"] = ("check", "Buttons, toggles and radios"),
+        ["Text input"] = ("pencil", "Text boxes and search"),
+        ["Values and lists"] = ("list", "Sliders, numbers and lists"),
+        ["Inputs"] = ("sliders", "Segments, ratings, token boxes"),
+        ["Data"] = ("grid", "Grids and trees"),
+        ["Dates"] = ("calendar", "Calendar and date picker"),
+        ["Colors"] = ("eye", "Color panel and picker"),
+        ["Display"] = ("info", "Labels, badges, avatars, stats"),
+        ["Panels"] = ("layout", "Cards, groups and expanders"),
+        ["Navigation"] = ("arrow-right", "Breadcrumbs, pagers, steppers"),
+        ["Shell"] = ("home", "Status bars and navigation panes"),
+        ["Collections"] = ("image", "Thumbnail and card galleries"),
+        ["Layout"] = ("layout", "Separators and containers"),
+        ["Menus and dialogs"] = ("menu", "Menus, dialogs, tooltips, toasts"),
+    };
+
     /// <summary>The icon that <see cref="Dot"/> creates once.</summary>
     static SkiaImage? dot;
 
@@ -511,24 +530,46 @@ public sealed class ThemeMatrix : Box
     /// <summary>The sample Control of each cell, by row and state.</summary>
     readonly Dictionary<(string Row, string State), Control> cells = [];
 
+    /// <summary>The page of each category.</summary>
+    readonly Dictionary<string, Box> pages = [];
+
+    /// <summary>The category that is shown.</summary>
+    string selectedCategory;
+
     /// <summary>Creates the matrix with all of its rows.</summary>
     public ThemeMatrix()
     {
         Name = "matrix";
 
-        Tabs.AddClass("pages");
-
         foreach (var category in Categories)
-            Tabs.AddTab(category, BuildPage(category));
+            pages[category] = BuildPage(category);
 
-        Children.Add(Tabs);
+        selectedCategory = Categories.First();
+
+        Children.Add(pages[selectedCategory]);
     }
 
-    /// <summary>Gets the names of the tab pages, in order. Each page holds the rows of one category of Controls.</summary>
+    /// <summary>Raised after another category was shown.</summary>
+    public event EventHandler? CategoryChanged;
+
+    /// <summary>Gets the names of the categories, in order. Each holds the rows of one group of Controls.</summary>
     public static IEnumerable<string> Categories => Rows.Select(r => r.Category).Distinct();
 
-    /// <summary>Gets the tabs that hold one page for each of the <see cref="Categories"/>.</summary>
-    public TabView Tabs { get; } = new();
+    /// <summary>Gets the glyph, the short description and the number of Controls of a category, for the list beside the matrix.</summary>
+    /// <param name="category">One of <see cref="Categories"/>.</param>
+    /// <returns>The facts about the category.</returns>
+    public static CategoryInfo Describe(string category)
+    {
+        var (glyph, description) = Details.GetValueOrDefault(category, ("info", string.Empty));
+
+        return new CategoryInfo(glyph, description, Rows.Count(r => r.Category == category));
+    }
+
+    /// <summary>Gets the category that is shown.</summary>
+    public string SelectedCategory => selectedCategory;
+
+    /// <summary>Gets the page of the category that is shown, which holds its rows.</summary>
+    public Box Page => pages[selectedCategory];
 
     /// <summary>Shows the page of a category, so that its rows are on screen.</summary>
     /// <param name="category">One of <see cref="Categories"/>.</param>
@@ -536,16 +577,20 @@ public sealed class ThemeMatrix : Box
     /// <exception cref="ArgumentException">There is no such category.</exception>
     public bool ShowCategory(string category)
     {
-        var index = Categories.ToList().IndexOf(category);
-
-        if (index < 0)
+        if (!pages.TryGetValue(category, out var page))
             throw new ArgumentException($"There is no category named '{category}'.", nameof(category));
 
-        var changed = Tabs.SelectedIndex != index;
+        if (category == selectedCategory)
+            return false;
 
-        Tabs.SelectedIndex = index;
+        selectedCategory = category;
 
-        return changed;
+        Children.Clear();
+        Children.Add(page);
+
+        CategoryChanged?.Invoke(this, EventArgs.Empty);
+
+        return true;
     }
 
     /// <summary>Gets the names of the rows, in order.</summary>

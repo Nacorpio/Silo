@@ -45,7 +45,7 @@ public sealed class StudioView : Window
     {
         Name = "studio";
         Title = "Silo Studio";
-        InitialWidth = editor is null ? 820 : 1260;
+        InitialWidth = editor is null ? 1080 : 1520;
         InitialHeight = editor is null ? 560 : 920;
 
         var bar = new Box { Name = "bar" };
@@ -61,6 +61,7 @@ public sealed class StudioView : Window
         bar.Children.Add(light);
         bar.Children.Add(dark);
 
+        body.Children.Add(new CategoryList(Matrix));
         body.Children.Add(scroll);
 
         if (editor is not null)
