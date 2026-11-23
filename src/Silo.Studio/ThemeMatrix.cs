@@ -194,13 +194,21 @@ public sealed class ThemeMatrix : Box
     {
         var entries = new List<MenuItem>
         {
-            new("&Copy"),
-            new("&Paste"),
+            new("&Copy") { ShortcutText = "Ctrl+C", Glyph = "plus" },
+            new("&Paste") { ShortcutText = "Ctrl+V", IsEnabled = false, Glyph = "list" },
             MenuItem.Separator,
-            new("&Recent") { Children = [new MenuItem("a.txt")] },
+            new("&Word wrap") { IsChecked = true },
+            new("&Small") { IsChecked = false, GroupName = "size" },
+            new("&Large") { IsChecked = true, GroupName = "size" },
+            MenuItem.Separator,
+            new("&Recent") { Glyph = "home", Children = [new MenuItem("a.txt")] },
         };
 
-        return new ContextMenu { Entries = entries, SelectedIndex = 1 };
+        var menu = new ContextMenu { Entries = entries, SelectedIndex = 0 };
+
+        menu.SetValue(FlexShrinkProperty, 0);
+
+        return menu;
     }
 
     /// <summary>Creates a MenuBar with two menus.</summary>

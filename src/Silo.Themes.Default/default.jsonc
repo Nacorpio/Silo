@@ -612,6 +612,7 @@
       "selection-color": "var(--accent)",
       "selection-text-color": "var(--accent-text)",
       "separator-color": "var(--border)",
+      "disabled-text-color": "var(--muted)",
     },
     "TreeView": {
       "height": "160px",

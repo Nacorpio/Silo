@@ -142,10 +142,10 @@ public class ListView : Control, IScrollable
     public override bool IsFocusable => true;
 
     /// <summary>Gets the room that the icons take in front of the text in pixels, which is 0 when no row has an icon.</summary>
-    protected double IconSpace => hasIcons ? IconSize + IconGap : 0;
+    protected virtual double IconSpace => hasIcons ? IconSize + IconGap : 0;
 
     /// <summary>Gets the side of the square that the icons fit in, in pixels.</summary>
-    double IconSize => Math.Max(0, GetValue(IconSizeProperty));
+    protected double IconSize => Math.Max(0, GetValue(IconSizeProperty));
 
     /// <summary>Gets the height of a row in pixels.</summary>
     protected double RowHeight => Math.Max(1, GetValue(ItemHeightProperty));
@@ -278,7 +278,7 @@ public class ListView : Control, IScrollable
     {
         var selected = index == selectedIndex;
         var style = CurrentTextStyle();
-        var color = GetValue(selected ? SelectionTextColorProperty : ColorProperty);
+        var color = RowTextColor(index, selected);
 
         if (selected)
             context.FillRect(new Rect(content.X, top, content.Width, RowHeight), GetValue(SelectionColorProperty));
@@ -291,6 +291,12 @@ public class ListView : Control, IScrollable
         if (index < icons.Count && icons[index] is { } icon)
             DrawIcon(context, icon, content.X + TextInset + RowIndent(index), top, color);
     }
+
+    /// <summary>Gets the color that a row's text and icon are drawn in.</summary>
+    /// <param name="index">The row's index.</param>
+    /// <param name="selected">Whether the row is selected.</param>
+    /// <returns>The selection text color for a selected row, otherwise the text color.</returns>
+    protected virtual Color RowTextColor(int index, bool selected) => GetValue(selected ? SelectionTextColorProperty : ColorProperty);
 
     /// <summary>Draws a row's icon, centered vertically in the row.</summary>
     /// <param name="context">The context to draw on.</param>

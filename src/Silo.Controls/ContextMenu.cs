@@ -50,6 +50,16 @@ public class ContextMenu : ListView
     /// <summary>The size of one step of the arrow in pixels.</summary>
     const double ArrowStep = 2;
 
+    /// <summary>The room left of the entries for the check marks, in pixels.</summary>
+    const double CheckSpace = 22;
+
+    /// <summary>The room between the text and a shortcut, in pixels.</summary>
+    const double ShortcutGap = 24;
+
+
+    /// <summary>The color of the text of an entry that is off.</summary>
+    public static readonly StyledProperty<Color> DisabledColorProperty =
+        StyledProperty.Register<ContextMenu, Color>("disabled-text-color", new(156, 163, 175), Color.TryParse);
 
     /// <summary>The color of the line that a separator entry draws.</summary>
     public static readonly StyledProperty<Color> SeparatorColorProperty =
@@ -61,6 +71,9 @@ public class ContextMenu : ListView
 
     /// <summary>The text of each entry without the ampersand, with the index of its access key (or -1) and the key.</summary>
     IReadOnlyList<(string Text, int Index, char? Key)> labels = [];
+
+    /// <summary>Whether any entry has a glyph, which takes the room of an icon.</summary>
+    bool hasGlyphs;
 
     /// <summary>The menu that this menu is a submenu of, or <see langword="null"/>.</summary>
     ContextMenu? parent;
@@ -111,6 +124,8 @@ public class ContextMenu : ListView
 
             Items = labels.Select(label => label.Text).ToList();
             Icons = entries.Select(entry => entry.Icon).ToList();
+
+            hasGlyphs = entries.Any(entry => entry.Glyph is not null);
         }
     }
 
@@ -122,6 +137,9 @@ public class ContextMenu : ListView
 
     /// <summary>Gets the room that arrows take right of the text, which is 0 when no entry opens a submenu.</summary>
     double ArrowRoom => entries.Any(entry => entry.Children is not null) ? ArrowSpace : 0;
+
+    /// <summary>Gets the room that check marks take left of the entries, which is 0 when no entry is a check or radio item.</summary>
+    double CheckRoom => entries.Any(entry => entry.IsChecked is not null) ? CheckSpace : 0;
 
     /// <summary>Gets the menu that the chain of submenus started from, which is this menu when it is not a submenu.</summary>
     ContextMenu Root => parent?.Root ?? this;
@@ -203,7 +221,17 @@ public class ContextMenu : ListView
     }
 
     /// <inheritdoc/>
-    protected override bool IsSelectable(int index) => !entries[index].IsSeparator;
+    protected override bool IsSelectable(int index) => !entries[index].IsSeparator && entries[index].IsEnabled;
+
+    /// <inheritdoc/>
+    protected override double IconSpace => hasGlyphs && base.IconSpace == 0 ? IconSize + 6 : base.IconSpace;
+
+    /// <inheritdoc/>
+    protected override double RowIndent(int index) => CheckRoom;
+
+    /// <inheritdoc/>
+    protected override Color RowTextColor(int index, bool selected) =>
+        entries[index].IsEnabled ? base.RowTextColor(index, selected) : GetValue(DisabledColorProperty);
 
     /// <inheritdoc/>
     protected override Size MeasureContent(double? availableWidth)
@@ -212,8 +240,14 @@ public class ContextMenu : ListView
         var measurer = Measurer();
         var width = labels.Select(label => measurer.Measure(label.Text, style).Width).DefaultIfEmpty(0).Max();
 
+        var shortcut = entries
+            .Where(entry => entry.ShortcutText is { Length: > 0 })
+            .Select(entry => measurer.Measure(entry.ShortcutText!, style).Width)
+            .DefaultIfEmpty(0)
+            .Max();
+
         return new Size(
-            width + (2 * TextInset) + IconSpace + ArrowRoom,
+            width + (2 * TextInset) + IconSpace + CheckRoom + ArrowRoom + (shortcut > 0 ? shortcut + ShortcutGap : 0),
             entries.Count * Math.Max(1, GetValue(ItemHeightProperty)));
     }
 
@@ -244,7 +278,7 @@ public class ContextMenu : ListView
             return;
 
         var entry = entries[index];
-        var color = GetValue(index == SelectedIndex ? SelectionTextColorProperty : ColorProperty);
+        var color = RowTextColor(index, index == SelectedIndex);
 
         if (entry.IsSeparator)
         {
@@ -255,8 +289,21 @@ public class ContextMenu : ListView
             return;
         }
 
+        if (entry.Glyph is { } glyph && entry.Icon is null)
+        {
+            var square = new Rect(content.X + TextInset + CheckRoom, top + ((RowHeight - IconSize) / 2), IconSize, IconSize);
+
+            Icon.Draw(context, glyph, square, color, 2);
+        }
+
         if (entry.Children is not null)
             DrawArrow(context, content, top, color);
+
+        if (entry.ShortcutText is { Length: > 0 } shortcut)
+            DrawShortcut(context, content, top, shortcut, color);
+
+        if (entry.IsChecked == true)
+            DrawMark(context, content, top, entry.GroupName is not null, color);
 
         if (labels[index].Index >= 0)
             DrawUnderline(context, content, index, top, color);
@@ -280,6 +327,48 @@ public class ContextMenu : ListView
         }
     }
 
+    /// <summary>Draws the text of a shortcut right-aligned, left of the arrow room.</summary>
+    /// <param name="context">The context to draw on.</param>
+    /// <param name="content">The content box.</param>
+    /// <param name="top">The row's top edge.</param>
+    /// <param name="shortcut">The text.</param>
+    /// <param name="color">The color of the text.</param>
+    void DrawShortcut(IDrawingContext context, Rect content, double top, string shortcut, Color color)
+    {
+        var style = CurrentTextStyle();
+        var size = Measurer().Measure(shortcut, style);
+
+        var x = content.Right - TextInset - ArrowRoom - size.Width;
+        var y = top + Math.Max(0, RowHeight - size.Height) / 2;
+
+        context.DrawText(shortcut, x, y, style, color);
+    }
+
+    /// <summary>Draws the check mark of a checked check item, or the dot of a checked radio item, in the room left of the text.</summary>
+    /// <param name="context">The context to draw on.</param>
+    /// <param name="content">The content box.</param>
+    /// <param name="top">The row's top edge.</param>
+    /// <param name="radio">Whether the entry belongs to a radio group.</param>
+    /// <param name="color">The color of the mark.</param>
+    void DrawMark(IDrawingContext context, Rect content, double top, bool radio, Color color)
+    {
+        var size = 12.0;
+        var x = content.X + TextInset + ((CheckSpace - size) / 2) - 2;
+        var y = top + ((RowHeight - size) / 2);
+
+        if (radio)
+        {
+            context.FillRect(new Rect(x + 3, y + 3, size - 6, size - 6), color, (size - 6) / 2);
+
+            return;
+        }
+
+        var scale = size / Glyphs.Grid * 1.2;
+        List<(double X, double Y)> points = [(4, 12), (10, 18), (20, 6)];
+
+        context.StrokePolyline(points.Select(point => (x + (point.X * scale) - 1, y + (point.Y * scale) - 2)).ToList(), color, 1.6);
+    }
+
     /// <summary>Underlines the access key of an entry.</summary>
     /// <param name="context">The context to draw on.</param>
     /// <param name="content">The content box.</param>
@@ -295,7 +384,7 @@ public class ContextMenu : ListView
         var before = measurer.Measure(text[..at], style).Width;
         var key = measurer.Measure(text[at].ToString(), style);
 
-        var x = content.X + TextInset + IconSpace + before;
+        var x = content.X + TextInset + CheckRoom + IconSpace + before;
         var y = top + Math.Max(0, RowHeight - key.Height) / 2;
 
         context.FillRect(new Rect(x, y + key.Height - 1, key.Width, 1), color);
@@ -312,7 +401,7 @@ public class ContextMenu : ListView
     int FindAccessKey(char letter)
     {
         for (var i = 0; i < labels.Count; i++)
-            if (!entries[i].IsSeparator && labels[i].Key == letter)
+            if (IsSelectable(i) && labels[i].Key == letter)
                 return i;
 
         return -1;
@@ -376,7 +465,7 @@ public class ContextMenu : ListView
     {
         var entry = entries[index];
 
-        if (entry.IsSeparator)
+        if (entry.IsSeparator || !entry.IsEnabled)
             return;
 
         if (HasSubmenu(index))
@@ -386,8 +475,28 @@ public class ContextMenu : ListView
             return;
         }
 
+        Check(entry);
+
         Root.Close();
 
         entry.Click?.Invoke();
+    }
+
+    /// <summary>Updates the check state of an entry that was picked: a check item flips, a radio item turns on and the others of its group off.</summary>
+    /// <param name="entry">The entry.</param>
+    void Check(MenuItem entry)
+    {
+        if (entry.IsChecked is not { } on)
+            return;
+
+        if (entry.GroupName is null)
+        {
+            entry.IsChecked = !on;
+
+            return;
+        }
+
+        foreach (var other in entries.Where(other => other.GroupName == entry.GroupName && other.IsChecked is not null))
+            other.IsChecked = ReferenceEquals(other, entry);
     }
 }
