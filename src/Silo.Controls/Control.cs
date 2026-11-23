@@ -187,6 +187,13 @@ public abstract class Control : Element, ILayoutNode
     public virtual bool IsAnimating => false;
 
     /// <summary>
+    /// Runs once for every frame the window draws, before it is drawn, so that a Control can act on the passing of time. A button
+    /// that repeats while it is held raises its Click here. Read the time from <see cref="AnimationTime"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> when the Control changed so that styles need to be applied again. The default is <see langword="false"/>.</returns>
+    protected internal virtual bool OnFrame() => false;
+
+    /// <summary>
     /// Gets or sets the layer that popups are shown in. When it is not set, the nearest ancestor's layer is used, so the
     /// platform window sets it once on the root.
     /// </summary>

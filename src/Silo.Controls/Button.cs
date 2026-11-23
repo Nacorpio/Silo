@@ -25,12 +25,12 @@ public class Button : TextControl
 
     /// <summary>Presses the Button.</summary>
     /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
-    public bool PointerDown() => SetPressed(true);
+    public virtual bool PointerDown() => SetPressed(true);
 
     /// <summary>Releases the Button.</summary>
     /// <param name="inside"><see langword="true"/> when the pointer is still over the Button, which makes the release a click.</param>
     /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
-    public bool PointerUp(bool inside)
+    public virtual bool PointerUp(bool inside)
     {
         var wasPressed = PseudoStates.Contains("active");
 
@@ -39,7 +39,14 @@ public class Button : TextControl
         if (!wasPressed || !inside)
             return changed;
 
-        changed |= OnClick();
+        return changed | RaiseClick();
+    }
+
+    /// <summary>Runs <see cref="OnClick"/> and raises <see cref="Click"/>.</summary>
+    /// <returns><see langword="true"/> when the Button changed a Pseudo-state, so styles need to be applied again.</returns>
+    protected bool RaiseClick()
+    {
+        var changed = OnClick();
 
         Click?.Invoke(this, EventArgs.Empty);
 
