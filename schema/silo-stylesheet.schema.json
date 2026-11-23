@@ -136,6 +136,10 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Control.",
           "$ref": "#/$defs/scalar"
         },
+        "disabled-text-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by ContextMenu.",
+          "$ref": "#/$defs/scalar"
+        },
         "dismiss-on-outside-press": {
           "description": "A flag written as a keyword or number, such as normal, bold or 700 for font-weight. Declared by Dialog.",
           "$ref": "#/$defs/scalar"
