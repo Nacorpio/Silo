@@ -17,6 +17,9 @@ public class DisplayListTests
         public void ClipRect(Rect rect) => Calls.Add($"clip {rect.X} {rect.Y} {rect.Width} {rect.Height}");
         public void FillRect(Rect rect, Color color, double cornerRadius = 0)
             => Calls.Add($"fill {rect.Width}x{rect.Height} {color.R} r{cornerRadius}");
+        public void ClipRoundRect(Rect rect, double cornerRadius) => Calls.Add($"roundclip {rect.Width} {cornerRadius}");
+        public void StrokePolyline(IReadOnlyList<(double X, double Y)> points, Color color, double width, bool closed = false)
+            => Calls.Add($"polyline {points.Count} {color.R} {width} {closed}");
         public void FillGradient(Rect rect, Color from, Color to, bool vertical = false)
             => Calls.Add($"gradient {rect.Width} {from.R} {to.R} {vertical}");
         public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0)
@@ -41,6 +44,8 @@ public class DisplayListTests
         builder.ClipRect(new Rect(0, 0, 10, 10));
         builder.FillRect(new Rect(0, 0, 10, 4), new Color(9, 0, 0), 2);
         builder.FillGradient(new Rect(0, 0, 10, 4), new Color(1, 0, 0), new Color(2, 0, 0), vertical: true);
+        builder.ClipRoundRect(new Rect(0, 0, 10, 4), 2);
+        builder.StrokePolyline([(0, 0), (5, 5), (10, 0)], new Color(3, 0, 0), 2, closed: true);
         builder.StrokeRect(new Rect(0, 0, 10, 4), new Color(0, 0, 0), 1);
         builder.DrawText("Hi", 1, 2, new TextStyle("Inter", 14), new Color(0, 0, 0));
         builder.DrawImage(new Picture(8, 6), new Rect(3, 4, 16, 12));
@@ -53,7 +58,7 @@ public class DisplayListTests
 
         string[] expected =
         [
-            "save", "translate 5 6", "clip 0 0 10 10", "fill 10x4 9 r2", "gradient 10 1 2 True", "stroke 1", "text Hi 1 2 14", "image 8x6 3 4 16", "mask 8x6 1 7", "restore",
+            "save", "translate 5 6", "clip 0 0 10 10", "fill 10x4 9 r2", "gradient 10 1 2 True", "roundclip 10 2", "polyline 3 3 2 True", "stroke 1", "text Hi 1 2 14", "image 8x6 3 4 16", "mask 8x6 1 7", "restore",
         ];
 
         Assert.Equal(expected, log.Calls);

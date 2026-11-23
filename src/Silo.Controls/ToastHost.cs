@@ -38,7 +38,7 @@ public enum ToastPosition
 /// <code language="csharp">
 /// window.Toasts.Position = ToastPosition.TopRight;
 ///
-/// window.Toasts.Show("Build finished", "CI", ToastSeverity.Success);
+/// window.Toasts.Show("Build finished", "CI", Severity.Success);
 /// </code>
 /// </example>
 public class ToastHost : Control
@@ -123,7 +123,7 @@ public class ToastHost : Control
     public Toast Show(
         string message,
         string? title = null,
-        ToastSeverity severity = ToastSeverity.Info,
+        Severity severity = Severity.Info,
         IImage? icon = null,
         string? actionText = null,
         TimeSpan? duration = null)

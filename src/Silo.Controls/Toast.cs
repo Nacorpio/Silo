@@ -2,22 +2,6 @@ using Silo.Rendering;
 
 namespace Silo;
 
-/// <summary>How serious a <see cref="Toast"/> is. The theme colors each kind through its Class.</summary>
-public enum ToastSeverity
-{
-    /// <summary>Something to know. The Class is <c>info</c>. This is the default.</summary>
-    Info,
-
-    /// <summary>Something that went well. The Class is <c>success</c>.</summary>
-    Success,
-
-    /// <summary>Something that needs attention. The Class is <c>warning</c>.</summary>
-    Warning,
-
-    /// <summary>Something that went wrong. The Class is <c>error</c>.</summary>
-    Error,
-}
-
 /// <summary>
 /// A short message that a <see cref="ToastHost"/> shows in a corner of the window for a few seconds.
 /// </summary>
@@ -35,7 +19,7 @@ public enum ToastSeverity
 /// </remarks>
 /// <example>
 /// <code language="csharp">
-/// var toast = window.Toasts.Show("Saved", severity: ToastSeverity.Success, actionText: "Undo");
+/// var toast = window.Toasts.Show("Saved", severity: Severity.Success, actionText: "Undo");
 ///
 /// toast.ActionInvoked += (_, _) => document.Undo();
 /// </code>
@@ -62,7 +46,7 @@ public class Toast : Control
 
 
     /// <summary>The kind of the Toast.</summary>
-    ToastSeverity severity = ToastSeverity.Info;
+    Severity severity = Severity.Info;
 
     /// <summary>The icon, or <see langword="null"/>.</summary>
     IImage? icon;
@@ -156,7 +140,7 @@ public class Toast : Control
     }
 
     /// <summary>Gets or sets the kind of the Toast, which sets its Class.</summary>
-    public ToastSeverity Severity
+    public Severity Severity
     {
         get => severity;
         set
@@ -187,7 +171,7 @@ public class Toast : Control
     /// <summary>Gets the Class of a severity.</summary>
     /// <param name="value">The severity.</param>
     /// <returns>The lower case name.</returns>
-    static string ClassOf(ToastSeverity value) => value.ToString().ToLowerInvariant();
+    static string ClassOf(Severity value) => value.ToString().ToLowerInvariant();
 
     /// <summary>Raises <see cref="ActionInvoked"/> and then asks the host to dismiss the Toast.</summary>
     void OnAction()

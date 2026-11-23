@@ -55,6 +55,26 @@ public sealed record FillRectCommand(Rect Rect, Color Color, double CornerRadius
     public override void Execute(IDrawingContext context) => context.FillRect(Rect, Color, CornerRadius);
 }
 
+/// <summary>Records <see cref="IDrawingContext.ClipRoundRect"/>.</summary>
+/// <param name="Rect">The clip rectangle.</param>
+/// <param name="CornerRadius">The corner radius in pixels.</param>
+public sealed record ClipRoundRectCommand(Rect Rect, double CornerRadius) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.ClipRoundRect(Rect, CornerRadius);
+}
+
+/// <summary>Records <see cref="IDrawingContext.StrokePolyline"/>.</summary>
+/// <param name="Points">The points of the line.</param>
+/// <param name="Color">The line color.</param>
+/// <param name="Width">The line width in pixels.</param>
+/// <param name="Closed">Whether the last point joins the first.</param>
+public sealed record StrokePolylineCommand(IReadOnlyList<(double X, double Y)> Points, Color Color, double Width, bool Closed) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.StrokePolyline(Points, Color, Width, Closed);
+}
+
 /// <summary>Records <see cref="IDrawingContext.FillGradient"/>.</summary>
 /// <param name="Rect">The rectangle to fill.</param>
 /// <param name="From">The color at the start edge.</param>
