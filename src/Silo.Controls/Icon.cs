@@ -58,22 +58,27 @@ public class Icon : Control
     {
         base.OnRender(context, bounds);
 
-        if (!Glyphs.TryGet(Glyph, out var lines))
-            return;
-
         var content = ContentBox(bounds);
         var side = Math.Min(content.Width, content.Height);
 
-        if (side <= 0)
+        Draw(context, Glyph, new Rect(content.X + ((content.Width - side) / 2), content.Y + ((content.Height - side) / 2), side, side), GetValue(ColorProperty), GetValue(IconStrokeProperty));
+    }
+
+    /// <summary>Draws a glyph into a square. A Control that shows a glyph next to other content, such as a navigation item, uses it.</summary>
+    /// <param name="context">The context to draw on.</param>
+    /// <param name="glyph">The name of the glyph. A name that is not in <see cref="Glyphs"/> draws nothing.</param>
+    /// <param name="square">The square to draw in, in the coordinates of the context.</param>
+    /// <param name="color">The color of the lines.</param>
+    /// <param name="stroke">How thick the lines are on the 24 by 24 grid of the glyph.</param>
+    internal static void Draw(IDrawingContext context, string glyph, Rect square, Color color, double stroke)
+    {
+        if (square.Width <= 0 || square.Height <= 0 || !Glyphs.TryGet(glyph, out var lines))
             return;
 
-        var scale = side / Glyphs.Grid;
-        var left = content.X + ((content.Width - side) / 2);
-        var top = content.Y + ((content.Height - side) / 2);
-        var width = Math.Max(0.5, GetValue(IconStrokeProperty) * scale);
-        var color = GetValue(ColorProperty);
+        var scale = Math.Min(square.Width, square.Height) / Glyphs.Grid;
+        var width = Math.Max(0.5, stroke * scale);
 
         foreach (var line in lines)
-            context.StrokePolyline([.. line.Points.Select(p => (left + (p.X * scale), top + (p.Y * scale)))], color, width, line.Closed);
+            context.StrokePolyline([.. line.Points.Select(p => (square.X + (p.X * scale), square.Y + (p.Y * scale)))], color, width, line.Closed);
     }
 }
