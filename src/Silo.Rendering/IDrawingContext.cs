@@ -67,6 +67,11 @@ public interface IDrawingContext
     /// <param name="closed"><see langword="true"/> to join the last point to the first.</param>
     void StrokePolyline(IReadOnlyList<(double X, double Y)> points, Color color, double width, bool closed = false);
 
+    /// <summary>Fills the area inside a polygon.</summary>
+    /// <param name="points">The corners, in order; the last one joins the first. Fewer than three draw nothing.</param>
+    /// <param name="color">The fill color.</param>
+    void FillPolygon(IReadOnlyList<(double X, double Y)> points, Color color);
+
     /// <summary>Fills a rectangle with a gradient that changes evenly from one color to another along one axis.</summary>
     /// <param name="rect">The rectangle to fill.</param>
     /// <param name="from">The color at the left edge, or at the top edge when <paramref name="vertical"/> is set.</param>

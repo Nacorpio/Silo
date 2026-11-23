@@ -100,6 +100,10 @@ public sealed class DisplayListBuilder : IDrawingContext
     public void ClipRoundRect(Rect rect, double cornerRadius) => commands.Add(new ClipRoundRectCommand(rect, cornerRadius));
 
     /// <inheritdoc/>
+    public void FillPolygon(IReadOnlyList<(double X, double Y)> points, Color color)
+        => commands.Add(new FillPolygonCommand([.. points], color));
+
+    /// <inheritdoc/>
     public void StrokePolyline(IReadOnlyList<(double X, double Y)> points, Color color, double width, bool closed = false)
         => commands.Add(new StrokePolylineCommand([.. points], color, width, closed));
 
