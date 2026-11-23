@@ -316,6 +316,17 @@ public sealed unsafe class SdlWindow : IDisposable
     static Key ToKey(SDL_Keycode code) => code switch
     {
         SDL_Keycode.SDLK_ESCAPE => Key.Escape,
+        SDL_Keycode.SDLK_INSERT => Key.Insert,
+        SDL_Keycode.SDLK_F1 => Key.F1,
+        SDL_Keycode.SDLK_F2 => Key.F2,
+        SDL_Keycode.SDLK_F3 => Key.F3,
+        SDL_Keycode.SDLK_F4 => Key.F4,
+        SDL_Keycode.SDLK_F6 => Key.F6,
+        SDL_Keycode.SDLK_F7 => Key.F7,
+        SDL_Keycode.SDLK_F8 => Key.F8,
+        SDL_Keycode.SDLK_F9 => Key.F9,
+        SDL_Keycode.SDLK_F10 => Key.F10,
+        SDL_Keycode.SDLK_F11 => Key.F11,
         SDL_Keycode.SDLK_F5 => Key.F5,
         SDL_Keycode.SDLK_F12 => Key.F12,
         SDL_Keycode.SDLK_BACKSPACE => Key.Backspace,

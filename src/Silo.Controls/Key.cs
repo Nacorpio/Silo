@@ -128,4 +128,37 @@ public enum Key
 
     /// <summary>The Z key, which with Control undoes.</summary>
     Z,
+
+    /// <summary>The Insert key.</summary>
+    Insert,
+
+    /// <summary>The F1 key.</summary>
+    F1,
+
+    /// <summary>The F2 key.</summary>
+    F2,
+
+    /// <summary>The F3 key.</summary>
+    F3,
+
+    /// <summary>The F4 key.</summary>
+    F4,
+
+    /// <summary>The F6 key.</summary>
+    F6,
+
+    /// <summary>The F7 key.</summary>
+    F7,
+
+    /// <summary>The F8 key.</summary>
+    F8,
+
+    /// <summary>The F9 key.</summary>
+    F9,
+
+    /// <summary>The F10 key.</summary>
+    F10,
+
+    /// <summary>The F11 key.</summary>
+    F11,
 }

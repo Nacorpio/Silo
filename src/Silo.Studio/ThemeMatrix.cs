@@ -112,6 +112,7 @@ public sealed class ThemeMatrix : Box
         new("ScrollBar", "Panels", CreateScrollBar, ["normal", "hover", "pressed"]),
         new("ScrollViewer", "Panels", CreateScrollViewer, ["normal"]),
         new("AspectRatioBox", "Panels", CreateAspectRatioBox, ["normal"]),
+        new("Terminal", "Panels", CreateTerminal, ["normal"]),
         new("BusyIndicator", "Panels", CreateBusyIndicator, ["normal"]),
         new("SplitPane", "Panels", CreateSplitPane, ["normal"]),
         new("InfoBar", "Panels", CreateInfoBars, ["normal"]),
@@ -270,6 +271,36 @@ public sealed class ThemeMatrix : Box
         busy.SetValue(FlexShrinkProperty, 0);
 
         return busy;
+    }
+
+    /// <summary>Creates a Terminal that shows a shell session with colors, styles and a cursor.</summary>
+    static Terminal CreateTerminal()
+    {
+        const string Esc = "\u001b";
+
+        var terminal = new Terminal(52, 11);
+
+        terminal.Write($"{Esc}[1;32mnac@silo{Esc}[0m:{Esc}[1;34m~/silo{Esc}[0m$ ls --color\r\n");
+        terminal.Write($"{Esc}[1;34msrc{Esc}[0m  {Esc}[1;34mtests{Esc}[0m  {Esc}[32mbuild.sh{Esc}[0m  README.md  {Esc}[31marchive.tar.gz{Esc}[0m\r\n");
+        terminal.Write($"{Esc}[1;32mnac@silo{Esc}[0m:{Esc}[1;34m~/silo{Esc}[0m$ dotnet test\r\n");
+        terminal.Write($"  {Esc}[32mPassed!{Esc}[0m  total: 874  {Esc}[2mfailed: 0{Esc}[0m\r\n");
+        terminal.Write($"{Esc}[4munderline{Esc}[0m {Esc}[3mitalic{Esc}[0m {Esc}[9mstrike{Esc}[0m {Esc}[7mreverse{Esc}[0m {Esc}[1mbold{Esc}[0m\r\n");
+
+        for (var i = 0; i < 8; i++)
+            terminal.Write($"{Esc}[4{i}m  ");
+
+        for (var i = 0; i < 8; i++)
+            terminal.Write($"{Esc}[10{i}m  ");
+
+        terminal.Write($"{Esc}[0m\r\n");
+
+        for (var i = 0; i < 36; i++)
+            terminal.Write($"{Esc}[48;2;{255 - (i * 7)};{i * 7};180m ");
+
+        terminal.Write($"{Esc}[0m\r\n{Esc}[1;32mnac@silo{Esc}[0m:{Esc}[1;34m~/silo{Esc}[0m$ ");
+        terminal.SetValue(FlexShrinkProperty, 0);
+
+        return terminal;
     }
 
     /// <summary>Creates a 16:9 Card letterboxed inside a square AspectRatioBox.</summary>
