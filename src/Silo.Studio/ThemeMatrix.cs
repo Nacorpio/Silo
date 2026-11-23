@@ -105,6 +105,7 @@ public sealed class ThemeMatrix : Box
         new("GroupBox", "Panels", () => new GroupBox { Header = "Options", Content = new TextBlock { Text = "Wrap lines" } }, ["normal"]),
         new("Card", "Panels", CreateCard, ["normal"]),
         new("ScrollBar", "Panels", CreateScrollBar, ["normal", "hover", "pressed"]),
+        new("BusyIndicator", "Panels", CreateBusyIndicator, ["normal"]),
         new("InfoBar", "Panels", CreateInfoBars, ["normal"]),
         new("Breadcrumb", "Navigation", () => new Breadcrumb { Items = ["Home", "Projects", "Silo", "Readme"] }, ["normal"]),
         new("Pager", "Navigation", () => new Pager { PageCount = 20, CurrentPage = 10 }, ["normal"]),
@@ -234,6 +235,18 @@ public sealed class ThemeMatrix : Box
         dialog.SetValue(WidthProperty, new Silo.Styling.Values.Length(260, Silo.Styling.Values.LengthUnit.Px));
 
         return dialog;
+    }
+
+    /// <summary>Creates a busy card: a Card dimmed by a BusyIndicator with a message.</summary>
+    static BusyIndicator CreateBusyIndicator()
+    {
+        var busy = new BusyIndicator { Content = CreateCard(), Message = "Loading…", IsBusy = true };
+
+        busy.SetValue(WidthProperty, new Silo.Styling.Values.Length(220, Silo.Styling.Values.LengthUnit.Px));
+        busy.SetValue(HeightProperty, new Silo.Styling.Values.Length(130, Silo.Styling.Values.LengthUnit.Px));
+        busy.SetValue(FlexShrinkProperty, 0);
+
+        return busy;
     }
 
     /// <summary>Creates a row of a spinning ring, a ring that is 65 percent full, and a ring that is off.</summary>
