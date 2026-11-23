@@ -28,6 +28,12 @@ public class Window : Control
     /// <summary>The window title.</summary>
     string title = string.Empty;
 
+    /// <summary>What carries out the state changes.</summary>
+    IWindowHost? host;
+
+    /// <summary>Whether the window is to be shown above the others.</summary>
+    bool alwaysOnTop;
+
 
     /// <summary>Raised after <see cref="Title"/> changed.</summary>
     public event EventHandler? TitleChanged;
@@ -62,7 +68,35 @@ public class Window : Control
     public event EventHandler? StateChanged;
 
     /// <summary>Gets or sets what carries out the state changes, which the platform window sets when it opens.</summary>
-    public IWindowHost? Host { get; set; }
+    /// <remarks>Setting it hands <see cref="AlwaysOnTop"/> to the new host.</remarks>
+    public IWindowHost? Host
+    {
+        get => host;
+        set
+        {
+            host = value;
+
+            if (host is not null && alwaysOnTop)
+                host.AlwaysOnTop = true;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether the window is shown above all other windows, also while another application has the focus, for
+    /// example a small tool or a console that should stay in view. It can be set before the platform window opens and changed
+    /// while it is open. The default is <see langword="false"/>.
+    /// </summary>
+    public bool AlwaysOnTop
+    {
+        get => host?.AlwaysOnTop ?? alwaysOnTop;
+        set
+        {
+            alwaysOnTop = value;
+
+            if (host is not null)
+                host.AlwaysOnTop = value;
+        }
+    }
 
     /// <summary>Gets whether the window is maximized.</summary>
     public bool IsMaximized => Host?.IsMaximized ?? false;

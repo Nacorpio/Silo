@@ -246,6 +246,26 @@ public class SdlWindowTests
     }
 
     [Fact]
+    public void A_window_can_be_shown_above_all_others_and_a_Window_Control_hands_its_value_on_when_it_opens()
+    {
+        SDL3.SDL_SetHint("SDL_VIDEO_DRIVER", "dummy");
+
+        var content = new Window { Title = "top", AlwaysOnTop = true };
+
+        using var window = new SdlWindow(content);
+
+        Assert.True(window.AlwaysOnTop);
+
+        content.AlwaysOnTop = false;
+
+        Assert.False(window.AlwaysOnTop);
+
+        window.AlwaysOnTop = true;
+
+        Assert.True(content.AlwaysOnTop);
+    }
+
+    [Fact]
     public async Task Posted_work_runs_on_the_pumping_thread_and_a_quit_event_ends_the_loop()
     {
         var (window, _) = Setup();
