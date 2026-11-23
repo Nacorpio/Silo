@@ -2,6 +2,7 @@ using System.Globalization;
 using Silo.Rendering.Skia;
 using SkiaSharp;
 using UnitsNet;
+using Color = Silo.Styling.Values.Color;
 
 namespace Silo.Studio;
 
@@ -65,6 +66,8 @@ public sealed class ThemeMatrix : Box
         new("TreeView", "Values and lists", CreateTreeView, ["normal", "hover", "focus"]),
         new("DatePicker", "Dates", () => new DatePicker { SelectedDate = new DateOnly(2026, 11, 23) }, ["normal", "hover", "focus"]),
         new("Calendar", "Dates", CreateCalendar, ["normal"]),
+        new("ColorPicker", "Colors", () => new ColorPicker { Color = new Color(59, 130, 246) }, ["normal", "hover", "focus"]),
+        new("ColorPanel", "Colors", () => new ColorPanel { Color = new Color(236, 72, 153), ShowAlpha = true }, ["normal"]),
         new("TextBlock", "Layout", () => new TextBlock { Text = "Some text" }, ["normal"]),
         new("Separator", "Layout", () => new Separator(), ["normal"]),
         new("Expander", "Layout", CreateExpander, ["normal"]),

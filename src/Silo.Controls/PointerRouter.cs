@@ -121,6 +121,9 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         if (Find<DatePicker>(hovered) is { } picker)
             changed |= picker.PointerDown();
 
+        if (Find<ColorPicker>(hovered) is { } colorPicker)
+            changed |= colorPicker.PointerDown();
+
         if (Find<ListView>(hovered) is { } list)
             changed |= list.PointerDown(list.ToLocal(x, y).Y);
 

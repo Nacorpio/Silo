@@ -55,6 +55,14 @@ public interface IDrawingContext
     /// <param name="cornerRadius">The radius of the corners in pixels. The default is 0 for square corners.</param>
     void FillRect(Rect rect, Color color, double cornerRadius = 0);
 
+    /// <summary>Fills a rectangle with a gradient that changes evenly from one color to another along one axis.</summary>
+    /// <param name="rect">The rectangle to fill.</param>
+    /// <param name="from">The color at the left edge, or at the top edge when <paramref name="vertical"/> is set.</param>
+    /// <param name="to">The color at the right edge, or at the bottom edge when <paramref name="vertical"/> is set.</param>
+    /// <param name="vertical"><see langword="true"/> to run from top to bottom. The default runs from left to right.</param>
+    /// <remarks>The colors are blended with their alpha, so a gradient can fade out to <c>Color(0, 0, 0, 0)</c>.</remarks>
+    void FillGradient(Rect rect, Color from, Color to, bool vertical = false);
+
     /// <summary>Draws the outline of a rectangle, centered on its edge.</summary>
     /// <param name="rect">The rectangle to outline.</param>
     /// <param name="color">The stroke color.</param>

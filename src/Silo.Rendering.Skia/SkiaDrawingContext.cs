@@ -55,6 +55,18 @@ public sealed class SkiaDrawingContext(SKCanvas canvas) : IDrawingContext
     }
 
     /// <inheritdoc/>
+    public void FillGradient(Rect rect, Color from, Color to, bool vertical = false)
+    {
+        var start = new SKPoint((float)rect.X, (float)rect.Y);
+        var end = vertical ? new SKPoint(start.X, (float)rect.Bottom) : new SKPoint((float)rect.Right, start.Y);
+
+        using var shader = SKShader.CreateLinearGradient(start, end, [ToSkia(from), ToSkia(to)], SKShaderTileMode.Clamp);
+        using var paint = new SKPaint { Shader = shader, IsAntialias = true, Style = SKPaintStyle.Fill };
+
+        canvas.DrawRect(ToSkia(rect), paint);
+    }
+
+    /// <inheritdoc/>
     public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0)
     {
         using var paint = new SKPaint
