@@ -15,6 +15,9 @@ namespace Silo.Studio;
 /// state that does not apply to a Control, such as <c>checked</c> for a Button, shows a dash.
 /// </para>
 /// <para>
+/// The rows are grouped into tab pages by category, so that one page is small enough to judge in a screenshot.
+/// </para>
+/// <para>
 /// The matrix styles itself with whatever resolver the window gives it, so switching the theme variant or editing the
 /// theme file changes every cell.
 /// </para>
@@ -36,36 +39,37 @@ public sealed class ThemeMatrix : Box
 
     /// <summary>One row: what is shown and in which states it can be.</summary>
     /// <param name="Name">The row label, which is the type name that Selectors use.</param>
+    /// <param name="Category">The name of the tab page that holds the row.</param>
     /// <param name="Create">Creates a new sample Control.</param>
     /// <param name="States">The states that apply.</param>
-    sealed record Row(string Name, Func<Control> Create, IReadOnlyList<string> States);
+    sealed record Row(string Name, string Category, Func<Control> Create, IReadOnlyList<string> States);
 
     /// <summary>The Controls that the matrix shows.</summary>
     static readonly Row[] Rows =
     [
-        new("Button", () => new Button { Text = "Button" }, ["normal", "hover", "pressed", "focus"]),
-        new("CheckBox", () => new CheckBox { Text = "Check" }, ["normal", "hover", "pressed", "focus", "checked"]),
-        new("RadioButton", () => new RadioButton { Text = "Radio" }, ["normal", "hover", "pressed", "focus", "checked"]),
-        new("ToggleSwitch", () => new ToggleSwitch { Text = "Toggle" }, ["normal", "hover", "pressed", "focus", "checked"]),
-        new("TextBox", () => new TextBox { Placeholder = "Type here" }, ["normal", "hover", "focus"]),
-        new("NumberBox", () => new NumberBox { Minimum = 0, Maximum = 100, Value = 42 }, ["normal", "hover", "focus"]),
-        new("PasswordBox", () => new PasswordBox { Text = "secret" }, ["normal", "hover", "focus"]),
-        new("QuantityBox", () => new QuantityBox { QuantityType = "Length", Value = Length.FromMeters(2.5) }, ["normal", "hover", "focus"]),
-        new("SearchBox", () => new SearchBox { Text = "button" }, ["normal", "hover", "focus"]),
-        new("TextArea", CreateTextArea, ["normal", "hover", "focus"]),
-        new("Slider", () => new Slider { Value = 0.6 }, ["normal", "hover", "pressed"]),
-        new("ProgressBar", () => new ProgressBar { Value = 0.6 }, ["normal"]),
-        new("ComboBox", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
-        new("ListView", () => new ListView { Items = ["Row 1", "Row 2", "Row 3"], SelectedIndex = 1 }, ["normal", "hover"]),
-        new("TreeView", CreateTreeView, ["normal", "hover", "focus"]),
-        new("TextBlock", () => new TextBlock { Text = "Some text" }, ["normal"]),
-        new("Separator", () => new Separator(), ["normal"]),
-        new("Expander", CreateExpander, ["normal"]),
-        new("TabView", CreateTabView, ["normal"]),
-        new("Toolbar", CreateToolbar, ["normal"]),
-        new("MenuBar", CreateMenuBar, ["normal"]),
-        new("ContextMenu", CreateContextMenu, ["normal"]),
-        new("Dialog", CreateDialog, ["normal"]),
+        new("Button", "Buttons", () => new Button { Text = "Button" }, ["normal", "hover", "pressed", "focus"]),
+        new("CheckBox", "Buttons", () => new CheckBox { Text = "Check" }, ["normal", "hover", "pressed", "focus", "checked"]),
+        new("RadioButton", "Buttons", () => new RadioButton { Text = "Radio" }, ["normal", "hover", "pressed", "focus", "checked"]),
+        new("ToggleSwitch", "Buttons", () => new ToggleSwitch { Text = "Toggle" }, ["normal", "hover", "pressed", "focus", "checked"]),
+        new("TextBox", "Text input", () => new TextBox { Placeholder = "Type here" }, ["normal", "hover", "focus"]),
+        new("NumberBox", "Text input", () => new NumberBox { Minimum = 0, Maximum = 100, Value = 42 }, ["normal", "hover", "focus"]),
+        new("PasswordBox", "Text input", () => new PasswordBox { Text = "secret" }, ["normal", "hover", "focus"]),
+        new("QuantityBox", "Text input", () => new QuantityBox { QuantityType = "Length", Value = Length.FromMeters(2.5) }, ["normal", "hover", "focus"]),
+        new("SearchBox", "Text input", () => new SearchBox { Text = "button" }, ["normal", "hover", "focus"]),
+        new("TextArea", "Text input", CreateTextArea, ["normal", "hover", "focus"]),
+        new("Slider", "Values and lists", () => new Slider { Value = 0.6 }, ["normal", "hover", "pressed"]),
+        new("ProgressBar", "Values and lists", () => new ProgressBar { Value = 0.6 }, ["normal"]),
+        new("ComboBox", "Values and lists", () => new ComboBox { Items = ["Small", "Medium"], SelectedIndex = 1 }, ["normal", "hover", "focus"]),
+        new("ListView", "Values and lists", () => new ListView { Items = ["Row 1", "Row 2", "Row 3"], SelectedIndex = 1 }, ["normal", "hover"]),
+        new("TreeView", "Values and lists", CreateTreeView, ["normal", "hover", "focus"]),
+        new("TextBlock", "Layout", () => new TextBlock { Text = "Some text" }, ["normal"]),
+        new("Separator", "Layout", () => new Separator(), ["normal"]),
+        new("Expander", "Layout", CreateExpander, ["normal"]),
+        new("TabView", "Layout", CreateTabView, ["normal"]),
+        new("Toolbar", "Menus and dialogs", CreateToolbar, ["normal"]),
+        new("MenuBar", "Menus and dialogs", CreateMenuBar, ["normal"]),
+        new("ContextMenu", "Menus and dialogs", CreateContextMenu, ["normal"]),
+        new("Dialog", "Menus and dialogs", CreateDialog, ["normal"]),
     ];
 
     /// <summary>Creates a TreeView with an expanded node, a collapsed node and a selected leaf.</summary>
@@ -178,10 +182,36 @@ public sealed class ThemeMatrix : Box
     {
         Name = "matrix";
 
-        Children.Add(HeaderRow());
+        Tabs.AddClass("pages");
 
-        foreach (var row in Rows)
-            Children.Add(BuildRow(row));
+        foreach (var category in Categories)
+            Tabs.AddTab(category, BuildPage(category));
+
+        Children.Add(Tabs);
+    }
+
+    /// <summary>Gets the names of the tab pages, in order. Each page holds the rows of one category of Controls.</summary>
+    public static IEnumerable<string> Categories => Rows.Select(r => r.Category).Distinct();
+
+    /// <summary>Gets the tabs that hold one page for each of the <see cref="Categories"/>.</summary>
+    public TabView Tabs { get; } = new();
+
+    /// <summary>Shows the page of a category, so that its rows are on screen.</summary>
+    /// <param name="category">One of <see cref="Categories"/>.</param>
+    /// <returns><see langword="true"/> when the page was not shown yet, so styles need to be applied again.</returns>
+    /// <exception cref="ArgumentException">There is no such category.</exception>
+    public bool ShowCategory(string category)
+    {
+        var index = Categories.ToList().IndexOf(category);
+
+        if (index < 0)
+            throw new ArgumentException($"There is no category named '{category}'.", nameof(category));
+
+        var changed = Tabs.SelectedIndex != index;
+
+        Tabs.SelectedIndex = index;
+
+        return changed;
     }
 
     /// <summary>Gets the names of the rows, in order.</summary>
@@ -192,6 +222,22 @@ public sealed class ThemeMatrix : Box
     /// <param name="state">The column, one of <see cref="States"/>.</param>
     /// <returns>The Control, or <see langword="null"/> when the state does not apply to the row.</returns>
     public Control? Cell(string row, string state) => cells.GetValueOrDefault((row, state));
+
+    /// <summary>Builds the page of a category: the column titles and one row for each of its Controls.</summary>
+    /// <param name="category">The category.</param>
+    /// <returns>The page.</returns>
+    Box BuildPage(string category)
+    {
+        var page = new Box { Name = $"page-{category}" };
+
+        page.AddClass("matrix-page");
+        page.Children.Add(HeaderRow());
+
+        foreach (var row in Rows.Where(r => r.Category == category))
+            page.Children.Add(BuildRow(row));
+
+        return page;
+    }
 
     /// <summary>Builds the row of column titles.</summary>
     /// <returns>The row.</returns>

@@ -55,4 +55,40 @@ public class ThemeMatrixTests
         Assert.Empty(matrix.ApplyStyles(Resolver(ThemeVariant.Light)));
         Assert.Empty(matrix.ApplyStyles(Resolver(ThemeVariant.Dark)));
     }
+
+    [Fact]
+    public void The_rows_are_grouped_into_one_tab_page_for_each_category()
+    {
+        var matrix = new ThemeMatrix();
+
+        Assert.Equal(["Buttons", "Text input", "Values and lists", "Layout", "Menus and dialogs"], ThemeMatrix.Categories);
+        Assert.Equal(ThemeMatrix.Categories.Count(), matrix.Tabs.Count);
+        Assert.Equal(0, matrix.Tabs.SelectedIndex);
+        Assert.NotNull(matrix.Cell("QuantityBox", "focus"));
+    }
+
+    [Fact]
+    public void Showing_a_category_selects_its_page_and_an_unknown_category_is_refused()
+    {
+        var matrix = new ThemeMatrix();
+
+        Assert.True(matrix.ShowCategory("Text input"));
+        Assert.False(matrix.ShowCategory("Text input"));
+        Assert.Equal(1, matrix.Tabs.SelectedIndex);
+        Assert.Equal("page-Text input", matrix.Tabs.SelectedContent!.Name);
+        Assert.Throws<ArgumentException>(() => matrix.ShowCategory("Nope"));
+    }
+
+    [Fact]
+    public void Every_page_is_styled_without_diagnostics()
+    {
+        var matrix = new ThemeMatrix();
+
+        foreach (var category in ThemeMatrix.Categories)
+        {
+            matrix.ShowCategory(category);
+
+            Assert.Empty(matrix.ApplyStyles(Resolver(ThemeVariant.Light)));
+        }
+    }
 }
