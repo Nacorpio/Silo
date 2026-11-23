@@ -69,6 +69,8 @@ public sealed class ThemeMatrix : Box
     static readonly Row[] Rows =
     [
         new("Button", "Buttons", () => new Button { Text = "Button" }, ["normal", "hover", "pressed", "focus"]),
+        new("DropDownButton", "Buttons", () => new DropDownButton { Text = "Export", Entries = [new MenuItem("As PDF"), new MenuItem("As CSV")] }, ["normal", "hover", "pressed"]),
+        new("SplitButton", "Buttons", () => new SplitButton { Text = "Save", Entries = [new MenuItem("Save As…")] }, ["normal", "hover", "pressed"]),
         new("CheckBox", "Buttons", () => new CheckBox { Text = "Check" }, ["normal", "hover", "pressed", "focus", "checked"]),
         new("RadioButton", "Buttons", () => new RadioButton { Text = "Radio" }, ["normal", "hover", "pressed", "focus", "checked"]),
         new("ToggleSwitch", "Buttons", () => new ToggleSwitch { Text = "Toggle" }, ["normal", "hover", "pressed", "focus", "checked"]),

@@ -124,6 +124,9 @@
       "&:hover": { "background": "var(--accent-hover)" },
       "&:active": { "background": "var(--accent-active)" },
     },
+    "Button.dropdown": { "text-align": "left" },
+    "SplitButton": { "flex-direction": "row", "gap": "2px" },
+    ".split-arrow": { "padding": "6px 8px" },
     "DatePicker": {
       "background": "var(--surface)",
       "color": "var(--text)",
