@@ -63,6 +63,7 @@ public static class StudioStyles
             },
             "#previews": { "height": "200px" },
             "#matrix": { "padding": "0px 16px 16px 16px", "gap": "10px", "flex-direction": "column" },
+            ".matrix-page": { "padding": "12px 0px 0px 0px", "gap": "10px", "flex-direction": "column" },
             ".matrix-row": { "flex-direction": "row", "align-items": "center", "gap": "8px" },
             ".row-label": { "width": "110px", "color": "var(--muted)" },
             "Button.row-label": {
