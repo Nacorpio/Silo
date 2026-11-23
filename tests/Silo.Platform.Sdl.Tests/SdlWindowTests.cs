@@ -6,6 +6,7 @@ using Silo.Styling;
 using Xunit;
 
 /// <summary>Runs a real SDL window on the dummy video driver, so no display is needed.</summary>
+[Collection("sdl")]
 public class SdlWindowTests
 {
     static (SdlWindow Window, Button Button) Setup()

@@ -232,6 +232,27 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Asks for a new frame.</summary>
     public void Invalidate() => dirty = true;
 
+    /// <summary>Gets how many windows are open in the process.</summary>
+    public static int OpenCount => Open.Count;
+
+    /// <summary>Gives the keyboard focus to a Control of this window, for example the Terminal of a terminal window.</summary>
+    /// <param name="control">The Control, or <see langword="null"/> to clear the focus.</param>
+    public void Focus(Control? control)
+    {
+        if (focus.Focus(control))
+            dirty = true;
+    }
+
+    /// <summary>Handles events for every open window until the last one has been closed.</summary>
+    /// <remarks>Use it instead of <see cref="Run"/> when an app opens windows next to each other, so that closing one leaves the others open.</remarks>
+    public static void RunAll()
+    {
+        while (Open.Count > 0)
+        {
+            Open[0].Pump(IdleMilliseconds);
+        }
+    }
+
     /// <summary>Handles events until the window is closed.</summary>
     public void Run()
     {

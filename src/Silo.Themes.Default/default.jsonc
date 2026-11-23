@@ -812,6 +812,7 @@
       "terminal-color-14": "var(--ansi-14)",
       "terminal-color-15": "var(--ansi-15)",
     },
+    "Terminal.fill": { "flex-grow": "1" },
     "EmptyState": {
       "flex-direction": "column",
       "align-items": "center",

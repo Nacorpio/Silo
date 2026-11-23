@@ -713,6 +713,23 @@ public class Terminal : Control, IScrollable, IPointerHandler
         }
     }
 
+    /// <summary>Gets the size that fits a number of columns and rows, with the padding and border, so that a window can be opened at the right size.</summary>
+    /// <param name="columns">The number of columns.</param>
+    /// <param name="rows">The number of rows.</param>
+    /// <returns>The size of the Control, or an empty size while it has no text measurer.</returns>
+    /// <remarks>The Control has to be styled first, since the font and the padding come from the Stylesheets.</remarks>
+    public Size SizeFor(int columns, int rows)
+    {
+        if (TextMeasurer is null)
+            return default;
+
+        var cell = CellSize();
+        var (width, height) = (Math.Max(1, columns) * cell.Width, Math.Max(1, rows) * cell.Height);
+        var inner = ContentBox(new Rect(0, 0, width, height));
+
+        return new Size((2 * width) - inner.Width, (2 * height) - inner.Height);
+    }
+
     /// <summary>Gets the size of a character cell.</summary>
     /// <returns>The width of <c>M</c> and the font height times <c>terminal-line-height</c>, rounded.</returns>
     Size CellSize()
