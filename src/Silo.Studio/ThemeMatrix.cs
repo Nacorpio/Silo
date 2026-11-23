@@ -110,6 +110,7 @@ public sealed class ThemeMatrix : Box
         new("GroupBox", "Panels", () => new GroupBox { Header = "Options", Content = new TextBlock { Text = "Wrap lines" } }, ["normal"]),
         new("Card", "Panels", CreateCard, ["normal"]),
         new("ScrollBar", "Panels", CreateScrollBar, ["normal", "hover", "pressed"]),
+        new("AspectRatioBox", "Panels", CreateAspectRatioBox, ["normal"]),
         new("BusyIndicator", "Panels", CreateBusyIndicator, ["normal"]),
         new("SplitPane", "Panels", CreateSplitPane, ["normal"]),
         new("InfoBar", "Panels", CreateInfoBars, ["normal"]),
@@ -268,6 +269,22 @@ public sealed class ThemeMatrix : Box
         busy.SetValue(FlexShrinkProperty, 0);
 
         return busy;
+    }
+
+    /// <summary>Creates a 16:9 Card letterboxed inside a square AspectRatioBox.</summary>
+    static AspectRatioBox CreateAspectRatioBox()
+    {
+        var card = new Card();
+
+        card.Children.Add(new TextBlock { Text = "16 : 9" });
+
+        var box = new AspectRatioBox { Ratio = 16.0 / 9, Content = card };
+
+        box.SetValue(WidthProperty, new Silo.Styling.Values.Length(160, Silo.Styling.Values.LengthUnit.Px));
+        box.SetValue(HeightProperty, new Silo.Styling.Values.Length(160, Silo.Styling.Values.LengthUnit.Px));
+        box.SetValue(FlexShrinkProperty, 0);
+
+        return box;
     }
 
     /// <summary>Creates a row of a spinning ring, a ring that is 65 percent full, and a ring that is off.</summary>
