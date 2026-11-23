@@ -256,6 +256,14 @@
     "Badge.success": { "background": "#16a34a", "color": "#ffffff" },
     "Badge.warning": { "background": "#f59e0b", "color": "#1f2937" },
     "Badge.error": { "background": "#dc2626", "color": "#ffffff" },
+    "Avatar": {
+      "width": "36px",
+      "height": "36px",
+      "color": "#ffffff",
+      "border-radius": "999px",
+      "font-size": "14px",
+      "font-weight": "bold",
+    },
     "CheckBox": {
       "color": "var(--text)",
       "padding": "2px 2px 2px 26px",
