@@ -120,6 +120,18 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextArea, TextBox.",
           "$ref": "#/$defs/scalar"
         },
+        "check-border-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by CheckedListBox.",
+          "$ref": "#/$defs/scalar"
+        },
+        "check-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by CheckedListBox.",
+          "$ref": "#/$defs/scalar"
+        },
+        "check-mark-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by CheckedListBox.",
+          "$ref": "#/$defs/scalar"
+        },
         "color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Control.",
           "$ref": "#/$defs/scalar"
@@ -333,15 +345,15 @@
           "$ref": "#/$defs/scalar"
         },
         "slider-fill-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Slider.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by RangeSlider, Slider.",
           "$ref": "#/$defs/scalar"
         },
         "slider-thumb-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Slider.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by RangeSlider, Slider.",
           "$ref": "#/$defs/scalar"
         },
         "slider-track-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Slider.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by RangeSlider, Slider.",
           "$ref": "#/$defs/scalar"
         },
         "text-align": {
