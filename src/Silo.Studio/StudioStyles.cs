@@ -109,6 +109,7 @@ public static class StudioStyles
             ".cell StatusBar": { "width": "330px", "flex-shrink": "0" },
             ".cell Stepper": { "width": "330px", "flex-shrink": "0" },
             ".cell Carousel": { "width": "200px", "flex-shrink": "0" },
+            ".cell GalleryView": { "width": "330px", "height": "120px", "flex-shrink": "0", "item-width": "80px", "item-height": "70px", "gallery-gap": "6px", "gallery-padding": "6px" },
             ".cell NavigationView": { "width": "330px", "height": "170px", "flex-shrink": "0" },
             ".cell DatePicker": { "width": "130px" },
             ".cell Calendar": { "width": "230px", "flex-shrink": "0" },

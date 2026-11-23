@@ -103,6 +103,9 @@ public class GalleryView : Control, IScrollable
     /// <summary>How far the items are scrolled, in pixels.</summary>
     double offset;
 
+    /// <summary>Whether the current item still has to be scrolled into view because there was no room to do it yet.</summary>
+    bool revealPending;
+
     /// <summary>The item pressed last and when, for the double press.</summary>
     (int Index, long Time) lastPress = (-1, 0);
 
@@ -219,6 +222,8 @@ public class GalleryView : Control, IScrollable
             current = anchor = valid ? value : -1;
 
             SetSelection(valid ? [value] : []);
+
+            revealPending = true;
             Reveal(current);
         }
     }
@@ -370,6 +375,13 @@ public class GalleryView : Control, IScrollable
         var area = Area;
         var result = Arranged();
 
+        if (revealPending && area.Width > 0 && area.Height > 0)
+        {
+            revealPending = false;
+
+            Reveal(current);
+        }
+
         offset = Math.Clamp(offset, 0, MaxOffset);
 
         var horizontal = layout.IsHorizontal;
@@ -516,10 +528,13 @@ public class GalleryView : Control, IScrollable
     /// <param name="index">The item's index, or -1.</param>
     void Reveal(int index)
     {
-        if (index < 0 || index >= items.Count)
+        var area = Area;
+
+        if (index < 0 || index >= items.Count || area.Width <= 0 || area.Height <= 0)
             return;
 
-        var area = Area;
+        revealPending = false;
+
         var rect = Arranged().Rects[index];
         var horizontal = layout.IsHorizontal;
         var start = horizontal ? rect.X : rect.Y;
