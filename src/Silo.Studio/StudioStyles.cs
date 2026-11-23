@@ -86,6 +86,8 @@ public static class StudioStyles
             ".cell Slider": { "width": "112px" },
             ".cell ProgressBar": { "width": "112px" },
             ".cell ComboBox": { "width": "112px" },
+            ".cell ColorPicker": { "width": "130px" },
+            ".cell ColorPanel": { "flex-shrink": "0" },
             ".cell DatePicker": { "width": "130px" },
             ".cell Calendar": { "width": "230px", "flex-shrink": "0" },
             ".cell Separator": { "width": "112px" },

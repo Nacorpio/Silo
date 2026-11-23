@@ -97,6 +97,10 @@ public sealed class DisplayListBuilder : IDrawingContext
         => commands.Add(new FillRectCommand(rect, color, cornerRadius));
 
     /// <inheritdoc/>
+    public void FillGradient(Rect rect, Color from, Color to, bool vertical = false)
+        => commands.Add(new FillGradientCommand(rect, from, to, vertical));
+
+    /// <inheritdoc/>
     public void StrokeRect(Rect rect, Color color, double width, double cornerRadius = 0)
         => commands.Add(new StrokeRectCommand(rect, color, width, cornerRadius));
 

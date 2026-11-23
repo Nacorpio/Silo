@@ -60,6 +60,9 @@ public class TextBox : Control
     /// <summary>Raised after <see cref="Text"/> changed.</summary>
     public event EventHandler? TextChanged;
 
+    /// <summary>Raised when the pointer goes down on the TextBox, before the caret moves.</summary>
+    public event EventHandler? Pressed;
+
     /// <summary>Raised when the user presses Enter in the TextBox.</summary>
     public event EventHandler? Submitted;
 
@@ -95,6 +98,8 @@ public class TextBox : Control
     /// <returns><see langword="true"/> when the caret moved, so a new frame is needed.</returns>
     public virtual bool PointerDown(double x)
     {
+        Pressed?.Invoke(this, EventArgs.Empty);
+
         var target = x - ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height)).X + scroll;
         var before = caret;
         var best = 0;

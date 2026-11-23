@@ -55,6 +55,17 @@ public sealed record FillRectCommand(Rect Rect, Color Color, double CornerRadius
     public override void Execute(IDrawingContext context) => context.FillRect(Rect, Color, CornerRadius);
 }
 
+/// <summary>Records <see cref="IDrawingContext.FillGradient"/>.</summary>
+/// <param name="Rect">The rectangle to fill.</param>
+/// <param name="From">The color at the start edge.</param>
+/// <param name="To">The color at the end edge.</param>
+/// <param name="Vertical">Whether the gradient runs from top to bottom instead of left to right.</param>
+public sealed record FillGradientCommand(Rect Rect, Color From, Color To, bool Vertical) : DrawCommand
+{
+    /// <inheritdoc/>
+    public override void Execute(IDrawingContext context) => context.FillGradient(Rect, From, To, Vertical);
+}
+
 /// <summary>Records <see cref="IDrawingContext.StrokeRect"/>.</summary>
 /// <param name="Rect">The rectangle to outline.</param>
 /// <param name="Color">The stroke color.</param>
