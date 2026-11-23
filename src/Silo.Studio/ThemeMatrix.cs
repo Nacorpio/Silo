@@ -127,6 +127,7 @@ public sealed class ThemeMatrix : Box
         new("MenuBar", "Menus and dialogs", CreateMenuBar, ["normal"]),
         new("ContextMenu", "Menus and dialogs", CreateContextMenu, ["normal"]),
         new("Dialog", "Menus and dialogs", CreateDialog, ["normal"]),
+        new("MessageBox", "Menus and dialogs", CreateMessageBox, ["normal"]),
     ];
 
     /// <summary>Creates a Calendar that shows a fixed month with a selected date, so the gallery looks the same every day.</summary>
@@ -221,6 +222,17 @@ public sealed class ThemeMatrix : Box
         bar.AddMenu("&Help", [new MenuItem("About")]);
 
         return bar;
+    }
+
+    /// <summary>Creates a MessageBox dialog, wide enough for its two lines.</summary>
+    /// <returns>The Dialog.</returns>
+    static Dialog CreateMessageBox()
+    {
+        var dialog = MessageBox.Create("Delete the file?\nThis cannot be undone.", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+        dialog.SetValue(WidthProperty, new Silo.Styling.Values.Length(260, Silo.Styling.Values.LengthUnit.Px));
+
+        return dialog;
     }
 
     /// <summary>Creates a Dialog that is not shown in a window, so that its title, content and buttons show in the matrix.</summary>
