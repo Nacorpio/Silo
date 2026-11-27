@@ -392,6 +392,9 @@ public static class FlexLayout
         double main = gap;
         double cross = 0;
 
+        if (isRow && contentLimit is not null)
+            return IntrinsicRow(node, contentLimit.Value, gap, horizontal, vertical);
+
         foreach (var child in node.Children)
         {
             var outer = OuterSize(child, contentLimit);
@@ -403,6 +406,60 @@ public static class FlexLayout
         return isRow
             ? new Size(main + horizontal, cross + vertical)
             : new Size(cross + horizontal, main + vertical);
+    }
+
+    /// <summary>
+    /// Computes the size of a row whose width is limited. Children that cannot grow keep their natural width, and the children
+    /// that grow are measured at the width they would get, so content that wraps reports the height it really needs.
+    /// </summary>
+    /// <param name="node">The row.</param>
+    /// <param name="limit">The content width of the row.</param>
+    /// <param name="gap">The total gap between the children.</param>
+    /// <param name="horizontal">The horizontal padding and border of the row.</param>
+    /// <param name="vertical">The vertical padding and border of the row.</param>
+    /// <returns>The border box size that fits the children.</returns>
+    static Size IntrinsicRow(ILayoutNode node, double limit, double gap, double horizontal, double vertical)
+    {
+        var outers = new Size[node.Children.Count];
+        double fixedWidth = gap;
+        double grow = 0;
+
+        for (var i = 0; i < outers.Length; i++)
+        {
+            var child = node.Children[i];
+
+            if (child.Style.Grow > 0 && Resolve(child.Style.Width, limit) is null)
+            {
+                grow += child.Style.Grow;
+
+                continue;
+            }
+
+            outers[i] = OuterSize(child, null);
+            fixedWidth += outers[i].Width;
+        }
+
+        var free = Math.Max(0, limit - fixedWidth);
+        double main = gap;
+        double cross = 0;
+
+        for (var i = 0; i < outers.Length; i++)
+        {
+            var child = node.Children[i];
+
+            if (child.Style.Grow > 0 && Resolve(child.Style.Width, limit) is null)
+            {
+                var share = free * child.Style.Grow / grow;
+
+                outers[i] = OuterSize(child, share);
+                outers[i] = new Size(Math.Min(outers[i].Width, share), outers[i].Height);
+            }
+
+            main += outers[i].Width;
+            cross = Math.Max(cross, outers[i].Height);
+        }
+
+        return new Size(main + horizontal, cross + vertical);
     }
 
     /// <summary>Computes the size of a child including its margins, using its own width and height when it has them.</summary>

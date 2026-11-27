@@ -34,6 +34,9 @@ public sealed class ReviewPanel : Box
     /// <summary>The line that says what Submit did.</summary>
     readonly TextBlock status = new() { Name = "review-status" };
 
+    /// <summary>The box that asks for the iteration to be discarded.</summary>
+    readonly CheckBox redo = new() { Text = "Discard this iteration and redo it", Name = "review-redo" };
+
     /// <summary>The Submit button.</summary>
     readonly Button submit = new() { Text = "Submit review", Name = "review-submit" };
 
@@ -69,12 +72,19 @@ public sealed class ReviewPanel : Box
 
         list.Children.Add(BuildComment());
 
+        redo.CheckedChanged += (_, _) =>
+        {
+            answers.Redo = redo.IsChecked;
+            submit.Text = redo.IsChecked ? "Submit and redo" : "Submit review";
+        };
+
         submit.Click += (_, _) => Submitted?.Invoke(this, EventArgs.Empty);
 
         footer.Children.Add(submit);
         footer.Children.Add(progress);
 
         Children.Add(scroll);
+        Children.Add(redo);
         Children.Add(status);
         Children.Add(footer);
 
@@ -89,6 +99,9 @@ public sealed class ReviewPanel : Box
 
     /// <summary>Gets the questions.</summary>
     public ReviewDocument Document { get; }
+
+    /// <summary>Gets the box that asks for the iteration to be discarded and done again.</summary>
+    public CheckBox RedoBox => redo;
 
     /// <summary>Gets the Submit button.</summary>
     public Button SubmitButton => submit;

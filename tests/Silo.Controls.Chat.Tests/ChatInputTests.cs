@@ -126,12 +126,12 @@ public class ChatInputTests
     [Fact]
     public void The_Send_button_and_the_attachment_slot_can_be_left_out_or_filled()
     {
-        var input = new ChatInput();
+        var input = new ChatInput { SendButtonMode = SendButtonMode.Always };
         var tray = new Box();
 
         Assert.Contains(input.SendButton, Descendants(input));
 
-        input.ShowSendButton = false;
+        input.SendButtonMode = SendButtonMode.Never;
 
         Assert.DoesNotContain(input.SendButton, Descendants(input));
 
@@ -142,6 +142,29 @@ public class ChatInputTests
         input.Attachments = null;
 
         Assert.DoesNotContain(tray, Descendants(input));
+    }
+
+    [Fact]
+    public void The_Send_button_can_show_only_while_there_is_text_and_its_text_can_change()
+    {
+        var input = new ChatInput { SendText = "Post" };
+
+        Assert.Equal(SendButtonMode.WhenText, input.SendButtonMode);
+
+        Assert.DoesNotContain(input.SendButton, Descendants(input));
+
+        input.Input.TextInput("hi");
+
+        Assert.Contains(input.SendButton, Descendants(input));
+        Assert.Equal("Post", input.SendButton.Text);
+
+        input.Send();
+
+        Assert.DoesNotContain(input.SendButton, Descendants(input));
+
+        input.SendButtonMode = SendButtonMode.Always;
+
+        Assert.Contains(input.SendButton, Descendants(input));
     }
 
     [Fact]
@@ -183,6 +206,25 @@ public class ChatInputTests
 
         Assert.Equal(one + 14, two);
         Assert.Equal(one + 28, input.Input.Bounds.Height);
+    }
+
+    [Fact]
+    public void A_long_line_wraps_and_makes_the_box_taller()
+    {
+        var input = new ChatInput { MaximumLines = 8 };
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+
+        root.Children.Add(input);
+        root.ApplyStyles(new StyleResolver([.. DefaultTheme.Load(ThemeVariant.Dark), ChatTheme.Load()]));
+        root.Arrange(new Size(300, 400));
+
+        var one = input.Input.Bounds.Height;
+
+        input.Text = string.Join(' ', Enumerable.Repeat("word", 30));
+        root.Arrange(new Size(300, 400));
+
+        Assert.True(input.Input.WordWrap);
+        Assert.True(input.Input.Bounds.Height > one);
     }
 
     [Fact]

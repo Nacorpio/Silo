@@ -71,6 +71,15 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// <summary>Whether the next frame must scroll the caret into view.</summary>
     bool revealCaret = true;
 
+    /// <summary>The rows of the text as they were last drawn.</summary>
+    readonly WrapMap rows = new();
+
+    /// <summary>The rows of the text at the width that was last measured, which can differ from the width that is drawn.</summary>
+    readonly WrapMap measured = new();
+
+    /// <summary>The horizontal position that Up and Down keep while the caret moves between rows, or <see langword="null"/>.</summary>
+    double? goalX;
+
     /// <summary>The height of a line when the Control was last drawn.</summary>
     double lineHeight = 16;
 
@@ -95,7 +104,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
     {
         this.buffer = buffer ?? new TextBuffer();
 
-        scroll = new ScrollState(() => this.buffer.LineCount * lineHeight, () => viewportHeight);
+        scroll = new ScrollState(() => rows.TotalRows * lineHeight, () => viewportHeight);
 
         reported = this.buffer.Text;
 
@@ -127,6 +136,16 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// </summary>
     public int? MaximumLines { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether long lines wrap at the width of the area instead of scrolling sideways. A line breaks after its last
+    /// space that fits, or inside a word that is wider than the area. Up, Down, Home and End then move by row. The default is
+    /// <see langword="false"/>.
+    /// </summary>
+    public bool WordWrap { get; set; }
+
+    /// <summary>Gets the number of rows that the text was drawn in. Without <see cref="WordWrap"/> that is the number of lines.</summary>
+    public int VisualLineCount => rows.TotalRows;
+
     /// <summary>Gets or sets whether a column with the line numbers is shown left of the text. The default is <see langword="false"/>.</summary>
     public bool ShowLineNumbers { get; set; }
 
@@ -146,6 +165,8 @@ public class TextArea : Control, IScrollable, IPointerHandler
     public bool PointerDown(PointerEvent e)
     {
         selecting = true;
+
+        goalX = null;
 
         revealCaret = true;
 
@@ -183,6 +204,9 @@ public class TextArea : Control, IScrollable, IPointerHandler
 
         revealCaret = true;
 
+        if (key is not (Key.Up or Key.Down or Key.PageUp or Key.PageDown))
+            goalX = null;
+
         if (IsReadOnly && IsEdit(key, control))
         {
             if (key == Key.X)
@@ -202,11 +226,11 @@ public class TextArea : Control, IScrollable, IPointerHandler
                 break;
 
             case Key.Up:
-                buffer.MoveUp(shift);
+                MoveRows(-1, shift);
                 break;
 
             case Key.Down:
-                buffer.MoveDown(shift);
+                MoveRows(1, shift);
                 break;
 
             case Key.Home when control:
@@ -215,6 +239,14 @@ public class TextArea : Control, IScrollable, IPointerHandler
 
             case Key.End when control:
                 buffer.MoveToEnd(shift);
+                break;
+
+            case Key.Home when WordWrap:
+                MoveInRow(toEnd: false, shift);
+                break;
+
+            case Key.End when WordWrap:
+                MoveInRow(toEnd: true, shift);
                 break;
 
             case Key.Home:
@@ -314,9 +346,20 @@ public class TextArea : Control, IScrollable, IPointerHandler
     protected override Size MeasureContent(double? availableWidth)
     {
         var minimum = Math.Max(1, MinimumLines);
-        var lines = MaximumLines is { } maximum ? Math.Clamp(buffer.LineCount, minimum, Math.Max(minimum, maximum)) : minimum;
+        var measurer = Measurer();
+        var style = CurrentTextStyle();
+        var count = buffer.LineCount;
 
-        return new Size(MinimumWidth, Measurer().LineHeight(CurrentTextStyle()) * lines);
+        if (WordWrap)
+        {
+            measured.Update(buffer, measurer, style, (availableWidth ?? MinimumWidth) - GutterWidth(measurer, style));
+
+            count = measured.TotalRows;
+        }
+
+        var lines = MaximumLines is { } maximum ? Math.Clamp(count, minimum, Math.Max(minimum, maximum)) : minimum;
+
+        return new Size(MinimumWidth, measurer.LineHeight(style) * lines);
     }
 
     /// <inheritdoc/>
@@ -330,6 +373,8 @@ public class TextArea : Control, IScrollable, IPointerHandler
         var height = measurer.LineHeight(style);
         var gutter = GutterWidth(measurer, style);
         var text = new Rect(content.X + gutter, content.Y, Math.Max(0, content.Width - gutter), content.Height);
+
+        rows.Update(buffer, measurer, style, WordWrap ? text.Width : 0);
 
         lineHeight = height;
         viewportHeight = content.Height;
@@ -366,16 +411,21 @@ public class TextArea : Control, IScrollable, IPointerHandler
         double gutter)
     {
         var first = Math.Max(0, (int)(scroll.Offset / lineHeight));
-        var last = Math.Min(buffer.LineCount - 1, (int)((scroll.Offset + content.Height) / lineHeight));
+        var last = Math.Min(rows.TotalRows - 1, (int)((scroll.Offset + content.Height) / lineHeight));
         var color = GetValue(ColorProperty);
         var gutterColor = GetValue(GutterColorProperty);
         var focused = PseudoStates.Contains("focus");
+        var x = text.X - scrollX;
 
-        for (var line = first; line <= last; line++)
+        for (var row = first; row <= last; row++)
         {
-            var y = content.Y + (line * lineHeight) - scroll.Offset;
+            var (line, inLine) = rows.Locate(row);
+            var y = content.Y + (row * lineHeight) - scroll.Offset;
+            var start = rows.StartOf(line, inLine);
+            var end = rows.EndOf(line, inLine);
+            var piece = buffer.GetLine(line)[start..end];
 
-            if (ShowLineNumbers)
+            if (ShowLineNumbers && inLine == 0)
             {
                 var number = (line + 1).ToString(CultureInfo.InvariantCulture);
                 var numberWidth = measurer.Measure(number, style).Width;
@@ -386,13 +436,13 @@ public class TextArea : Control, IScrollable, IPointerHandler
             context.Save();
             context.ClipRect(text);
 
-            DrawSelection(context, measurer, style, line, text.X - scrollX, y);
+            DrawSelection(context, measurer, style, line, inLine, x, y);
 
-            context.DrawText(buffer.GetLine(line), text.X - scrollX, y, style, color);
+            context.DrawText(piece, x, y, style, color);
 
-            if (focused && line == buffer.Line)
+            if (focused && line == buffer.Line && rows.RowOf(line, buffer.Column) == inLine)
             {
-                var caretX = text.X - scrollX + Width(measurer, style, buffer.GetLine(line)[..buffer.Column]);
+                var caretX = x + Width(measurer, style, buffer.GetLine(line)[start..buffer.Column]);
 
                 context.FillRect(new Rect(caretX, y, 1, lineHeight), GetValue(CaretColorProperty));
             }
@@ -401,32 +451,35 @@ public class TextArea : Control, IScrollable, IPointerHandler
         }
     }
 
-    /// <summary>Fills the selected part of a line.</summary>
+    /// <summary>Fills the selected part of a row.</summary>
     /// <param name="context">Where to draw.</param>
     /// <param name="measurer">Measures the text.</param>
     /// <param name="style">The font.</param>
     /// <param name="line">The line.</param>
-    /// <param name="x">Where the line's text starts.</param>
-    /// <param name="y">The top of the line.</param>
-    void DrawSelection(IDrawingContext context, ITextMeasurer measurer, TextStyle style, int line, double x, double y)
+    /// <param name="inLine">The row within the line.</param>
+    /// <param name="x">Where the row's text starts.</param>
+    /// <param name="y">The top of the row.</param>
+    void DrawSelection(IDrawingContext context, ITextMeasurer measurer, TextStyle style, int line, int inLine, double x, double y)
     {
         if (!buffer.HasSelection)
             return;
 
-        var start = buffer.LineStart(line);
-        var end = buffer.LineEnd(line);
+        var lineStart = buffer.LineStart(line);
+        var start = lineStart + rows.StartOf(line, inLine);
+        var end = lineStart + rows.EndOf(line, inLine);
+        var lastRow = inLine == rows.RowsIn(line) - 1;
         var from = Math.Max(buffer.SelectionStart, start);
-        var to = Math.Min(buffer.SelectionEnd, end + 1);
+        var to = Math.Min(buffer.SelectionEnd, lastRow ? end + 1 : end);
 
         if (from >= to)
             return;
 
-        var text = buffer.GetLine(line);
-        var layout = new TextLayout(measurer, text, style);
+        var piece = buffer.GetLine(line)[rows.StartOf(line, inLine)..rows.EndOf(line, inLine)];
+        var layout = new TextLayout(measurer, piece, style);
         var left = layout.WidthTo(from - start);
         var right = layout.WidthTo(Math.Min(to, end) - start);
 
-        if (to > end)
+        if (lastRow && to > end)
             right += Width(measurer, style, " ");
 
         context.FillRect(new Rect(x + left, y, right - left, lineHeight), GetValue(SelectionColorProperty));
@@ -462,9 +515,17 @@ public class TextArea : Control, IScrollable, IPointerHandler
     {
         revealCaret = false;
 
-        var top = buffer.Line * lineHeight;
+        var inLine = rows.RowOf(buffer.Line, buffer.Column);
+        var top = (rows.FirstRow(buffer.Line) + inLine) * lineHeight;
 
         scroll.EnsureVisible(top, lineHeight);
+
+        if (WordWrap)
+        {
+            scrollX = 0;
+
+            return;
+        }
 
         var caretX = new TextLayout(measurer, buffer.GetLine(buffer.Line), style).WidthTo(buffer.Column);
 
@@ -484,12 +545,99 @@ public class TextArea : Control, IScrollable, IPointerHandler
         var measurer = Measurer();
         var style = CurrentTextStyle();
         var content = ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height));
-        var line = Math.Clamp((int)Math.Floor((y - content.Y + scroll.Offset) / lineHeight), 0, buffer.LineCount - 1);
+        var row = Math.Clamp((int)Math.Floor((y - content.Y + scroll.Offset) / lineHeight), 0, Math.Max(0, rows.TotalRows - 1));
+        var (line, inLine) = rows.Locate(row);
         var target = x - content.X - GutterWidth(measurer, style) + scrollX;
-        var text = buffer.GetLine(line);
-        var best = new TextLayout(measurer, text, style).IndexAt(target);
+        var start = rows.StartOf(line, inLine);
+        var piece = buffer.GetLine(line)[start..rows.EndOf(line, inLine)];
+        var best = new TextLayout(measurer, piece, style).IndexAt(target);
 
-        return buffer.LineStart(line) + best;
+        if (inLine < rows.RowsIn(line) - 1 && best == piece.Length && best > 0)
+            best--;
+
+        return buffer.LineStart(line) + start + best;
+    }
+
+    /// <summary>Gets the horizontal position of the caret in its row.</summary>
+    /// <returns>The distance from the start of the row, in pixels.</returns>
+    double CaretX()
+    {
+        var inLine = rows.RowOf(buffer.Line, buffer.Column);
+        var start = rows.StartOf(buffer.Line, inLine);
+
+        return Width(Measurer(), CurrentTextStyle(), buffer.GetLine(buffer.Line)[start..buffer.Column]);
+    }
+
+    /// <summary>Moves the caret up or down by rows, which are the lines when the text does not wrap.</summary>
+    /// <param name="delta">The number of rows, negative for up.</param>
+    /// <param name="extend">Whether to select while moving.</param>
+    void MoveRows(int delta, bool extend)
+    {
+        if (!WordWrap)
+        {
+            Action<bool> move = delta < 0 ? buffer.MoveUp : buffer.MoveDown;
+
+            for (var i = 0; i < Math.Abs(delta); i++)
+                move(extend);
+
+            return;
+        }
+
+        var row = rows.FirstRow(buffer.Line) + rows.RowOf(buffer.Line, buffer.Column);
+        var target = row + delta;
+
+        if (target < 0)
+        {
+            buffer.MoveTo(0, extend);
+
+            return;
+        }
+
+        if (target >= rows.TotalRows)
+        {
+            buffer.MoveToEnd(extend);
+
+            return;
+        }
+
+        var x = goalX ??= CaretX();
+        var (line, inLine) = rows.Locate(target);
+        var start = rows.StartOf(line, inLine);
+        var piece = buffer.GetLine(line)[start..rows.EndOf(line, inLine)];
+        var best = new TextLayout(Measurer(), piece, CurrentTextStyle()).IndexAt(x);
+
+        if (inLine < rows.RowsIn(line) - 1 && best == piece.Length && best > 0)
+            best--;
+
+        buffer.MoveTo(buffer.LineStart(line) + start + best, extend);
+    }
+
+    /// <summary>Moves the caret to the start or the end of its row.</summary>
+    /// <param name="toEnd"><see langword="true"/> for the end.</param>
+    /// <param name="extend">Whether to select while moving.</param>
+    void MoveInRow(bool toEnd, bool extend)
+    {
+        var line = buffer.Line;
+        var inLine = rows.RowOf(line, buffer.Column);
+
+        if (!toEnd)
+        {
+            var start = rows.StartOf(line, inLine);
+
+            if (inLine == 0)
+                buffer.MoveToLineStart(extend);
+            else
+                buffer.MoveTo(buffer.LineStart(line) + start, extend);
+
+            return;
+        }
+
+        var end = rows.EndOf(line, inLine);
+
+        if (inLine < rows.RowsIn(line) - 1 && end > 0 && buffer.GetLine(line)[end - 1] == ' ')
+            end--;
+
+        buffer.MoveTo(buffer.LineStart(line) + end, extend);
     }
 
     /// <summary>Moves the caret by a page of lines.</summary>
@@ -497,12 +645,9 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// <param name="extend">Whether to select while moving.</param>
     void MovePage(int direction, bool extend)
     {
-        var lines = Math.Max(1, (int)(viewportHeight / lineHeight) - 1);
+        var count = Math.Max(1, (int)(viewportHeight / lineHeight) - 1);
 
-        Action<bool> move = direction < 0 ? buffer.MoveUp : buffer.MoveDown;
-
-        for (var i = 0; i < lines; i++)
-            move(extend);
+        MoveRows(direction * count, extend);
     }
 
     /// <summary>Puts the selected text on the clipboard.</summary>
@@ -519,6 +664,8 @@ public class TextArea : Control, IScrollable, IPointerHandler
 
         if (buffer.Text == reported)
             return;
+
+        goalX = null;
 
         reported = buffer.Text;
 

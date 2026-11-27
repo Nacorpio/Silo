@@ -7,7 +7,7 @@ namespace Silo;
 /// <remarks>
 /// <para>
 /// Enter sends the message and Shift+Enter breaks the line. With <see cref="SendOnEnter"/> off, Ctrl+Enter sends and Enter breaks
-/// the line. A message that is only white space is not sent. Sending raises <see cref="Submitted"/> with the trimmed text and
+/// the line. <see cref="SendButtonMode"/> decides when the Send button is shown. A message that is only white space is not sent. Sending raises <see cref="Submitted"/> with the trimmed text and
 /// clears the box. Escape closes the context bar when there is one.
 /// </para>
 /// <para>
@@ -30,7 +30,7 @@ namespace Silo;
 public class ChatInput : Control
 {
     /// <summary>The text area.</summary>
-    readonly ComposerArea composer = new() { MinimumLines = 1, MaximumLines = 8 };
+    readonly ComposerArea composer = new() { MinimumLines = 1, MaximumLines = 8, WordWrap = true };
 
     /// <summary>The Send button.</summary>
     readonly Button send = new() { Text = "Send" };
@@ -56,8 +56,8 @@ public class ChatInput : Control
     /// <summary>The density.</summary>
     ChatDensity density = ChatDensity.Normal;
 
-    /// <summary>Whether the Send button is shown.</summary>
-    bool showSendButton = true;
+    /// <summary>When the Send button is shown.</summary>
+    SendButtonMode sendButtonMode = SendButtonMode.WhenText;
 
     /// <summary>Creates an empty input.</summary>
     public ChatInput()
@@ -76,7 +76,13 @@ public class ChatInput : Control
         send.Click += (_, _) => Send();
 
         composer.Intercept = Intercept;
-        composer.TextChanged += (_, _) => TextChanged?.Invoke(this, EventArgs.Empty);
+        composer.TextChanged += (_, _) =>
+        {
+            if (sendButtonMode == SendButtonMode.WhenText)
+                Rebuild();
+
+            TextChanged?.Invoke(this, EventArgs.Empty);
+        };
 
         contextBar.Children.Add(contextText);
         contextBar.Children.Add(close);
@@ -155,16 +161,23 @@ public class ChatInput : Control
         }
     }
 
-    /// <summary>Gets or sets whether the Send button is shown. The default is <see langword="true"/>.</summary>
-    public bool ShowSendButton
+    /// <summary>Gets or sets when the Send button is shown. The default is <see cref="SendButtonMode.WhenText"/>.</summary>
+    public SendButtonMode SendButtonMode
     {
-        get => showSendButton;
+        get => sendButtonMode;
         set
         {
-            showSendButton = value;
+            sendButtonMode = value;
 
             Rebuild();
         }
+    }
+
+    /// <summary>Gets or sets the text of the Send button, such as <c>Post</c> or an icon glyph. The default is <c>Send</c>.</summary>
+    public string SendText
+    {
+        get => send.Text;
+        set => send.Text = value ?? string.Empty;
     }
 
     /// <summary>Gets or sets the control that is shown above the text, such as a tray of attachments, or <see langword="null"/> for none.</summary>
@@ -281,7 +294,7 @@ public class ChatInput : Control
         row.Children.Clear();
         row.Children.Add(composer);
 
-        if (showSendButton)
+        if (sendButtonMode == SendButtonMode.Always || (sendButtonMode == SendButtonMode.WhenText && CanSend))
             row.Children.Add(send);
 
         Children.Add(row);
