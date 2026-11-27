@@ -5,6 +5,7 @@
   <Folder Name="/src/">
     <Project Path="src/Silo.Controls/Silo.Controls.csproj" />
     <Project Path="src/Silo.Controls.Agents/Silo.Controls.Agents.csproj" />
+    <Project Path="src/Silo.Controls.Chat/Silo.Controls.Chat.csproj" />
     <Project Path="src/Silo.Controls.UnitsNet/Silo.Controls.UnitsNet.csproj" />
     <Project Path="src/Silo.Core/Silo.Core.csproj" />
     <Project Path="src/Silo.Diagnostics/Silo.Diagnostics.csproj" />
@@ -22,6 +23,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Silo.Controls.Tests/Silo.Controls.Tests.csproj" />
     <Project Path="tests/Silo.Controls.Agents.Tests/Silo.Controls.Agents.Tests.csproj" />
+    <Project Path="tests/Silo.Controls.Chat.Tests/Silo.Controls.Chat.Tests.csproj" />
     <Project Path="tests/Silo.Controls.UnitsNet.Tests/Silo.Controls.UnitsNet.Tests.csproj" />
     <Project Path="tests/Silo.Core.Tests/Silo.Core.Tests.csproj" />
     <Project Path="tests/Silo.Diagnostics.Tests/Silo.Diagnostics.Tests.csproj" />

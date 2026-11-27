@@ -336,4 +336,59 @@ public class TextAreaTests
 
         Assert.Equal("two", editor.Buffer.Text);
     }
+
+    [Fact]
+    public void The_height_is_MinimumLines_and_grows_with_the_text_up_to_MaximumLines()
+    {
+        var editor = new TextArea { MinimumLines = 2, MaximumLines = 4 };
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+
+        root.Children.Add(editor);
+        
+        Assert.Equal(28, ((Silo.Layout.ILayoutNode)editor).Measure(null).Height);
+
+        editor.Buffer.Reset("a\nb\nc");
+        
+        Assert.Equal(42, ((Silo.Layout.ILayoutNode)editor).Measure(null).Height);
+
+        editor.Buffer.Reset("a\nb\nc\nd\ne\nf");
+        
+        Assert.Equal(56, ((Silo.Layout.ILayoutNode)editor).Measure(null).Height);
+    }
+
+    [Fact]
+    public void Without_MaximumLines_the_height_stays_at_MinimumLines()
+    {
+        var editor = new TextArea { MinimumLines = 3 };
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+
+        editor.Buffer.Reset("a\nb\nc\nd\ne");
+        root.Children.Add(editor);
+        
+        Assert.Equal(42, ((Silo.Layout.ILayoutNode)editor).Measure(null).Height);
+    }
+
+    [Fact]
+    public void The_placeholder_is_drawn_only_while_the_area_is_empty()
+    {
+        var editor = new TextArea { Placeholder = "Type here" };
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+
+        root.Children.Add(editor);
+        
+        Assert.Contains("Type here", Drawn(root));
+
+        editor.Buffer.Reset("x");
+
+        Assert.DoesNotContain("Type here", Drawn(root));
+    }
+
+    static List<string> Drawn(Control root)
+    {
+        var builder = new DisplayListBuilder();
+
+        root.Render(builder);
+
+        return [.. builder.Build().Commands.OfType<DrawTextCommand>().Select(c => c.Text)];
+    }
 }

@@ -39,9 +39,6 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// <summary>The smallest width when no <c>width</c> is set, in pixels.</summary>
     const double MinimumWidth = 240;
 
-    /// <summary>The smallest height when no <c>height</c> is set, in lines.</summary>
-    const int MinimumLines = 8;
-
     /// <summary>The color of the selected text's background.</summary>
     public static readonly StyledProperty<Color> SelectionColorProperty =
         StyledProperty.Register<TextArea, Color>("selection-color", new(59, 130, 246, 90), Color.TryParse);
@@ -49,6 +46,10 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// <summary>The color of the caret.</summary>
     public static readonly StyledProperty<Color> CaretColorProperty =
         StyledProperty.Register<TextArea, Color>("caret-color", new(0, 0, 0), Color.TryParse);
+
+    /// <summary>The color of the placeholder text.</summary>
+    public static readonly StyledProperty<Color> PlaceholderColorProperty =
+        StyledProperty.Register<TextArea, Color>("placeholder-color", new(156, 163, 175), Color.TryParse);
 
     /// <summary>The color of the line numbers.</summary>
     public static readonly StyledProperty<Color> GutterColorProperty =
@@ -109,6 +110,22 @@ public class TextArea : Control, IScrollable, IPointerHandler
 
     /// <summary>Gets or sets what copy, cut and paste use. Without it those keys do nothing.</summary>
     public IClipboard? Clipboard { get; set; }
+
+    /// <summary>Gets or sets the text that is shown, in the <c>placeholder-color</c>, while the area is empty. The default is empty.</summary>
+    public string Placeholder { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the height of the area when no <c>height</c> is set, in lines. It is also the least height when
+    /// <see cref="MaximumLines"/> lets the area grow. The default is 8.
+    /// </summary>
+    public int MinimumLines { get; set; } = 8;
+
+    /// <summary>
+    /// Gets or sets the most lines that the area grows to when no <c>height</c> is set. The area is as tall as its text, between
+    /// <see cref="MinimumLines"/> and this value, and scrolls beyond it. The default is <see langword="null"/>, which keeps the area at
+    /// <see cref="MinimumLines"/>.
+    /// </summary>
+    public int? MaximumLines { get; set; }
 
     /// <summary>Gets or sets whether a column with the line numbers is shown left of the text. The default is <see langword="false"/>.</summary>
     public bool ShowLineNumbers { get; set; }
@@ -296,7 +313,10 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// <inheritdoc/>
     protected override Size MeasureContent(double? availableWidth)
     {
-        return new Size(MinimumWidth, Measurer().LineHeight(CurrentTextStyle()) * MinimumLines);
+        var minimum = Math.Max(1, MinimumLines);
+        var lines = MaximumLines is { } maximum ? Math.Clamp(buffer.LineCount, minimum, Math.Max(minimum, maximum)) : minimum;
+
+        return new Size(MinimumWidth, Measurer().LineHeight(CurrentTextStyle()) * lines);
     }
 
     /// <inheritdoc/>
@@ -323,6 +343,9 @@ public class TextArea : Control, IScrollable, IPointerHandler
         context.ClipRect(content);
 
         DrawLines(context, measurer, style, content, text, gutter);
+
+        if (Placeholder.Length > 0 && buffer.Text.Length == 0)
+            context.DrawText(Placeholder, text.X - scrollX, content.Y, style, GetValue(PlaceholderColorProperty));
 
         context.Restore();
     }

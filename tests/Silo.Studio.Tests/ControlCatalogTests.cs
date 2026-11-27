@@ -22,7 +22,7 @@ public class ControlCatalogTests
     }
 
     static IEnumerable<Type> ControlTypes() =>
-        new[] { typeof(Control).Assembly, typeof(QuantityBox).Assembly, typeof(ToolCallCard).Assembly }
+        new[] { typeof(Control).Assembly, typeof(QuantityBox).Assembly, typeof(ToolCallCard).Assembly, typeof(ChatInput).Assembly }
             .SelectMany(a => a.GetTypes())
             .Where(t => typeof(Control).IsAssignableFrom(t) && t.IsPublic && !t.IsAbstract);
 

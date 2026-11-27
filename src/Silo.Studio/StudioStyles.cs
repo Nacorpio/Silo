@@ -30,6 +30,7 @@ public static class StudioStyles
               "flex-grow": "1", "flex-direction": "column", "padding": "24px", "background": "var(--surface)", "border-width": "1px",
               "border-color": "var(--border)", "border-radius": "6px", "align-items": "flex-start"
             },
+            "#review-stage ChatInput": { "width": "460px", "flex-shrink": "0" },
             "#review-stage ToolCallCard": { "width": "420px", "flex-shrink": "0" },
             "#review-stage ToolCallTimeline": { "width": "440px", "flex-shrink": "0" },
             "#review": { "flex-direction": "column", "gap": "10px", "padding": "8px 16px 16px 16px" },
@@ -130,6 +131,7 @@ public static class StudioStyles
             ".cell EmojiPanel": { "flex-shrink": "0" },
             ".cell ToolCallCard": { "width": "380px", "flex-shrink": "0" },
             ".cell ToolCallTimeline": { "width": "420px", "flex-shrink": "0" },
+            ".cell ChatInput": { "width": "420px", "flex-shrink": "0" },
             ".cell .toasts": { "flex-direction": "column", "gap": "6px", "width": "330px", "height": "176px", "flex-shrink": "0" },
             ".cell .stack": { "flex-direction": "column", "gap": "4px" },
             ".cell .badges": { "flex-direction": "row", "gap": "6px", "align-items": "center", "width": "360px", "flex-shrink": "0" },

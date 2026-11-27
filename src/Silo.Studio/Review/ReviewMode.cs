@@ -122,7 +122,7 @@ public static class ReviewMode
     /// <param name="variant">The theme variant.</param>
     /// <returns>The resolver.</returns>
     public static StyleResolver Styles(ThemeVariant variant)
-        => new([.. DefaultTheme.Load(variant), QuantityTheme.Load(), AgentsTheme.Load(), StudioStyles.Load()]);
+        => new([.. DefaultTheme.Load(variant), QuantityTheme.Load(), AgentsTheme.Load(), ChatTheme.Load(), StudioStyles.Load()]);
 
     /// <summary>Draws the window to a PNG file.</summary>
     /// <param name="view">The review view.</param>

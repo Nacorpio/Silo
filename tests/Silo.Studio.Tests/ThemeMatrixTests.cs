@@ -61,7 +61,7 @@ public class ThemeMatrixTests
     {
         var matrix = new ThemeMatrix();
 
-        Assert.Equal(["Buttons", "Text input", "Values and lists", "Inputs", "Data", "Dates", "Colors", "Display", "Panels", "Navigation", "Shell", "Collections", "Layout", "Menus and dialogs", "Agents", "Animations"], ThemeMatrix.Categories);
+        Assert.Equal(["Buttons", "Text input", "Values and lists", "Inputs", "Data", "Dates", "Colors", "Display", "Panels", "Navigation", "Shell", "Collections", "Layout", "Menus and dialogs", "Agents", "Chat", "Animations"], ThemeMatrix.Categories);
         Assert.Equal("Buttons", matrix.SelectedCategory);
         Assert.Single(matrix.Children);
         Assert.NotNull(matrix.Cell("QuantityBox", "focus"));
