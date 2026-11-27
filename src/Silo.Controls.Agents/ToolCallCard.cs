@@ -99,6 +99,12 @@ public class ToolCallCard : Control
     /// <summary>The verbosity that the timeline gives.</summary>
     ToolCallVerbosity inherited = ToolCallVerbosity.Normal;
 
+    /// <summary>The density that was set on the card, or <see langword="null"/> to follow the timeline.</summary>
+    ToolCallDensity? density;
+
+    /// <summary>The density that the timeline gives.</summary>
+    ToolCallDensity inheritedDensity = ToolCallDensity.Normal;
+
     /// <summary>Whether the card is expanded, as far as <see cref="ToolCallVerbosity.Normal"/> goes.</summary>
     bool expanded;
 
@@ -207,6 +213,29 @@ public class ToolCallCard : Control
         }
     }
 
+    /// <summary>
+    /// Gets or sets how much room the card leaves around its content. Until it is set, a card follows the <see cref="ToolCallTimeline"/>
+    /// it is in, and is <see cref="ToolCallDensity.Normal"/> on its own.
+    /// </summary>
+    public ToolCallDensity Density
+    {
+        get => density ?? inheritedDensity;
+        set
+        {
+            density = value;
+
+            ApplyDensity();
+        }
+    }
+
+    /// <summary>Makes the card follow the timeline's density again.</summary>
+    public void ClearDensity()
+    {
+        density = null;
+
+        ApplyDensity();
+    }
+
     /// <summary>Makes the card follow the timeline's verbosity again.</summary>
     public void ClearVerbosity()
     {
@@ -247,6 +276,29 @@ public class ToolCallCard : Control
         toggledByHand = true;
 
         Expand(value);
+    }
+
+    /// <summary>Sets the density that a timeline gives, which counts until the card has its own.</summary>
+    /// <param name="value">The density.</param>
+    internal void InheritDensity(ToolCallDensity value)
+    {
+        inheritedDensity = value;
+
+        ApplyDensity();
+    }
+
+    /// <summary>Puts the Class of the density on the card.</summary>
+    void ApplyDensity()
+    {
+        _ = RemoveClass("density-compact");
+        _ = RemoveClass("density-roomy");
+
+        _ = Density switch
+        {
+            ToolCallDensity.Compact => AddClass("density-compact"),
+            ToolCallDensity.Roomy => AddClass("density-roomy"),
+            _ => false,
+        };
     }
 
     /// <summary>Sets the verbosity that a timeline gives, which counts until the card has its own.</summary>

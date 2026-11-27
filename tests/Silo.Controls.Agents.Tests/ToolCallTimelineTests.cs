@@ -181,4 +181,37 @@ public class ToolCallTimelineTests
     }
 
     sealed class FakeTime : TimeProvider;
+
+    [Fact]
+    public void Density_goes_to_every_card_that_has_not_set_its_own_and_to_cards_added_later()
+    {
+        var parent = new ToolCall("agent", "{}");
+        var timeline = new ToolCallTimeline();
+
+        timeline.Add(parent);
+        timeline.Add(new ToolCall("b", "{}"));
+
+        timeline.Groups[1].Card.Density = ToolCallDensity.Roomy;
+        timeline.Density = ToolCallDensity.Compact;
+
+        parent.AddChild(new ToolCall("child", "{}"));
+        timeline.Groups[0].Card.Call = parent;
+
+        Assert.True(timeline.HasClass("density-compact"));
+        Assert.Equal(ToolCallDensity.Compact, timeline.Groups[0].Card.Density);
+        Assert.Equal(ToolCallDensity.Compact, timeline.Groups[0].Groups[0].Card.Density);
+        Assert.Equal(ToolCallDensity.Roomy, timeline.Groups[1].Card.Density);
+        Assert.True(timeline.Groups[0].Card.HasClass("density-compact"));
+        Assert.True(timeline.Groups[1].Card.HasClass("density-roomy"));
+
+        timeline.Groups[1].Card.ClearDensity();
+
+        Assert.True(timeline.Groups[1].Card.HasClass("density-compact"));
+        Assert.False(timeline.Groups[1].Card.HasClass("density-roomy"));
+
+        timeline.Density = ToolCallDensity.Normal;
+
+        Assert.False(timeline.HasClass("density-compact"));
+        Assert.False(timeline.Groups[0].Card.HasClass("density-compact"));
+    }
 }

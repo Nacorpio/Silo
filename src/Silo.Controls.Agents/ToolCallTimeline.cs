@@ -41,6 +41,9 @@ public class ToolCallTimeline : Control
     /// <summary>The verbosity.</summary>
     ToolCallVerbosity verbosity = ToolCallVerbosity.Normal;
 
+    /// <summary>The density.</summary>
+    ToolCallDensity density = ToolCallDensity.Normal;
+
     /// <summary>The clipboard.</summary>
     IClipboard? clipboard;
 
@@ -92,6 +95,32 @@ public class ToolCallTimeline : Control
         }
     }
 
+    /// <summary>
+    /// Gets or sets how much room the timeline and the cards that have not set their own density leave. The default is
+    /// <see cref="ToolCallDensity.Normal"/>. The theme sees it as the Classes <c>density-compact</c> and <c>density-roomy</c>.
+    /// </summary>
+    public ToolCallDensity Density
+    {
+        get => density;
+        set
+        {
+            density = value;
+
+            _ = RemoveClass("density-compact");
+            _ = RemoveClass("density-roomy");
+
+            _ = value switch
+            {
+                ToolCallDensity.Compact => AddClass("density-compact"),
+                ToolCallDensity.Roomy => AddClass("density-roomy"),
+                _ => false,
+            };
+
+            foreach (var group in groups)
+                group.InheritDensity(value);
+        }
+    }
+
     /// <summary>Gets or sets the clipboard that the Copy buttons of the cards write to.</summary>
     public IClipboard? Clipboard
     {
@@ -126,6 +155,7 @@ public class ToolCallTimeline : Control
         var group = new ToolCallGroup(call);
 
         group.Inherit(verbosity);
+        group.InheritDensity(density);
         group.Configure(clipboard, time);
 
         group.CancelRequested += (_, c) => CancelRequested?.Invoke(this, c);

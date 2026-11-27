@@ -24,6 +24,9 @@ public sealed class ToolCallGroup : Control
     /// <summary>The verbosity that the timeline gives.</summary>
     ToolCallVerbosity inherited = ToolCallVerbosity.Normal;
 
+    /// <summary>The density that the timeline gives, which a group added later also gets.</summary>
+    ToolCallDensity inheritedDensity = ToolCallDensity.Normal;
+
 
     /// <summary>Creates a group for a call and for the sub-calls that it has.</summary>
     /// <param name="call">The call.</param>
@@ -81,6 +84,18 @@ public sealed class ToolCallGroup : Control
         RefreshChildren();
     }
 
+    /// <summary>Gives the card, and the groups under it, the density of the timeline.</summary>
+    /// <param name="value">The density.</param>
+    internal void InheritDensity(ToolCallDensity value)
+    {
+        inheritedDensity = value;
+
+        card.InheritDensity(value);
+
+        foreach (var group in groups)
+            group.InheritDensity(value);
+    }
+
     /// <summary>Opens or closes this card and every card under it.</summary>
     /// <param name="value"><see langword="true"/> to open them.</param>
     internal void SetExpandedAll(bool value)
@@ -129,6 +144,7 @@ public sealed class ToolCallGroup : Control
             var group = new ToolCallGroup(child);
 
             group.Inherit(inherited);
+            group.InheritDensity(inheritedDensity);
             group.Configure(card.Clipboard, card.TimeProvider);
 
             group.CancelRequested += (_, c) => CancelRequested?.Invoke(this, c);
