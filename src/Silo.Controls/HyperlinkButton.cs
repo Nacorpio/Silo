@@ -23,6 +23,7 @@ namespace Silo;
 /// };
 /// </code>
 /// </example>
+[PseudoStates("hover", "active", "focus", "visited")]
 public class HyperlinkButton : Button
 {
     /// <summary>Whether the link was followed.</summary>

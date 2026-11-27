@@ -31,6 +31,7 @@ namespace Silo;
 /// files.SelectionChanged += (_, _) => Open(files.Items[files.SelectedIndex]);
 /// </code>
 /// </example>
+[PseudoStates("hover")]
 public class ListView : Control, IScrollable, IPointerHandler
 {
     /// <summary>The space left of each row's text in pixels.</summary>

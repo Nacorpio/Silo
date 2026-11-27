@@ -22,6 +22,7 @@ namespace Silo;
 /// volume.ValueChanged += (_, _) => player.Volume = volume.Value;
 /// </code>
 /// </example>
+[PseudoStates("hover", "active")]
 public class Slider : Control, IPointerHandler
 {
     /// <summary>The diameter of the thumb in pixels.</summary>

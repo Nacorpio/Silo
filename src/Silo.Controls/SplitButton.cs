@@ -22,6 +22,7 @@ namespace Silo;
 /// save.Click += (_, _) => Save();
 /// </code>
 /// </example>
+[PseudoStates("hover", "active")]
 public class SplitButton : Control
 {
     /// <summary>The button with the main action.</summary>

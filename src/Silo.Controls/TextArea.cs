@@ -27,6 +27,7 @@ namespace Silo;
 /// editor.TextChanged += (_, _) => Console.WriteLine(editor.Buffer.Text.Length);
 /// </code>
 /// </example>
+[PseudoStates("hover", "focus")]
 public class TextArea : Control, IScrollable, IPointerHandler
 {
     /// <summary>The space on each side of the line numbers, in pixels.</summary>

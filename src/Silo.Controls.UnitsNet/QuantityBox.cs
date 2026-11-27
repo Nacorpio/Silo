@@ -30,6 +30,7 @@ namespace Silo;
 /// length.ValueChanged += (_, _) => model.Width = (Length)length.Value!;
 /// </code>
 /// </example>
+[PseudoStates("hover", "focus")]
 public class QuantityBox : Control
 {
     /// <summary>The most significant digits that a double keeps.</summary>

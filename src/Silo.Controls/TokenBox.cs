@@ -26,6 +26,7 @@ namespace Silo;
 /// tags.TokensChanged += (_, _) => issue.Labels = tags.Tokens;
 /// </code>
 /// </example>
+[PseudoStates("focus")]
 public class TokenBox : Control
 {
     /// <summary>The text box for the next token.</summary>

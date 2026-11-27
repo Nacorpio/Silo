@@ -34,6 +34,7 @@ namespace Silo;
 /// root.Render(frame);
 /// </code>
 /// </example>
+[PseudoStates("focus-within")]
 public abstract class Control : Element, ILayoutNode
 {
     /// <summary>The width, or <see langword="null"/> for <c>auto</c>.</summary>

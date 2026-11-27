@@ -21,6 +21,7 @@ namespace Silo;
 /// toppings.CheckedChanged += (_, _) => order.Toppings = toppings.CheckedIndices;
 /// </code>
 /// </example>
+[PseudoStates("focus")]
 public class CheckedListBox : ListView
 {
     /// <summary>The side of a check box in pixels.</summary>

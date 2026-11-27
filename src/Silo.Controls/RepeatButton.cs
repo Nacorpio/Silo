@@ -23,6 +23,7 @@ namespace Silo;
 /// up.Click += (_, _) => number.Value++;
 /// </code>
 /// </example>
+[PseudoStates("hover", "active")]
 public class RepeatButton : Button
 {
     /// <summary>The default time before the first repeat, in milliseconds.</summary>

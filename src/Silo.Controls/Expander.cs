@@ -17,6 +17,7 @@ namespace Silo;
 /// advanced.IsExpanded = true;
 /// </code>
 /// </example>
+[PseudoStates("expanded")]
 public class Expander : Control
 {
     /// <summary>The header that is clicked.</summary>

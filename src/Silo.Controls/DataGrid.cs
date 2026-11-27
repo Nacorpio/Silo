@@ -42,6 +42,7 @@ namespace Silo;
 /// grid.RowActivated += (_, index) => Open((Person)grid.SelectedRow!);
 /// </code>
 /// </example>
+[PseudoStates("focus")]
 public class DataGrid : Control, IScrollable, IPointerHandler
 {
     /// <summary>The space left and right of the text of a cell, in pixels.</summary>

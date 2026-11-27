@@ -18,6 +18,7 @@ namespace Silo;
 /// save.Click += (_, _) => document.Save();
 /// </code>
 /// </example>
+[PseudoStates("hover", "active", "focus")]
 public class Button : TextControl
 {
     /// <summary>Raised when the pointer is released over the Button after it was pressed on it.</summary>

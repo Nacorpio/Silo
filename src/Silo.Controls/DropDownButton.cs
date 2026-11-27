@@ -24,6 +24,7 @@ namespace Silo;
 /// };
 /// </code>
 /// </example>
+[PseudoStates("hover", "active")]
 public class DropDownButton : Button
 {
     /// <summary>The size of the arrow in pixels.</summary>

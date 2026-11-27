@@ -42,6 +42,7 @@ namespace Silo;
 /// editor.ContextMenu = menu;
 /// </code>
 /// </example>
+[PseudoStates]
 public class ContextMenu : ListView
 {
     /// <summary>The room right of the text for the arrow of an entry with a submenu, in pixels.</summary>

@@ -30,6 +30,7 @@ namespace Silo;
 /// tabs.GetHeader(0).AddButton(new TabHeaderButton { Text = "+" });
 /// </code>
 /// </example>
+[PseudoStates("selected")]
 public sealed class TabHeader : Button
 {
     /// <summary>Which side of the text the icon goes on.</summary>

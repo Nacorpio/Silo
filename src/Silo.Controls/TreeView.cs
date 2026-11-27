@@ -27,6 +27,7 @@ namespace Silo;
 /// tree.SelectedNodeChanged += (_, node) => Show(node?.Tag);
 /// </code>
 /// </example>
+[PseudoStates("hover", "focus")]
 public class TreeView : ListView
 {
     /// <summary>The width of the triangle area in front of a node in pixels.</summary>

@@ -25,6 +25,7 @@ namespace Silo;
 /// price.RangeChanged += (_, _) => filter.Apply(price.Lower, price.Upper);
 /// </code>
 /// </example>
+[PseudoStates("hover", "active")]
 public class RangeSlider : Control, IPointerHandler
 {
     /// <summary>The diameter of a thumb in pixels.</summary>
