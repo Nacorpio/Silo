@@ -39,17 +39,31 @@ public static class StudioStyles
             "#review .title": { "font-size": "16px", "font-weight": "bold" },
             "#review .muted": { "color": "var(--muted)", "font-size": "12px" },
             "#review-scroll": { "flex-grow": "1" },
-            "#review-questions": { "flex-direction": "column", "gap": "18px", "padding": "0px 10px 0px 0px" },
-            "#review .question": { "flex-direction": "column", "gap": "6px", "align-items": "flex-start" },
-            "#review .prompt": { "font-weight": "bold" },
-            "#review TextArea": {
-              "width": "100%", "height": "72px", "background": "var(--surface)", "color": "var(--text)", "border-width": "1px",
+            "#review-steps": { "flex-direction": "row", "gap": "4px" },
+            "#review .dot": {
+              "background": "var(--track)", "color": "var(--muted)", "padding": "2px 8px", "font-size": "12px",
+              "&:hover": { "background": "var(--border)" }
+            },
+            "#review .dot.answered": { "background": "#16a34a", "color": "#ffffff" },
+            "#review .dot.skipped": { "background": "#f59e0b", "color": "#000000" },
+            "#review .dot.current": { "background": "var(--accent)", "color": "var(--accent-text)", "font-weight": "bold" },
+            "#review-nav": { "flex-direction": "row", "gap": "10px", "align-items": "center" },
+            "#review .nav": { "background": "var(--accent)", "color": "var(--accent-text)", "padding": "6px 16px" },
+            "#review-nav #review-back": { "background": "var(--track)", "color": "var(--text)" },
+            "#review-summary": { "flex-direction": "column", "gap": "10px", "padding": "0px 10px 0px 0px" },
+            "#review .question": { "flex-direction": "column", "gap": "12px", "align-items": "flex-start", "padding": "8px 10px 0px 0px" },
+            "#review TextArea.wrapped": { "width": "100%", "background": "transparent", "border-width": "0px", "padding": "0px", "color": "var(--text)" },
+            "#review TextArea.prompt": { "font-size": "18px", "font-weight": "bold" },
+            "#review TextArea.meta": { "color": "var(--muted)", "font-size": "12px" },
+            "#review-summary TextArea.unanswered": { "color": "#f59e0b" },
+            "#review TextArea.hint": { "color": "var(--muted)" },
+            "#review TextArea.last": { "color": "#f59e0b", "font-size": "13px" },
+            "#review TextArea.entry": {
+              "width": "100%", "height": "96px", "background": "var(--surface)", "color": "var(--text)", "border-width": "1px",
               "border-color": "var(--border)", "border-radius": "4px", "caret-color": "var(--text)",
               "&:focus": { "border-color": "var(--accent)" }
             },
             "#review TextBox": { "width": "100%" },
-            "#review .show": { "background": "var(--track)", "color": "var(--text)", "padding": "3px 10px", "&:hover": { "background": "var(--border)" } },
-            "#review-footer": { "flex-direction": "row", "gap": "12px", "align-items": "center" },
             "#review-submit": { "background": "var(--accent)", "color": "var(--accent-text)", "padding": "6px 16px" },
             "#editor": {
               "width": "440px", "padding": "0px 16px 16px 8px", "gap": "8px", "flex-direction": "column"

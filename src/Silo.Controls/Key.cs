@@ -161,4 +161,34 @@ public enum Key
 
     /// <summary>The F11 key.</summary>
     F11,
+
+    /// <summary>The 0 key above the letters.</summary>
+    Digit0,
+
+    /// <summary>The 1 key above the letters.</summary>
+    Digit1,
+
+    /// <summary>The 2 key above the letters.</summary>
+    Digit2,
+
+    /// <summary>The 3 key above the letters.</summary>
+    Digit3,
+
+    /// <summary>The 4 key above the letters.</summary>
+    Digit4,
+
+    /// <summary>The 5 key above the letters.</summary>
+    Digit5,
+
+    /// <summary>The 6 key above the letters.</summary>
+    Digit6,
+
+    /// <summary>The 7 key above the letters.</summary>
+    Digit7,
+
+    /// <summary>The 8 key above the letters.</summary>
+    Digit8,
+
+    /// <summary>The 9 key above the letters.</summary>
+    Digit9,
 }

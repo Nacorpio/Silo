@@ -52,7 +52,8 @@ public sealed class ReviewView : Window
     /// <summary>Creates the view with the first sample shown.</summary>
     /// <param name="document">The questions.</param>
     /// <exception cref="ArgumentException">The Control of the document is not in the <see cref="ControlCatalog"/>.</exception>
-    public ReviewView(ReviewDocument document)
+    /// <param name="history">What earlier rounds said, or <see langword="null"/> for a first round.</param>
+    public ReviewView(ReviewDocument document, ReviewHistory? history = null)
     {
         ArgumentNullException.ThrowIfNull(document);
 
@@ -63,7 +64,7 @@ public sealed class ReviewView : Window
 
         variants = ControlCatalog.VariantsOf(document.Control);
         Answers = new ReviewAnswers(document.Control);
-        Panel = new ReviewPanel(document, Answers);
+        Panel = new ReviewPanel(document, Answers, history ?? ReviewHistory.None);
 
         var bar = new Box { Name = "bar" };
         var title = new TextBlock { Text = document.Control };
@@ -104,6 +105,9 @@ public sealed class ReviewView : Window
 
         ShowSelected();
         ShowSample();
+
+        if (Panel.Current is { } first)
+            Show(first.Variant, first.State);
     }
 
     /// <summary>Raised after <see cref="Variant"/> changed.</summary>
