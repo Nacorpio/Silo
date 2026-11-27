@@ -39,8 +39,8 @@ public class ScrollViewer : Control, IScrollable
     public static readonly StyledProperty<double> ScrollBarWidthProperty =
         StyledProperty.Register<ScrollViewer, double>("scrollbar-width", 12, ValueParsers.Pixels);
 
-    /// <summary>How far the content has been scrolled up, in pixels.</summary>
-    double offset;
+    /// <summary>How far the content has been scrolled up.</summary>
+    readonly ScrollState scroll;
 
     /// <summary>The Control that is scrolled.</summary>
     Control? content;
@@ -48,7 +48,7 @@ public class ScrollViewer : Control, IScrollable
     /// <summary>The overlay bar.</summary>
     readonly ScrollBar bar = new() { Orientation = Orientation.Vertical };
 
-    /// <summary>Whether the bar is changing <see cref="offset"/> or the offset is changing the bar, so the change is not echoed back.</summary>
+    /// <summary>Whether the bar is changing the offset or the offset is changing the bar, so the change is not echoed back.</summary>
     bool syncing;
 
     /// <summary>
@@ -62,12 +62,14 @@ public class ScrollViewer : Control, IScrollable
     /// <summary>Creates a ScrollViewer with no content.</summary>
     public ScrollViewer()
     {
+        scroll = new ScrollState(() => ContentExtent, () => Viewport.Height);
+
         bar.ValueChanged += (_, _) =>
         {
             if (syncing)
                 return;
 
-            offset = bar.Value;
+            scroll.ScrollTo(bar.Value);
         };
 
         Children.Add(bar);
@@ -115,11 +117,11 @@ public class ScrollViewer : Control, IScrollable
     }
 
     /// <summary>Gets the distance the content is scrolled, in pixels. It is between 0 and <see cref="MaxOffset"/>.</summary>
-    public double Offset => Math.Clamp(offset, 0, MaxOffset);
+    public double Offset => scroll.Offset;
 
     /// <summary>Gets the largest <see cref="Offset"/>: how much taller the content is than the viewport. It is 0 when everything fits.</summary>
     /// <remarks>It is only meaningful after <see cref="Control.Arrange"/>.</remarks>
-    public double MaxOffset => Math.Max(0, ContentExtent - Viewport.Height);
+    public double MaxOffset => scroll.MaxOffset;
 
     /// <summary>Gets the height of the children, from the top of the first to the bottom of the last.</summary>
     public double ContentExtent => content is null ? 0 : content.Bounds.Bottom - Viewport.Y;
@@ -195,13 +197,11 @@ public class ScrollViewer : Control, IScrollable
     /// <inheritdoc/>
     public bool ScrollBy(double delta)
     {
-        var before = Offset;
-
-        offset = Math.Clamp(before + delta, 0, MaxOffset);
+        var changed = scroll.ScrollBy(delta);
 
         SyncBar();
 
-        return offset != before;
+        return changed;
     }
 
     /// <summary>Scrolls to the top.</summary>

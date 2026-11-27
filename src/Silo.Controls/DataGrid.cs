@@ -122,11 +122,11 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     /// <summary>The shown index of the row under the pointer.</summary>
     int hoveredIndex = -1;
 
-    /// <summary>How far the rows are scrolled down in pixels.</summary>
-    double offset;
+    /// <summary>How far the rows are scrolled down.</summary>
+    readonly ScrollState scroll;
 
     /// <summary>How far the columns are scrolled to the left in pixels.</summary>
-    double horizontalOffset;
+    readonly ScrollState horizontalScroll;
 
     /// <summary>The column whose edge is being dragged.</summary>
     DataGridColumn? resizing;
@@ -144,6 +144,13 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     /// </summary>
     static DataGrid()
     {
+    }
+
+    /// <summary>Creates a DataGrid without columns or rows.</summary>
+    public DataGrid()
+    {
+        scroll = new ScrollState(() => order.Length * RowHeight, () => BodyHeight);
+        horizontalScroll = new ScrollState(() => ColumnWidths().Sum(), () => Viewport.Width);
     }
 
     /// <summary>Raised after <see cref="SelectedIndex"/> changed.</summary>
@@ -169,7 +176,7 @@ public class DataGrid : Control, IScrollable, IPointerHandler
         set
         {
             rows = value ?? [];
-            offset = 0;
+            scroll.Reset();
 
             Reorder();
 
@@ -194,16 +201,16 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     public object? SelectedRow => selectedIndex >= 0 ? rows[order[selectedIndex]] : null;
 
     /// <summary>Gets how far the rows are scrolled down in pixels.</summary>
-    public double Offset => Math.Clamp(offset, 0, MaxOffset);
+    public double Offset => scroll.Offset;
 
     /// <summary>Gets how far the rows can be scrolled down, in pixels.</summary>
-    public double MaxOffset => Math.Max(0, (order.Length * RowHeight) - BodyHeight);
+    public double MaxOffset => scroll.MaxOffset;
 
     /// <summary>Gets how far the columns are scrolled to the left in pixels.</summary>
-    public double HorizontalOffset => Math.Clamp(horizontalOffset, 0, MaxHorizontalOffset);
+    public double HorizontalOffset => horizontalScroll.Offset;
 
     /// <summary>Gets how far the columns can be scrolled to the left, in pixels. It is 0 while they fit.</summary>
-    public double MaxHorizontalOffset => Math.Max(0, ColumnWidths().Sum() - Viewport.Width);
+    public double MaxHorizontalOffset => horizontalScroll.MaxOffset;
 
     /// <inheritdoc/>
     public override bool IsFocusable => true;
@@ -242,26 +249,12 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool ScrollBy(double delta)
-    {
-        var before = Offset;
-
-        offset = Math.Clamp(before + delta, 0, MaxOffset);
-
-        return offset != before;
-    }
+    public bool ScrollBy(double delta) => scroll.ScrollBy(delta);
 
     /// <summary>Scrolls the columns sideways.</summary>
     /// <param name="delta">The distance in pixels. Positive scrolls to the right.</param>
     /// <returns><see langword="true"/> when the columns moved, so a new frame is needed.</returns>
-    public bool ScrollHorizontallyBy(double delta)
-    {
-        var before = HorizontalOffset;
-
-        horizontalOffset = Math.Clamp(before + delta, 0, MaxHorizontalOffset);
-
-        return horizontalOffset != before;
-    }
+    public bool ScrollHorizontallyBy(double delta) => horizontalScroll.ScrollBy(delta);
 
     /// <summary>Highlights the row under the pointer.</summary>
     /// <param name="e">The pointer position relative to the grid's border box.</param>
@@ -510,21 +503,8 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     /// <param name="index">The shown index.</param>
     void Reveal(int index)
     {
-        var height = BodyHeight;
-
-        if (index < 0 || height <= 0)
-            return;
-
-        var top = index * RowHeight;
-
-        if (top < offset)
-        {
-            offset = top;
-
-            return;
-        }
-
-        offset = Math.Max(offset, top + RowHeight - height);
+        if (index >= 0)
+            scroll.EnsureVisible(index * RowHeight, RowHeight);
     }
 
     /// <summary>Draws one row.</summary>

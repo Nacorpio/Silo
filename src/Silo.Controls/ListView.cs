@@ -69,8 +69,8 @@ public class ListView : Control, IScrollable, IPointerHandler
     /// <summary>The index of the selected row, or -1.</summary>
     int selectedIndex = -1;
 
-    /// <summary>How far the rows are scrolled up, in pixels.</summary>
-    double offset;
+    /// <summary>How far the rows are scrolled up.</summary>
+    readonly ScrollState scroll;
 
 
     /// <summary>
@@ -80,6 +80,9 @@ public class ListView : Control, IScrollable, IPointerHandler
     static ListView()
     {
     }
+
+    /// <summary>Creates an empty ListView.</summary>
+    public ListView() => scroll = new ScrollState(() => items.Count * RowHeight, () => Viewport.Height);
 
     /// <summary>Raised after <see cref="SelectedIndex"/> changed.</summary>
     public event EventHandler? SelectionChanged;
@@ -97,7 +100,7 @@ public class ListView : Control, IScrollable, IPointerHandler
         set
         {
             items = value ?? [];
-            offset = 0;
+            scroll.Reset();
 
             SelectedIndex = -1;
         }
@@ -132,11 +135,11 @@ public class ListView : Control, IScrollable, IPointerHandler
     public bool HoverSelects { get; set; }
 
     /// <summary>Gets how far the rows are scrolled, in pixels. It is between 0 and <see cref="MaxOffset"/>.</summary>
-    public double Offset => Math.Clamp(offset, 0, MaxOffset);
+    public double Offset => scroll.Offset;
 
     /// <summary>Gets the largest <see cref="Offset"/>: how much taller the rows are than the viewport.</summary>
     /// <remarks>It is only meaningful after <see cref="Control.Arrange"/>.</remarks>
-    public double MaxOffset => Math.Max(0, items.Count * RowHeight - Viewport.Height);
+    public double MaxOffset => scroll.MaxOffset;
 
     /// <inheritdoc/>
     public override bool IsFocusable => true;
@@ -154,14 +157,7 @@ public class ListView : Control, IScrollable, IPointerHandler
     protected Rect Viewport => ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height));
 
     /// <inheritdoc/>
-    public bool ScrollBy(double delta)
-    {
-        var before = Offset;
-
-        offset = Math.Clamp(before + delta, 0, MaxOffset);
-
-        return offset != before;
-    }
+    public bool ScrollBy(double delta) => scroll.ScrollBy(delta);
 
     /// <summary>Selects the row under a moving pointer when <see cref="HoverSelects"/> is set. The list does not scroll.</summary>
     /// <param name="e">The pointer position relative to the ListView's border box.</param>
@@ -343,20 +339,7 @@ public class ListView : Control, IScrollable, IPointerHandler
     /// <param name="index">The row's index, or -1 for none.</param>
     void Reveal(int index)
     {
-        var height = Viewport.Height;
-
-        if (index < 0 || height <= 0)
-            return;
-
-        var top = index * RowHeight;
-
-        if (top < offset)
-        {
-            offset = top;
-
-            return;
-        }
-
-        offset = Math.Max(offset, top + RowHeight - height);
+        if (index >= 0)
+            scroll.EnsureVisible(index * RowHeight, RowHeight);
     }
 }

@@ -60,8 +60,8 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// <summary>The text that was last reported by <see cref="TextChanged"/>.</summary>
     string reported;
 
-    /// <summary>How far the lines are scrolled up, in pixels.</summary>
-    double scrollY;
+    /// <summary>How far the lines are scrolled up.</summary>
+    readonly ScrollState scroll;
 
     /// <summary>How far the text is scrolled to the left, in pixels.</summary>
     double scrollX;
@@ -93,6 +93,8 @@ public class TextArea : Control, IScrollable, IPointerHandler
     {
         this.buffer = buffer ?? new TextBuffer();
 
+        scroll = new ScrollState(() => this.buffer.LineCount * lineHeight, () => viewportHeight);
+
         reported = this.buffer.Text;
 
         this.buffer.Changed += (_, _) => OnBufferChanged();
@@ -114,14 +116,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
     public override bool IsFocusable => true;
 
     /// <inheritdoc/>
-    public bool ScrollBy(double delta)
-    {
-        var before = scrollY;
-
-        scrollY = Math.Clamp(scrollY + delta, 0, MaximumScroll());
-
-        return before != scrollY;
-    }
+    public bool ScrollBy(double delta) => scroll.ScrollBy(delta);
 
     /// <inheritdoc/>
     public bool PointerDown(PointerEvent e)
@@ -302,7 +297,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
         if (revealCaret)
             Reveal(measurer, style, text);
 
-        scrollY = Math.Clamp(scrollY, 0, MaximumScroll());
+        scroll.Clamp();
 
         context.Save();
         context.ClipRect(content);
@@ -327,15 +322,15 @@ public class TextArea : Control, IScrollable, IPointerHandler
         Rect text,
         double gutter)
     {
-        var first = Math.Max(0, (int)(scrollY / lineHeight));
-        var last = Math.Min(buffer.LineCount - 1, (int)((scrollY + content.Height) / lineHeight));
+        var first = Math.Max(0, (int)(scroll.Offset / lineHeight));
+        var last = Math.Min(buffer.LineCount - 1, (int)((scroll.Offset + content.Height) / lineHeight));
         var color = GetValue(ColorProperty);
         var gutterColor = GetValue(GutterColorProperty);
         var focused = PseudoStates.Contains("focus");
 
         for (var line = first; line <= last; line++)
         {
-            var y = content.Y + (line * lineHeight) - scrollY;
+            var y = content.Y + (line * lineHeight) - scroll.Offset;
 
             if (ShowLineNumbers)
             {
@@ -425,11 +420,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
 
         var top = buffer.Line * lineHeight;
 
-        if (top < scrollY)
-            scrollY = top;
-
-        if (top + lineHeight > scrollY + text.Height)
-            scrollY = top + lineHeight - text.Height;
+        scroll.EnsureVisible(top, lineHeight);
 
         var caretX = Width(measurer, style, buffer.GetLine(buffer.Line)[..buffer.Column]);
 
@@ -449,7 +440,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
         var measurer = Measurer();
         var style = CurrentTextStyle();
         var content = ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height));
-        var line = Math.Clamp((int)Math.Floor((y - content.Y + scrollY) / lineHeight), 0, buffer.LineCount - 1);
+        var line = Math.Clamp((int)Math.Floor((y - content.Y + scroll.Offset) / lineHeight), 0, buffer.LineCount - 1);
         var target = x - content.X - GutterWidth(measurer, style) + scrollX;
         var text = buffer.GetLine(line);
         var best = 0;
@@ -488,10 +479,6 @@ public class TextArea : Control, IScrollable, IPointerHandler
         if (buffer.HasSelection)
             Clipboard?.SetText(buffer.SelectedText);
     }
-
-    /// <summary>Gets how far the lines can be scrolled.</summary>
-    /// <returns>The distance in pixels.</returns>
-    double MaximumScroll() => Math.Max(0, (buffer.LineCount * lineHeight) - viewportHeight);
 
     /// <summary>Reacts to a change of the buffer by reporting a change of text.</summary>
     void OnBufferChanged()
