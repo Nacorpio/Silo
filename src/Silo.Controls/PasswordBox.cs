@@ -27,5 +27,8 @@ public class PasswordBox : TextBox
     public bool IsRevealed { get; set; }
 
     /// <inheritdoc/>
+    protected override bool CanCopy => IsRevealed;
+
+    /// <inheritdoc/>
     protected override string Display(string value) => IsRevealed ? value : new string(MaskCharacter, value.Length);
 }

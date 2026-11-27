@@ -48,17 +48,29 @@ public sealed class TextBuffer
     Kind last = Kind.None;
 
     /// <summary>Creates a buffer.</summary>
-    /// <param name="text">The text, with <c>\n</c> or <c>\r\n</c> line breaks.</param>
-    public TextBuffer(string text = "")
+    /// <param name="text">The text, with <c>\n</c> or <c>\r\n</c> line breaks. In a single-line buffer they become spaces.</param>
+    /// <param name="singleLine">Whether the buffer holds one line, as for a text box.</param>
+    public TextBuffer(string text = "", bool singleLine = false)
     {
         ArgumentNullException.ThrowIfNull(text);
 
-        lineBreak = text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
-        state = new(text.Replace("\r\n", "\n", StringComparison.Ordinal), 0, 0);
+        IsSingleLine = singleLine;
+        lineBreak = singleLine || !text.Contains("\r\n", StringComparison.Ordinal) ? "\n" : "\r\n";
+        state = new(Normalize(text), 0, 0);
     }
 
     /// <summary>Raised after the text, the caret or the selection changed.</summary>
     public event EventHandler? Changed;
+
+    /// <summary>
+    /// Gets a value indicating whether the buffer holds one line. Line breaks in text that is typed, pasted or reset become
+    /// spaces, and <see cref="NewLine"/> and <see cref="Tab"/> do nothing.
+    /// </summary>
+    public bool IsSingleLine { get; }
+
+    /// <summary>Gets or sets a test that every edit must pass. An edit that produces a text it refuses changes nothing.</summary>
+    /// <remarks>It does not run for <see cref="Reset"/>.</remarks>
+    public Func<string, bool>? Accepts { get; set; }
 
     /// <summary>Gets the text, with <c>\n</c> as the only line break.</summary>
     public string Text => state.Text;
@@ -149,8 +161,8 @@ public sealed class TextBuffer
     {
         ArgumentNullException.ThrowIfNull(text);
 
-        lineBreak = text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
-        state = new(text.Replace("\r\n", "\n", StringComparison.Ordinal), 0, 0);
+        lineBreak = IsSingleLine || !text.Contains("\r\n", StringComparison.Ordinal) ? "\n" : "\r\n";
+        state = new(Normalize(text), 0, 0);
 
         undo.Clear();
         redo.Clear();
@@ -230,7 +242,7 @@ public sealed class TextBuffer
     {
         ArgumentNullException.ThrowIfNull(text);
 
-        var normalized = text.Replace("\r\n", "\n", StringComparison.Ordinal);
+        var normalized = Normalize(text);
 
         if (normalized.Length == 0 && !HasSelection)
             return;
@@ -244,6 +256,9 @@ public sealed class TextBuffer
     /// <remarks>After an opening brace or bracket at the end of the line, the new line is indented one step further.</remarks>
     public void NewLine()
     {
+        if (IsSingleLine)
+            return;
+
         var before = state.Text[LineStart(Line)..SelectionStart];
         var indent = before[..(before.Length - before.TrimStart(' ').Length)];
         var opens = before.TrimEnd().EndsWith('{') || before.TrimEnd().EndsWith('[');
@@ -272,6 +287,9 @@ public sealed class TextBuffer
     /// <summary>Indents: inserts a step at the caret, or indents every line that the selection touches.</summary>
     public void Tab()
     {
+        if (IsSingleLine)
+            return;
+
         if (!HasSelection || LineOf(SelectionStart) == LineOf(SelectionEnd))
         {
             Edit(SelectionStart, SelectionEnd, Indent, Kind.Other);
@@ -324,6 +342,16 @@ public sealed class TextBuffer
     /// <returns>The new text.</returns>
     static string Outdent(string line)
         => line.StartsWith(Indent, StringComparison.Ordinal) ? line[Indent.Length..] : line.TrimStart(' ');
+
+    /// <summary>Brings line breaks to <c>\n</c>, or to spaces in a single-line buffer.</summary>
+    /// <param name="text">The text.</param>
+    /// <returns>The text.</returns>
+    string Normalize(string text)
+    {
+        var unified = text.Replace("\r\n", "\n", StringComparison.Ordinal);
+
+        return IsSingleLine ? unified.Replace("\r", " ", StringComparison.Ordinal).Replace('\n', ' ') : unified;
+    }
 
     /// <summary>Moves the caret by lines.</summary>
     /// <param name="delta">The number of lines, negative for up.</param>
@@ -383,15 +411,18 @@ public sealed class TextBuffer
     /// <param name="kind">The kind of the edit, which decides if it is merged with the one before.</param>
     void Edit(int start, int end, string replacement, Kind kind)
     {
+        var next = string.Concat(state.Text.AsSpan(0, start), replacement, state.Text.AsSpan(end));
+
+        if (Accepts is { } accepts && !accepts(next))
+            return;
+
         if (kind == Kind.Other || kind != last)
             undo.Push(state);
 
         redo.Clear();
 
         var caret = kind == Kind.Deleting ? start : start + replacement.Length;
-        var text = string.Concat(state.Text.AsSpan(0, start), replacement, state.Text.AsSpan(end));
-
-        state = new(text, caret, caret);
+        state = new(next, caret, caret);
         desiredColumn = -1;
         last = kind;
 

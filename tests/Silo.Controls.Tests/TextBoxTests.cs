@@ -189,4 +189,147 @@ public class TextBoxTests
         Assert.True(focus.Focus(null));
         Assert.DoesNotContain("focus-within", root.PseudoStates);
     }
+
+    sealed class FakeClipboard : IClipboard
+    {
+        public string Text { get; set; } = string.Empty;
+
+        public string GetText() => Text;
+
+        public void SetText(string text) => Text = text;
+    }
+
+    [Fact]
+    public void Shift_and_the_arrows_select_and_typing_replaces_the_selection()
+    {
+        var (_, box, _, _) = Setup();
+
+        box.Text = "hello";
+        box.KeyDown(Key.Home);
+        box.KeyDown(Key.Right, KeyModifiers.Shift);
+        box.KeyDown(Key.Right, KeyModifiers.Shift);
+
+        Assert.Equal("he", box.Buffer.SelectedText);
+
+        box.TextInput("J");
+
+        Assert.Equal("Jllo", box.Text);
+        Assert.False(box.Buffer.HasSelection);
+    }
+
+    [Fact]
+    public void A_drag_selects_from_the_press_to_the_pointer()
+    {
+        var (_, box, _, _) = Setup();
+
+        box.Text = "hello";
+
+        box.PointerDown(new(0, 5));
+        box.PointerDrag(new(21, 5));
+        box.PointerUp(new(21, 5));
+
+        Assert.Equal("hel", box.Buffer.SelectedText);
+
+        box.PointerDrag(new(35, 5));
+
+        Assert.Equal("hel", box.Buffer.SelectedText);
+    }
+
+    [Fact]
+    public void Control_A_selects_all_and_Control_Z_and_Y_undo_and_redo()
+    {
+        var (_, box, _, _) = Setup();
+
+        box.TextInput("a");
+        box.TextInput("b");
+        box.KeyDown(Key.A, KeyModifiers.Control);
+
+        Assert.Equal("ab", box.Buffer.SelectedText);
+
+        box.KeyDown(Key.Delete);
+
+        Assert.Equal(string.Empty, box.Text);
+        Assert.True(box.KeyDown(Key.Z, KeyModifiers.Control));
+        Assert.Equal("ab", box.Text);
+
+        box.KeyDown(Key.Y, KeyModifiers.Control);
+
+        Assert.Equal(string.Empty, box.Text);
+
+        box.KeyDown(Key.Z, KeyModifiers.Control);
+        box.KeyDown(Key.Z, KeyModifiers.Control | KeyModifiers.Shift);
+
+        Assert.Equal(string.Empty, box.Text);
+    }
+
+    [Fact]
+    public void Copy_cut_and_paste_use_the_clipboard_and_paste_flattens_line_breaks()
+    {
+        var (_, box, _, _) = Setup();
+        var clipboard = new FakeClipboard();
+
+        box.Clipboard = clipboard;
+        box.Text = "hello";
+        box.KeyDown(Key.A, KeyModifiers.Control);
+        box.KeyDown(Key.C, KeyModifiers.Control);
+
+        Assert.Equal("hello", clipboard.Text);
+        Assert.Equal("hello", box.Text);
+
+        box.KeyDown(Key.X, KeyModifiers.Control);
+
+        Assert.Equal(string.Empty, box.Text);
+
+        clipboard.Text = "a\nb";
+        box.KeyDown(Key.V, KeyModifiers.Control);
+
+        Assert.Equal("a b", box.Text);
+    }
+
+    [Fact]
+    public void Without_a_clipboard_the_clipboard_keys_do_nothing()
+    {
+        var (_, box, _, _) = Setup();
+
+        box.Text = "hi";
+        box.KeyDown(Key.A, KeyModifiers.Control);
+
+        Assert.False(box.KeyDown(Key.V, KeyModifiers.Control));
+
+        box.KeyDown(Key.C, KeyModifiers.Control);
+
+        Assert.Equal("hi", box.Text);
+    }
+
+    [Fact]
+    public void Setting_the_text_forgets_what_could_be_undone()
+    {
+        var (_, box, _, _) = Setup();
+
+        box.TextInput("a");
+
+        box.Text = "fresh";
+
+        Assert.False(box.Buffer.CanUndo);
+        Assert.Equal(5, box.CaretIndex);
+    }
+
+    [Fact]
+    public void The_selection_is_drawn_behind_the_text()
+    {
+        var (root, box, _, _) = Setup();
+
+        box.Text = "hello";
+        box.KeyDown(Key.Home);
+        box.KeyDown(Key.Right, KeyModifiers.Shift);
+
+        var builder = new DisplayListBuilder();
+
+        root.Render(builder);
+
+        var selection = builder.Build().Commands.OfType<FillRectCommand>().Where(c => c.Color == new Color(59, 130, 246, 90)).ToList();
+
+        Assert.Single(selection);
+        Assert.Equal(7, selection[0].Rect.Width);
+    }
 }

@@ -71,4 +71,34 @@ public class PasswordBoxTests
         Assert.Equal("ac", box.Text);
         Assert.Equal(1, box.CaretIndex);
     }
+
+    sealed class FakeClipboard : IClipboard
+    {
+        public string Text { get; set; } = string.Empty;
+
+        public string GetText() => Text;
+
+        public void SetText(string text) => Text = text;
+    }
+
+    [Fact]
+    public void Copy_and_cut_do_nothing_while_the_text_is_hidden_and_work_when_it_is_revealed()
+    {
+        var (_, box) = Setup();
+        var clipboard = new FakeClipboard { Text = "x" };
+
+        box.Clipboard = clipboard;
+        box.Text = "secret";
+        box.KeyDown(Key.A, KeyModifiers.Control);
+        box.KeyDown(Key.C, KeyModifiers.Control);
+        box.KeyDown(Key.X, KeyModifiers.Control);
+
+        Assert.Equal("x", clipboard.Text);
+        Assert.Equal("secret", box.Text);
+
+        box.IsRevealed = true;
+        box.KeyDown(Key.C, KeyModifiers.Control);
+
+        Assert.Equal("secret", clipboard.Text);
+    }
 }
