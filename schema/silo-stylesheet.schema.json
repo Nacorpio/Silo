@@ -397,7 +397,7 @@
           "$ref": "#/$defs/scalar"
         },
         "selection-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid, ListView, TextArea.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid, ListView, TextArea, TextBox.",
           "$ref": "#/$defs/scalar"
         },
         "selection-text-color": {
