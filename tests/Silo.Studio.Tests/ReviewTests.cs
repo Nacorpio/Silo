@@ -222,6 +222,26 @@ public class ReviewTests
     }
 
     [Fact]
+    public void Ticking_the_redo_box_sets_the_verdict_and_changes_the_Submit_text()
+    {
+        var view = new ReviewView(ReviewMode.Load("ToolCallCard", null));
+
+        Assert.False(view.Answers.Redo);
+        Assert.Contains("\"verdict\": \"keep\"", view.Answers.ToJson(DateTimeOffset.UnixEpoch));
+
+        view.Panel.RedoBox.IsChecked = true;
+
+        Assert.True(view.Answers.Redo);
+        Assert.Equal("Submit and redo", view.Panel.SubmitButton.Text);
+        Assert.Contains("\"verdict\": \"redo\"", view.Answers.ToJson(DateTimeOffset.UnixEpoch));
+
+        view.Panel.RedoBox.IsChecked = false;
+
+        Assert.False(view.Answers.Redo);
+        Assert.Equal("Submit review", view.Panel.SubmitButton.Text);
+    }
+
+    [Fact]
     public void A_Control_that_is_not_in_the_catalog_is_an_ArgumentException()
         => Assert.Throws<ArgumentException>(() => new ReviewView(ReviewMode.Load("Nothing", null)));
 }

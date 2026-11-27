@@ -19,3 +19,4 @@ Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/age
 ## Reviewing a new control
 
 After a new control is implemented, add `src/Silo.Studio/Reviews/<Control>.review.jsonc` (questions about the control, see `ReviewDocument`) and open the review window with `silo-studio --review <Control> --dark`. A window that is already open for the same control is closed first. Submit writes `reviews/review-<Control>-<timestamp>.json`; read it back and act on it.
+The answers file has a `verdict`: `keep` (improve it from the answers) or `redo` (the user wants the whole iteration thrown away; do not patch it, redo it from the design using the comment as the reason).

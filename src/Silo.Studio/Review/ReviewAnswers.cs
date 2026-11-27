@@ -27,6 +27,12 @@ public sealed class ReviewAnswers(string control)
     /// <summary>Gets or sets the free comment about the whole Control.</summary>
     public string Comment { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets whether the user wants the whole iteration thrown away and done again, instead of improved. The comment is then
+    /// the reason. The default is <see langword="false"/>.
+    /// </summary>
+    public bool Redo { get; set; }
+
     /// <summary>Gets the number of questions that have an answer.</summary>
     public int Count => answers.Count;
 
@@ -73,6 +79,7 @@ public sealed class ReviewAnswers(string control)
             writer.WriteStartObject();
             writer.WriteString("control", Control);
             writer.WriteString("submitted", at);
+            writer.WriteString("verdict", Redo ? "redo" : "keep");
             writer.WriteString("comment", Comment);
             writer.WriteStartArray("viewed");
 
