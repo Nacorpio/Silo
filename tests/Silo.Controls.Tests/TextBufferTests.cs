@@ -329,4 +329,38 @@ public class TextBufferTests
         Assert.Equal("fresh", buffer.Text);
         Assert.False(buffer.CanUndo);
     }
+
+    [Fact]
+    public void A_single_line_buffer_turns_line_breaks_into_spaces_and_ignores_new_lines_and_tabs()
+    {
+        var buffer = new TextBuffer("a\r\nb", singleLine: true);
+
+        Assert.Equal("a b", buffer.Text);
+
+        buffer.MoveToEnd(extend: false);
+        buffer.Insert("c\nd");
+        buffer.NewLine();
+        buffer.Tab();
+
+        Assert.Equal("a bc d", buffer.Text);
+        Assert.Equal(1, buffer.LineCount);
+        Assert.Equal("a bc d", buffer.ToFileText());
+    }
+
+    [Fact]
+    public void An_edit_that_the_accepts_test_refuses_changes_nothing()
+    {
+        var buffer = new TextBuffer { Accepts = candidate => candidate.All(char.IsDigit) };
+
+        buffer.Insert("1");
+        buffer.Insert("x");
+        buffer.Insert("2");
+
+        Assert.Equal("12", buffer.Text);
+
+        buffer.Undo();
+
+        Assert.Equal(string.Empty, buffer.Text);
+        Assert.False(buffer.CanUndo);
+    }
 }
