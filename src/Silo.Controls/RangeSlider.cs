@@ -139,9 +139,9 @@ public class RangeSlider : Control, IPointerHandler
     public override bool IsFocusable => true;
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public bool PointerDown(PointerEvent e)
     {
-        var value = ValueAt(x);
+        var value = ValueAt(e.X);
 
         upperActive = Math.Abs(value - upper) < Math.Abs(value - lower) || (value >= upper && lower == upper);
         dragging = true;
@@ -150,14 +150,14 @@ public class RangeSlider : Control, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool PointerDrag(double x, double y) => dragging && MoveActive(ValueAt(x));
+    public bool PointerDrag(PointerEvent e) => dragging && MoveActive(ValueAt(e.X));
 
     /// <inheritdoc/>
-    public void PointerUp()
+    public bool PointerUp(PointerEvent e)
     {
         dragging = false;
 
-        SetPseudoState("active", false);
+        return SetPseudoState("active", false);
     }
 
     /// <inheritdoc/>

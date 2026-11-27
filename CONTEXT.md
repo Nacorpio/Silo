@@ -26,6 +26,10 @@ _Avoid_: Markup, template, page, layout
 A concrete syntax that Views can be written in; JSONC is the first one.
 _Avoid_: Markup language, view language, dialect
 
+**Pointer handler**:
+A Control that receives pointer events from the router for its own area; the innermost one under the pointer wins, and the one that got the press keeps the pointer until release.
+_Avoid_: Listener, hit target
+
 **Class**:
 A free-form label that app code attaches to an Element so Selectors can match it.
 _Avoid_: Tag, style key

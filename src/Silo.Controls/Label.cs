@@ -25,7 +25,7 @@ namespace Silo;
 /// label.AddClass("required");
 /// </code>
 /// </example>
-public class Label : TextBlock
+public class Label : TextBlock, IPointerHandler
 {
     /// <summary>The marker that follows the text of a required Label.</summary>
     const string Marker = "*";
@@ -53,9 +53,10 @@ public class Label : TextBlock
     public bool IsRequired => Classes.Contains("required");
 
     /// <summary>Acts on <see cref="For"/>. The pointer router calls this when the pointer goes down on the Label.</summary>
+    /// <param name="e">The pointer position relative to the Label's border box.</param>
     /// <returns><see langword="true"/> when the target changed, so styles need to be applied again.</returns>
     /// <remarks>A target that can have the focus gets it from the <see cref="FocusManager"/>, which looks at <see cref="For"/> too.</remarks>
-    public bool PointerDown()
+    public bool PointerDown(PointerEvent e)
     {
         if (For is not ToggleButton toggle)
             return false;

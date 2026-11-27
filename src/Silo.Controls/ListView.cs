@@ -31,7 +31,7 @@ namespace Silo;
 /// files.SelectionChanged += (_, _) => Open(files.Items[files.SelectedIndex]);
 /// </code>
 /// </example>
-public class ListView : Control, IScrollable
+public class ListView : Control, IScrollable, IPointerHandler
 {
     /// <summary>The space left of each row's text in pixels.</summary>
     internal const double TextInset = 8;
@@ -164,26 +164,26 @@ public class ListView : Control, IScrollable
     }
 
     /// <summary>Selects the row under a moving pointer when <see cref="HoverSelects"/> is set. The list does not scroll.</summary>
-    /// <param name="y">The vertical position relative to the ListView's border box.</param>
+    /// <param name="e">The pointer position relative to the ListView's border box.</param>
     /// <returns><see langword="true"/> when the selection changed, so a new frame is needed.</returns>
-    public bool PointerMove(double y)
+    public bool PointerMove(PointerEvent e)
     {
         var before = selectedIndex;
 
         if (HoverSelects)
-            Select((int)Math.Floor((y - Viewport.Y + Offset) / RowHeight), false);
+            Select((int)Math.Floor((e.Y - Viewport.Y + Offset) / RowHeight), false);
 
         return before != selectedIndex;
     }
 
     /// <summary>Selects the row at a pointer position.</summary>
-    /// <param name="y">The vertical position relative to the ListView's border box.</param>
+    /// <param name="e">The pointer position relative to the ListView's border box.</param>
     /// <returns><see langword="true"/> when the selection changed, so a new frame is needed.</returns>
-    public bool PointerDown(double y)
+    public virtual bool PointerDown(PointerEvent e)
     {
         var before = selectedIndex;
 
-        SelectedIndex = (int)Math.Floor((y - Viewport.Y + Offset) / RowHeight);
+        SelectedIndex = (int)Math.Floor((e.Y - Viewport.Y + Offset) / RowHeight);
 
         if (selectedIndex >= 0)
             Activated?.Invoke(this, selectedIndex);

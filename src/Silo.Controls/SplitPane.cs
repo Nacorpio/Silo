@@ -230,9 +230,9 @@ public class SplitPane : Control, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public bool PointerDown(PointerEvent e)
     {
-        var along = Along(x, y);
+        var along = Along(e.X, e.Y);
         var found = isLocked ? -1 : DividerAt(along);
 
         if (found < 0)
@@ -260,22 +260,22 @@ public class SplitPane : Control, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool PointerDrag(double x, double y)
+    public bool PointerDrag(PointerEvent e)
     {
         if (dragging < 0)
             return false;
 
-        var wanted = Along(x, y) - grab;
+        var wanted = Along(e.X, e.Y) - grab;
 
         return Move(dragging, wanted - DividerStart(dragging));
     }
 
     /// <inheritdoc/>
-    public void PointerUp()
+    public bool PointerUp(PointerEvent e)
     {
         dragging = -1;
 
-        SetPseudoState("active", false);
+        return SetPseudoState("active", false);
     }
 
     /// <inheritdoc/>

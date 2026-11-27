@@ -178,9 +178,9 @@ public class ScrollBar : Control, IPointerHandler, IScrollable
     }
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public bool PointerDown(PointerEvent e)
     {
-        var position = Along(x, y);
+        var position = Along(e.X, e.Y);
 
         SetPseudoState("active", true);
 
@@ -199,7 +199,7 @@ public class ScrollBar : Control, IPointerHandler, IScrollable
     }
 
     /// <inheritdoc/>
-    public bool PointerDrag(double x, double y)
+    public bool PointerDrag(PointerEvent e)
     {
         if (grab is not { } offset)
             return false;
@@ -208,17 +208,17 @@ public class ScrollBar : Control, IPointerHandler, IScrollable
         var before = value;
 
         if (room > 0)
-            Value = minimum + Math.Clamp((Along(x, y) - offset) / room, 0, 1) * (maximum - minimum);
+            Value = minimum + Math.Clamp((Along(e.X, e.Y) - offset) / room, 0, 1) * (maximum - minimum);
 
         return value != before;
     }
 
     /// <inheritdoc/>
-    public void PointerUp()
+    public bool PointerUp(PointerEvent e)
     {
         grab = null;
 
-        SetPseudoState("active", false);
+        return SetPseudoState("active", false);
     }
 
     /// <inheritdoc/>

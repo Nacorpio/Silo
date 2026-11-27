@@ -108,13 +108,13 @@ public class GalleryViewTests
 
         gallery.SelectionMode = GallerySelectionMode.Multiple;
 
-        Assert.True(gallery.PointerDown(5, 5, KeyModifiers.None));
+        Assert.True(gallery.PointerDown(new(5, 5, KeyModifiers.None)));
         Assert.Equal([0], gallery.SelectedIndices);
 
-        gallery.PointerDown(105, 5, KeyModifiers.Control);
+        gallery.PointerDown(new(105, 5, KeyModifiers.Control));
         Assert.Equal([0, 1], gallery.SelectedIndices);
 
-        gallery.PointerDown(5, 95, KeyModifiers.Shift);
+        gallery.PointerDown(new(5, 95, KeyModifiers.Shift));
         Assert.Equal([1, 2, 3], gallery.SelectedIndices);
     }
 
@@ -123,8 +123,8 @@ public class GalleryViewTests
     {
         var (_, gallery) = Setup();
 
-        gallery.PointerDown(5, 5, KeyModifiers.None);
-        gallery.PointerDown(105, 5, KeyModifiers.Control);
+        gallery.PointerDown(new(5, 5, KeyModifiers.None));
+        gallery.PointerDown(new(105, 5, KeyModifiers.Control));
 
         Assert.Equal([1], gallery.SelectedIndices);
 
@@ -164,9 +164,9 @@ public class GalleryViewTests
         gallery.Clock = () => now;
         gallery.ItemActivated += (_, index) => activated.Add(index);
 
-        gallery.PointerDown(105, 5, KeyModifiers.None);
+        gallery.PointerDown(new(105, 5, KeyModifiers.None));
         now += 100;
-        gallery.PointerDown(105, 5, KeyModifiers.None);
+        gallery.PointerDown(new(105, 5, KeyModifiers.None));
         gallery.KeyDown(Key.Enter);
 
         Assert.Equal([1, 1], activated);

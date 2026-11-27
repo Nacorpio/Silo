@@ -99,14 +99,14 @@ public class DataGridTests
 
         grid.SortChanged += (_, _) => raised++;
 
-        Assert.True(grid.PointerDown(30, 10));
+        Assert.True(grid.PointerDown(new(30, 10)));
         Assert.Equal(["Abe", "Bo", "Cara", "Dee", "Eli", "Fay", "Gus"], Shown(grid));
 
-        grid.PointerDown(30, 10);
+        grid.PointerDown(new(30, 10));
         Assert.True(grid.SortDescending);
         Assert.Equal(["Gus", "Fay", "Eli", "Dee", "Cara", "Bo", "Abe"], Shown(grid));
 
-        grid.PointerDown(30, 10);
+        grid.PointerDown(new(30, 10));
         Assert.Null(grid.SortColumn);
         Assert.Equal(["Cara", "Abe", "Bo", "Dee", "Eli", "Fay", "Gus"], Shown(grid));
         Assert.Equal(3, raised);
@@ -162,13 +162,13 @@ public class DataGridTests
 
         grid.RowActivated += (_, index) => activated.Add(index);
 
-        Assert.True(grid.PointerDown(10, 20 + 20 + 5));
+        Assert.True(grid.PointerDown(new(10, 20 + 20 + 5)));
         Assert.Equal(1, grid.SelectedIndex);
         Assert.Empty(activated);
 
         time.Now = time.Now.AddMilliseconds(200);
 
-        grid.PointerDown(10, 20 + 20 + 5);
+        grid.PointerDown(new(10, 20 + 20 + 5));
 
         Assert.Equal([1], activated);
     }
@@ -182,11 +182,11 @@ public class DataGridTests
 
         grid.RowActivated += (_, _) => activated++;
 
-        grid.PointerDown(10, 30);
+        grid.PointerDown(new(10, 30));
 
         time.Now = time.Now.AddMilliseconds(900);
 
-        grid.PointerDown(10, 30);
+        grid.PointerDown(new(10, 30));
 
         Assert.Equal(0, activated);
     }
@@ -230,21 +230,21 @@ public class DataGridTests
     {
         var (_, grid) = Setup();
 
-        grid.PointerDown(100, 10);
+        grid.PointerDown(new(100, 10));
 
-        Assert.True(grid.PointerDrag(140, 10));
+        Assert.True(grid.PointerDrag(new(140, 10)));
         Assert.Equal(140, grid.Columns[0].Width);
 
-        grid.PointerDrag(-50, 10);
+        grid.PointerDrag(new(-50, 10));
 
         Assert.Equal(grid.Columns[0].MinWidth, grid.Columns[0].Width);
 
-        grid.PointerUp();
+        grid.PointerUp(default);
 
-        Assert.False(grid.PointerDrag(200, 10));
+        Assert.False(grid.PointerDrag(new(200, 10)));
 
-        grid.PointerDown(300, 10);
-        grid.PointerDrag(250, 10);
+        grid.PointerDown(new(300, 10));
+        grid.PointerDrag(new(250, 10));
 
         Assert.Equal(0, grid.Columns[1].Star);
         Assert.Equal(210, grid.Columns[1].Width);

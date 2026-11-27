@@ -458,9 +458,9 @@ public class Terminal : Control, IScrollable, IPointerHandler
     public override bool TextInput(string text) => Send(string.Concat(text.Where(character => !char.IsControl(character))));
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public bool PointerDown(PointerEvent e)
     {
-        var cell = CellAt(x, y);
+        var cell = CellAt(e.X, e.Y);
         var now = Clock();
         var isDouble = lastPress is { } previous && now - previous <= DoublePressMilliseconds && cell == lastPressCell;
 
@@ -484,18 +484,23 @@ public class Terminal : Control, IScrollable, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool PointerDrag(double x, double y)
+    public bool PointerDrag(PointerEvent e)
     {
         if (!dragging)
             return false;
 
-        head = CellAt(x, y);
+        head = CellAt(e.X, e.Y);
 
         return true;
     }
 
     /// <inheritdoc/>
-    public void PointerUp() => dragging = false;
+    public bool PointerUp(PointerEvent e)
+    {
+        dragging = false;
+
+        return false;
+    }
 
     /// <inheritdoc/>
     protected override Size MeasureContent(double? availableWidth)

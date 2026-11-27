@@ -32,7 +32,7 @@ public class RatingTests
     {
         var (_, rating) = Setup(new Rating());
 
-        rating.PointerDown(55, 10);
+        rating.PointerDown(new(55, 10));
 
         Assert.Equal(3, rating.Value);
     }
@@ -42,11 +42,11 @@ public class RatingTests
     {
         var (_, rating) = Setup(new Rating { AllowHalf = true });
 
-        rating.PointerDown(5, 10);
+        rating.PointerDown(new(5, 10));
 
         Assert.Equal(0.5, rating.Value);
 
-        rating.PointerDown(15, 10);
+        rating.PointerDown(new(15, 10));
 
         Assert.Equal(1, rating.Value);
     }
@@ -65,8 +65,8 @@ public class RatingTests
         var (_, plain) = Setup(new Rating { Value = 1 });
         var (_, clearing) = Setup(new Rating { Value = 1, AllowClear = true });
 
-        plain.PointerDown(5, 10);
-        clearing.PointerDown(5, 10);
+        plain.PointerDown(new(5, 10));
+        clearing.PointerDown(new(5, 10));
 
         Assert.Equal(1, plain.Value);
         Assert.Equal(0, clearing.Value);
@@ -77,8 +77,8 @@ public class RatingTests
     {
         var (_, rating) = Setup(new Rating { Value = 2, IsReadOnly = true });
 
-        Assert.False(rating.PointerDown(90, 10));
-        Assert.False(rating.PointerMove(90));
+        Assert.False(rating.PointerDown(new(90, 10)));
+        Assert.False(rating.PointerMove(new(90, 10)));
         Assert.False(rating.KeyDown(Key.Right));
         Assert.Equal(2, rating.Value);
     }
@@ -88,7 +88,7 @@ public class RatingTests
     {
         var (_, rating) = Setup(new Rating { Value = 1 });
 
-        Assert.True(rating.PointerMove(80));
+        Assert.True(rating.PointerMove(new(80, 10)));
         Assert.Equal(4, rating.DisplayValue);
         Assert.Equal(1, rating.Value);
         Assert.True(rating.PointerLeave());

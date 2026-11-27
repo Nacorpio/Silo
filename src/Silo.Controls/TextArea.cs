@@ -124,32 +124,37 @@ public class TextArea : Control, IScrollable, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public bool PointerDown(PointerEvent e)
     {
         selecting = true;
 
         revealCaret = true;
 
-        buffer.MoveTo(OffsetAt(x, y), extend: false);
+        buffer.MoveTo(OffsetAt(e.X, e.Y), extend: false);
 
         return true;
     }
 
     /// <inheritdoc/>
-    public bool PointerDrag(double x, double y)
+    public bool PointerDrag(PointerEvent e)
     {
         if (!selecting)
             return false;
 
         revealCaret = true;
 
-        buffer.MoveTo(OffsetAt(x, y), extend: true);
+        buffer.MoveTo(OffsetAt(e.X, e.Y), extend: true);
 
         return true;
     }
 
     /// <inheritdoc/>
-    public void PointerUp() => selecting = false;
+    public bool PointerUp(PointerEvent e)
+    {
+        selecting = false;
+
+        return false;
+    }
 
     /// <inheritdoc/>
     public override bool KeyDown(Key key, KeyModifiers modifiers)

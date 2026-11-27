@@ -25,7 +25,7 @@ namespace Silo;
 /// name.Submitted += (_, _) => greeter.Greet(name.Text);
 /// </code>
 /// </example>
-public class TextBox : Control
+public class TextBox : Control, IPointerHandler
 {
     /// <summary>The smallest content width in pixels when no <c>width</c> is set.</summary>
     const double MinimumWidth = 120;
@@ -94,13 +94,13 @@ public class TextBox : Control
     public override bool IsFocusable => true;
 
     /// <summary>Moves the caret to the character boundary nearest to a pointer position.</summary>
-    /// <param name="x">The horizontal position relative to the TextBox's border box.</param>
+    /// <param name="e">The pointer position relative to the TextBox's border box.</param>
     /// <returns><see langword="true"/> when the caret moved, so a new frame is needed.</returns>
-    public virtual bool PointerDown(double x)
+    public virtual bool PointerDown(PointerEvent e)
     {
         Pressed?.Invoke(this, EventArgs.Empty);
 
-        var target = x - ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height)).X + scroll;
+        var target = e.X - ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height)).X + scroll;
         var before = caret;
         var best = 0;
         var bestDistance = double.MaxValue;
