@@ -61,7 +61,7 @@ public sealed class StyleResolver(IReadOnlyList<Stylesheet> sheets)
     /// A dictionary keyed by Styled property name (kebab-case, compared ordinally). It holds only the properties that at least
     /// one matching Rule declares, so it is empty when nothing matches. Each <see cref="CascadedValue.Value"/> is the Declared
     /// text exactly as written, so <c>var()</c> references are still unresolved; pass it to <see cref="Compute"/> together with
-    /// the result of <see cref="ResolveTokens"/> to get the Computed text. Token declarations (names starting with <c>--</c>)
+    /// the result of <see cref="ResolveTokens(IStyleNode)"/> to get the Computed text. Token declarations (names starting with <c>--</c>)
     /// are not included here.
     /// </returns>
     /// <remarks>
@@ -87,9 +87,23 @@ public sealed class StyleResolver(IReadOnlyList<Stylesheet> sheets)
     /// </example>
     public IReadOnlyDictionary<string, CascadedValue> Cascade(IStyleNode node, string? part = null)
     {
+        return Cascade(Match(node, part));
+    }
+
+    /// <summary>Finds the Rules that match an Element or Part, ordered from lowest to highest priority.</summary>
+    /// <param name="node">The Element to match against.</param>
+    /// <param name="part">The Part name, or <see langword="null"/> for the Element itself.</param>
+    /// <returns>The matching Rules, lowest priority first. A tree walk matches an Element once and passes the result to the overloads that take it.</returns>
+    public IReadOnlyList<Rule> Match(IStyleNode node, string? part = null) => [.. MatchingRules(node, part)];
+
+    /// <summary>Resolves the Cascaded values from Rules that <see cref="Match"/> found.</summary>
+    /// <param name="rules">The matching Rules, lowest priority first.</param>
+    /// <returns>The same result as <see cref="Cascade(IStyleNode, string?)"/> for the Element the Rules were matched for.</returns>
+    public IReadOnlyDictionary<string, CascadedValue> Cascade(IReadOnlyList<Rule> rules)
+    {
         var result = new Dictionary<string, CascadedValue>(StringComparer.Ordinal);
 
-        foreach (var rule in MatchingRules(node, part))
+        foreach (var rule in rules)
         {
             foreach (var declaration in rule.Declarations)
             {
@@ -152,12 +166,55 @@ public sealed class StyleResolver(IReadOnlyList<Stylesheet> sheets)
     }
 
     /// <summary>
+    /// Collects the Tokens that are visible at an Element when the Tokens visible at its parent are already known. This is
+    /// the incremental form of <see cref="ResolveTokens(IStyleNode)"/> that a tree walk uses so that each Element is matched once.
+    /// </summary>
+    /// <param name="rules">The Rules matched for the Element with <see cref="Match"/>.</param>
+    /// <param name="inherited">The Tokens visible at the parent of the Element, or the top-level Tokens for a root.</param>
+    /// <returns>
+    /// <paramref name="inherited"/> itself when no matching Rule declares a Token, so the caller must not change the result,
+    /// otherwise a new dictionary that holds the inherited Tokens plus the ones this Element declares.
+    /// </returns>
+    public IReadOnlyDictionary<string, string> ResolveTokens(IReadOnlyList<Rule> rules, IReadOnlyDictionary<string, string> inherited)
+    {
+        Dictionary<string, string>? own = null;
+
+        foreach (var rule in rules)
+        {
+            foreach (var token in rule.Tokens.Values)
+            {
+                own ??= new Dictionary<string, string>(inherited, StringComparer.Ordinal);
+                own[token.Name] = token.Value;
+            }
+        }
+
+        return own ?? inherited;
+    }
+
+    /// <summary>The top-level Tokens of every Stylesheet, a later Stylesheet overriding an earlier one.</summary>
+    /// <returns>A new dictionary that the caller may change.</returns>
+    public Dictionary<string, string> ResolveRootTokens()
+    {
+        var tokens = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var sheet in sheets)
+        {
+            foreach (var token in sheet.Tokens.Values)
+            {
+                tokens[token.Name] = token.Value;
+            }
+        }
+
+        return tokens;
+    }
+
+    /// <summary>
     /// Replaces every <c>var(--name)</c> and <c>var(--name, fallback)</c> in a value with the text of the named Token, which
     /// turns a Cascaded value into a Computed one as far as Tokens are concerned.
     /// </summary>
     /// <param name="value">The Declared value text, for example <c>"1px solid var(--border, #333)"</c>.</param>
     /// <param name="tokens">
-    /// The Tokens to look names up in, usually the result of <see cref="ResolveTokens"/>. Keys include the leading
+    /// The Tokens to look names up in, usually the result of <see cref="ResolveTokens(IStyleNode)"/>. Keys include the leading
     /// <c>--</c>.
     /// </param>
     /// <returns>

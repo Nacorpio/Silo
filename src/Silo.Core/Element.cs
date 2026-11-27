@@ -212,7 +212,11 @@ public partial class Element : IStyleNode
 
         var diagnostics = new List<StyleDiagnostic>();
 
-        ApplyStylesCore(resolver, diagnostics);
+        var inherited = Parent is null
+            ? resolver.ResolveRootTokens()
+            : resolver.ResolveTokens(Parent);
+
+        ApplyStylesCore(resolver, inherited, diagnostics);
 
         return diagnostics;
     }
@@ -244,11 +248,13 @@ public partial class Element : IStyleNode
 
     /// <summary>Applies the Stylesheets to this Element, then to its children.</summary>
     /// <param name="resolver">The resolver.</param>
+    /// <param name="inherited">The Tokens visible at the parent, which this Element's own Tokens are added to.</param>
     /// <param name="diagnostics">Receives the problems found.</param>
-    void ApplyStylesCore(StyleResolver resolver, List<StyleDiagnostic> diagnostics)
+    void ApplyStylesCore(StyleResolver resolver, IReadOnlyDictionary<string, string> inherited, List<StyleDiagnostic> diagnostics)
     {
-        var cascaded = resolver.Cascade(this);
-        var tokens = resolver.ResolveTokens(this);
+        var rules = resolver.Match(this);
+        var cascaded = resolver.Cascade(rules);
+        var tokens = resolver.ResolveTokens(rules, inherited);
         var properties = StyledProperty.GetProperties(GetType());
         var before = new object?[properties.Count];
 
@@ -305,7 +311,7 @@ public partial class Element : IStyleNode
 
         foreach (var child in Children)
         {
-            child.ApplyStylesCore(resolver, diagnostics);
+            child.ApplyStylesCore(resolver, tokens, diagnostics);
         }
     }
 
