@@ -54,26 +54,11 @@ public sealed unsafe class SdlWindow : IDisposable
     static readonly List<SdlWindow> Open = [];
 
 
-    /// <summary>The root of the Control tree.</summary>
-    readonly Control root;
+    /// <summary>Runs the content of the window: the Control tree, its overlays, the input rules and the steps of a frame.</summary>
+    readonly WindowScene scene;
 
-    /// <summary>Routes the pointer into the tree.</summary>
-    readonly PointerRouter router;
-
-    /// <summary>The Controls drawn above the root.</summary>
-    readonly OverlayLayer overlays;
-
-    /// <summary>Shows the tooltip of the Control that the pointer rests on.</summary>
-    readonly TooltipPresenter tooltips;
-
-    /// <summary>Tells how long the window has been running, for the tooltips' delay.</summary>
+    /// <summary>Tells how long the window has been running, for the scene's clock.</summary>
     readonly Stopwatch clock = Stopwatch.StartNew();
-
-    /// <summary>Runs the animations of the Controls and the overlays.</summary>
-    readonly AnimationScheduler scheduler;
-
-    /// <summary>Keeps the keyboard focus.</summary>
-    readonly FocusManager focus = new();
 
     /// <summary>Work that other threads asked the window thread to do.</summary>
     readonly ConcurrentQueue<Action> posted = new();
@@ -84,15 +69,6 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>The id that SDL puts in the events of this window.</summary>
     readonly uint id;
 
-
-    /// <summary>The Stylesheets the Controls are styled with.</summary>
-    StyleResolver? styles;
-
-    /// <summary>Whether the next <see cref="Pump"/> needs to draw a frame.</summary>
-    bool dirty = true;
-
-    /// <summary>Whether a Control was animating when the last frame was drawn, so that more frames are due.</summary>
-    bool animating;
 
     /// <summary>Whether the window was closed.</summary>
     bool closed;
@@ -126,20 +102,9 @@ public sealed unsafe class SdlWindow : IDisposable
         if (window is null)
             throw new InvalidOperationException($"SDL could not create the window: {SDL3.SDL_GetError()}");
 
-        this.root = root;
-
         id = (uint)SDL3.SDL_GetWindowID(window);
         root.TextMeasurer ??= new SkiaTextMeasurer();
-        var animationClock = new StopwatchClock(clock);
-
-        root.AnimationClock ??= animationClock;
-        overlays = new OverlayLayer { TextMeasurer = root.TextMeasurer, AnimationClock = animationClock };
-        root.Overlays = overlays;
-        tooltips = new TooltipPresenter(overlays);
-        Toasts = new ToastHost(overlays);
-        overlays.Changed += (_, _) => Restyle();
-        router = new PointerRouter(root, overlays);
-        scheduler = new AnimationScheduler(root, overlays) { FrameMilliseconds = FrameTime(window) };
+        scene = new WindowScene(root, new StopwatchClock(clock), FrameTime(window));
 
         SDL3.SDL_StartTextInput(window);
 
@@ -166,14 +131,14 @@ public sealed unsafe class SdlWindow : IDisposable
     public event EventHandler? Closed;
 
     /// <summary>Gets the root Control of the window.</summary>
-    public Control Root => root;
+    public Control Root => scene.Root;
 
     /// <summary>Gets the layer for menus, drop-down lists and tooltips, which are drawn above the root Control.</summary>
-    public OverlayLayer Overlays => overlays;
+    public OverlayLayer Overlays => scene.Overlays;
 
     /// <summary>Gets the host that shows toasts in a corner of the window.</summary>
     /// <remarks>Use it from the UI thread, or from <see cref="Post"/>.</remarks>
-    public ToastHost Toasts { get; }
+    public ToastHost Toasts => scene.Toasts;
 
     /// <summary>Gets the id that SDL puts in the events of this window.</summary>
     public uint Id => id;
@@ -196,7 +161,7 @@ public sealed unsafe class SdlWindow : IDisposable
             SDL3.SDL_SetWindowBordered(window, !value);
             InstallHitTest(value);
 
-            dirty = true;
+            scene.Invalidate();
         }
     }
 
@@ -225,8 +190,8 @@ public sealed unsafe class SdlWindow : IDisposable
     /// </summary>
     public bool ReducedMotion
     {
-        get => scheduler.ReducedMotion;
-        set => scheduler.ReducedMotion = value;
+        get => scene.ReducedMotion;
+        set => scene.ReducedMotion = value;
     }
 
     /// <summary>Gets or sets the color that every frame is cleared with. The default is white.</summary>
@@ -235,13 +200,8 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Gets or sets the Stylesheets to style the tree with. Setting it styles the tree and draws a new frame.</summary>
     public StyleResolver? Styles
     {
-        get => styles;
-        set
-        {
-            styles = value;
-
-            Restyle();
-        }
+        get => scene.Styles;
+        set => scene.Styles = value;
     }
 
     /// <summary>Gets how many frames have been drawn.</summary>
@@ -263,7 +223,7 @@ public sealed unsafe class SdlWindow : IDisposable
     }
 
     /// <summary>Asks for a new frame.</summary>
-    public void Invalidate() => dirty = true;
+    public void Invalidate() => scene.Invalidate();
 
     /// <summary>Gets how many windows are open in the process.</summary>
     public static int OpenCount => Open.Count;
@@ -272,8 +232,7 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <param name="control">The Control, or <see langword="null"/> to clear the focus.</param>
     public void Focus(Control? control)
     {
-        if (focus.Focus(control))
-            dirty = true;
+        scene.Focus(control);
     }
 
     /// <summary>Handles events for every open window until the last one has been closed.</summary>
@@ -432,83 +391,43 @@ public sealed unsafe class SdlWindow : IDisposable
         while (posted.TryDequeue(out var work))
             work();
 
-        if (tooltips.Tick(clock.Elapsed) | Toasts.Tick(clock.Elapsed))
-            dirty = true;
-
-        if (animating)
-            dirty = true;
-
-        if (animating && scheduler.Tick())
-            Restyle();
-
-        if (dirty && !closed)
+        if (scene.Tick() && !closed)
             Draw();
     }
 
-    /// <summary>Tells how long until a tooltip is due or a toast runs out, so that the event loop wakes up for it.</summary>
+    /// <summary>Tells how long until a tooltip is due, a toast runs out or an animation needs a frame, so that the event loop wakes up for it.</summary>
     /// <returns>The time in milliseconds, or <see cref="int.MaxValue"/> when nothing is waiting.</returns>
     int DueMilliseconds()
     {
-        var tooltip = tooltips.DueIn(clock.Elapsed);
-        var toast = Toasts.DueIn();
-        var due = tooltip is null ? toast : toast is null ? tooltip : tooltip < toast ? tooltip : toast;
+        var due = scene.DueIn();
 
-        var wait = due is { } time ? (int)Math.Ceiling(time.TotalMilliseconds) : int.MaxValue;
-
-        return animating ? Math.Min(wait, scheduler.FrameMilliseconds) : wait;
-    }
-
-    /// <summary>Applies the Stylesheets to the tree and asks for a frame.</summary>
-    void Restyle()
-    {
-        if (styles is not null)
-        {
-            root.ApplyStyles(styles);
-            overlays.ApplyStyles(styles);
-        }
-
-        dirty = true;
+        return due is { } time ? (int)Math.Ceiling(time.TotalMilliseconds) : int.MaxValue;
     }
 
     /// <summary>Reacts to one SDL event.</summary>
     /// <param name="e">The event.</param>
     void Handle(SDL_Event e)
     {
-        var changed = (SDL_EventType)e.type switch
+        _ = (SDL_EventType)e.type switch
         {
             SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED => Close(),
 
-            SDL_EventType.SDL_EVENT_MOUSE_MOTION => MovePointer(e.motion.x, e.motion.y),
+            SDL_EventType.SDL_EVENT_MOUSE_MOTION => scene.PointerMoved(e.motion.x, e.motion.y),
             SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 1 => PressPointer(e.button.x, e.button.y),
-            SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 3 => router.SecondaryDown(e.button.x, e.button.y),
-            SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP when e.button.button == 1 => router.Up(e.button.x, e.button.y),
-            SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => router.Leave() | tooltips.Dismiss(),
-            SDL_EventType.SDL_EVENT_MOUSE_WHEEL
-                => tooltips.Dismiss() | router.Scroll(e.wheel.mouse_x, e.wheel.mouse_y, -e.wheel.y * WheelStep),
+            SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when e.button.button == 3 => scene.SecondaryPressed(e.button.x, e.button.y),
+            SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP when e.button.button == 1 => scene.PointerReleased(e.button.x, e.button.y),
+            SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE => scene.PointerLeft(),
+            SDL_EventType.SDL_EVENT_MOUSE_WHEEL => scene.Wheel(e.wheel.mouse_x, e.wheel.mouse_y, -e.wheel.y * WheelStep),
 
             SDL_EventType.SDL_EVENT_KEY_DOWN => PressKey(e.key),
-            SDL_EventType.SDL_EVENT_TEXT_INPUT => focus.TextInput(Marshal.PtrToStringUTF8((IntPtr)e.text.text) ?? ""),
+            SDL_EventType.SDL_EVENT_TEXT_INPUT => scene.TextInput(Marshal.PtrToStringUTF8((IntPtr)e.text.text) ?? ""),
 
-            SDL_EventType.SDL_EVENT_WINDOW_EXPOSED or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED => true,
+            SDL_EventType.SDL_EVENT_WINDOW_EXPOSED or SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED => Refresh(),
             SDL_EventType.SDL_EVENT_WINDOW_MAXIMIZED or SDL_EventType.SDL_EVENT_WINDOW_RESTORED or SDL_EventType.SDL_EVENT_WINDOW_MINIMIZED
                 => StateChanged(),
 
             _ => false,
         };
-
-        if (changed)
-            Restyle();
-    }
-
-    /// <summary>Moves the pointer and tells the tooltips where it rests.</summary>
-    /// <param name="x">The horizontal position in logical units.</param>
-    /// <param name="y">The vertical position in logical units.</param>
-    /// <returns><see langword="true"/> when a Pseudo-state changed or a tooltip was hidden.</returns>
-    bool MovePointer(float x, float y)
-    {
-        var changed = router.Move(x, y);
-
-        return tooltips.Hover(router.Hovered, x, y, clock.Elapsed) | changed;
     }
 
     /// <summary>Converts SDL modifier flags to <see cref="KeyModifiers"/>.</summary>
@@ -530,44 +449,24 @@ public sealed unsafe class SdlWindow : IDisposable
         return result;
     }
 
-    /// <summary>Raises <see cref="KeyPressed"/> for a key press that is not an auto-repeat.</summary>
+    /// <summary>Raises <see cref="KeyPressed"/> for a key press that is not an auto-repeat, and gives the key to the scene.</summary>
     /// <param name="key">The SDL keyboard event.</param>
-    /// <returns>Always <see langword="false"/>, since a key press changes nothing by itself.</returns>
+    /// <returns><see langword="true"/> when something changed.</returns>
     bool PressKey(SDL_KeyboardEvent key)
     {
         var pressed = ToKey(key.key);
-        var hidden = tooltips.Dismiss();
 
         if (!key.repeat)
             KeyPressed?.Invoke(pressed);
 
-        var modifiers = ToModifiers(key.mod);
-
-        if (pressed == Key.Escape && overlays.CloseTop())
-            return true;
-
-        if (MenuBar.AccessKeyDown(root, pressed, modifiers))
-            return true;
-
-        if (overlays.ModalCount > 0)
-            return overlays.KeyDown(pressed, modifiers) | hidden;
-
-        return focus.KeyDown(pressed, modifiers) | hidden;
+        return scene.KeyDown(pressed, ToModifiers(key.mod));
     }
 
     /// <summary>Presses the pointer button and moves the keyboard focus to what was pressed.</summary>
     /// <param name="x">The horizontal position in logical units.</param>
     /// <param name="y">The vertical position in logical units.</param>
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
-    bool PressPointer(float x, float y)
-    {
-        var overlaid = overlays.ModalCount > 0;
-        router.Modifiers = ToModifiers(SDL3.SDL_GetModState());
-
-        var changed = router.Down(x, y) | tooltips.Dismiss();
-
-        return (!overlaid && focus.FocusFrom(router.Hovered)) | changed;
-    }
+    bool PressPointer(float x, float y) => scene.PointerPressed(x, y, ToModifiers(SDL3.SDL_GetModState()));
 
     /// <summary>Turns the callback on or off that tells SDL what the points of the window are.</summary>
     /// <param name="enabled">Whether SDL should ask.</param>
@@ -587,7 +486,16 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <returns>Always <see langword="true"/>, so that a frame is drawn with the new button glyph.</returns>
     bool StateChanged()
     {
-        (root as Window)?.NotifyStateChanged();
+        (scene.Root as Window)?.NotifyStateChanged();
+
+        return Refresh();
+    }
+
+    /// <summary>Applies the Stylesheets again and asks for a frame, as when the window was exposed or resized.</summary>
+    /// <returns>Always <see langword="true"/>.</returns>
+    bool Refresh()
+    {
+        scene.Restyle();
 
         return true;
     }
@@ -609,7 +517,7 @@ public sealed unsafe class SdlWindow : IDisposable
 
         SDL3.SDL_GetWindowSize(win, &width, &height);
 
-        var region = WindowHitTester.Test(target.root, area->x, area->y, width, height, !target.IsMaximized);
+        var region = WindowHitTester.Test(target.scene.Root, area->x, area->y, width, height, !target.IsMaximized);
 
         return region switch
         {
@@ -645,24 +553,13 @@ public sealed unsafe class SdlWindow : IDisposable
     /// <summary>Lays the tree out, draws it and copies it to the window.</summary>
     void Draw()
     {
-        dirty = false;
-
         int width, height, pixelWidth, pixelHeight;
 
         SDL3.SDL_GetWindowSize(window, &width, &height);
         SDL3.SDL_GetWindowSizeInPixels(window, &pixelWidth, &pixelHeight);
 
-        if (width <= 0 || height <= 0)
+        if (scene.Render(new Size(width, height)) is not { } list)
             return;
-
-        root.Arrange(new Size(width, height));
-
-        var builder = new DisplayListBuilder();
-
-        root.Render(builder);
-
-        overlays.Arrange(new Size(width, height));
-        overlays.Render(builder);
 
         using var bitmap =
             new SKBitmap(new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
@@ -671,12 +568,10 @@ public sealed unsafe class SdlWindow : IDisposable
         {
             canvas.Clear(new SKColor(Background.R, Background.G, Background.B, Background.A));
             canvas.Scale((float)pixelWidth / width, (float)pixelHeight / height);
-            builder.Build().Replay(new SkiaDrawingContext(canvas));
+            list.Replay(new SkiaDrawingContext(canvas));
         }
 
         Present(bitmap);
-
-        animating = scheduler.IsAnimating;
 
         Frames++;
     }
