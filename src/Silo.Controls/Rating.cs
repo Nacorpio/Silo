@@ -24,6 +24,7 @@ namespace Silo;
 /// stars.ValueChanged += (_, _) => review.Score = stars.Value;
 /// </code>
 /// </example>
+[PseudoStates("hover", "focus")]
 public class Rating : Control, IPointerHandler
 {
     /// <summary>The side of each star in pixels.</summary>

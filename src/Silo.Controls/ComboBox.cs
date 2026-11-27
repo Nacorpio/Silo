@@ -27,6 +27,7 @@ namespace Silo;
 /// size.SelectionChanged += (_, _) => Resize(size.SelectedItem);
 /// </code>
 /// </example>
+[PseudoStates("hover", "focus")]
 public class ComboBox : Control, IPointerHandler
 {
     /// <summary>The number of rows that the list scrolls beyond when <c>max-rows</c> is not set.</summary>

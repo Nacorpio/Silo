@@ -16,6 +16,7 @@ namespace Silo;
 /// </para>
 /// <para>The mark is drawn from rectangles, so it is a filled square or dot rather than a tick.</para>
 /// </remarks>
+[PseudoStates("hover", "active", "focus", "checked")]
 public abstract class ToggleButton : Button
 {
     /// <summary>The fill of the indicator.</summary>

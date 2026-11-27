@@ -21,6 +21,7 @@ namespace Silo;
 /// expander.HeaderControl.AddClass("section");
 /// </code>
 /// </example>
+[PseudoStates("expanded")]
 public sealed class ExpanderHeader : Button
 {
     /// <summary>The size of a step of the triangle in pixels.</summary>

@@ -23,6 +23,7 @@ namespace Silo;
 /// accent.ColorChanged += (_, _) => theme.Accent = accent.Color;
 /// </code>
 /// </example>
+[PseudoStates("hover", "focus")]
 public class ColorPicker : Control, IPointerHandler
 {
     /// <summary>The side of the swatch in pixels.</summary>

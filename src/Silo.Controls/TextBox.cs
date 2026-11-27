@@ -27,6 +27,7 @@ namespace Silo;
 /// name.Submitted += (_, _) => greeter.Greet(name.Text);
 /// </code>
 /// </example>
+[PseudoStates("hover", "focus")]
 public class TextBox : Control, IPointerHandler
 {
     /// <summary>The smallest content width in pixels when no <c>width</c> is set.</summary>

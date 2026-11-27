@@ -1,6 +1,7 @@
 namespace Silo;
 
 /// <summary>The Control that holds an item's visual in a <see cref="GalleryView"/> and carries its hover and <c>selected</c> Pseudo-states, which a stylesheet paints through <c>GalleryCell:selected</c>.</summary>
+[PseudoStates("selected")]
 public sealed class GalleryCell : Control
 {
     /// <summary>Runs before the first cell is created, so that the Styled properties are registered in time.</summary>

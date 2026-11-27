@@ -22,6 +22,7 @@ namespace Silo;
 /// file.AddClass("primary");
 /// </code>
 /// </example>
+[PseudoStates("open")]
 public sealed class MenuBarItem : Button
 {
     /// <summary>Whether the menu is shown.</summary>

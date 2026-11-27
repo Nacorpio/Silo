@@ -28,6 +28,7 @@ namespace Silo;
 /// birthday.SelectedDateChanged += (_, _) => profile.Birthday = birthday.SelectedDate;
 /// </code>
 /// </example>
+[PseudoStates("hover", "focus")]
 public class DatePicker : Control, IPointerHandler
 {
     /// <summary>The color of the placeholder text.</summary>

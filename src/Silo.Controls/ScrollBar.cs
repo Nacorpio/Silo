@@ -28,6 +28,7 @@ namespace Silo;
 /// bar.ValueChanged += (_, _) => viewer.ScrollBy(bar.Value - viewer.Offset);
 /// </code>
 /// </example>
+[PseudoStates("hover", "active")]
 public class ScrollBar : Control, IPointerHandler, IScrollable
 {
     /// <summary>The shortest the thumb gets, so that it can always be grabbed.</summary>

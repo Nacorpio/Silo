@@ -100,8 +100,8 @@ public class GalleryView : Control, IScrollable, IPointerHandler
     /// <summary>The item a Shift-click range starts at, or -1.</summary>
     int anchor = -1;
 
-    /// <summary>How far the items are scrolled, in pixels.</summary>
-    double offset;
+    /// <summary>How far the items are scrolled, along the layout's direction.</summary>
+    readonly ScrollState scroll;
 
     /// <summary>Whether the current item still has to be scrolled into view because there was no room to do it yet.</summary>
     bool revealPending;
@@ -118,6 +118,14 @@ public class GalleryView : Control, IScrollable, IPointerHandler
     {
     }
 
+    /// <summary>Creates an empty GalleryView.</summary>
+    public GalleryView()
+    {
+        scroll = new ScrollState(
+            () => layout.IsHorizontal ? Arranged().Extent.Width : Arranged().Extent.Height,
+            () => layout.IsHorizontal ? Area.Width : Area.Height);
+    }
+
     /// <summary>Raised after the selection changed.</summary>
     public event EventHandler? SelectionChanged;
 
@@ -131,7 +139,7 @@ public class GalleryView : Control, IScrollable, IPointerHandler
         set
         {
             items = value ?? [];
-            offset = 0;
+            scroll.Reset();
             current = anchor = -1;
 
             Invalidate();
@@ -177,7 +185,7 @@ public class GalleryView : Control, IScrollable, IPointerHandler
         set
         {
             layout = value ?? GalleryLayout.Grid;
-            offset = 0;
+            scroll.Reset();
 
             Invalidate();
         }
@@ -235,20 +243,11 @@ public class GalleryView : Control, IScrollable, IPointerHandler
     public override bool IsFocusable => true;
 
     /// <summary>Gets how far the items are scrolled, in pixels, along the layout's direction. It is between 0 and <see cref="MaxOffset"/>.</summary>
-    public double Offset => Math.Clamp(offset, 0, MaxOffset);
+    public double Offset => scroll.Offset;
 
     /// <summary>Gets the largest <see cref="Offset"/>: how much larger the items are than the viewport.</summary>
     /// <remarks>It is only meaningful after <see cref="Control.Arrange"/>.</remarks>
-    public double MaxOffset
-    {
-        get
-        {
-            var area = Area;
-            var extent = Arranged().Extent;
-
-            return layout.IsHorizontal ? Math.Max(0, extent.Width - area.Width) : Math.Max(0, extent.Height - area.Height);
-        }
-    }
+    public double MaxOffset => scroll.MaxOffset;
 
     /// <summary>Gets how many items have a Control right now.</summary>
     public int RealizedCount => cells.Count;
@@ -277,14 +276,7 @@ public class GalleryView : Control, IScrollable, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool ScrollBy(double delta)
-    {
-        var before = Offset;
-
-        offset = Math.Clamp(before + delta, 0, MaxOffset);
-
-        return offset != before;
-    }
+    public bool ScrollBy(double delta) => scroll.ScrollBy(delta);
 
     /// <summary>Handles a press on the gallery: selects, toggles or extends the selection, and activates on a double press.</summary>
     /// <param name="e">The pointer position relative to the GalleryView's border box, and the modifier keys held.</param>
@@ -380,12 +372,12 @@ public class GalleryView : Control, IScrollable, IPointerHandler
             Reveal(current);
         }
 
-        offset = Math.Clamp(offset, 0, MaxOffset);
+        scroll.Clamp();
 
         var horizontal = layout.IsHorizontal;
         var viewport = horizontal ? area.Width : area.Height;
-        var low = offset - viewport / 2;
-        var high = offset + viewport * 1.5;
+        var low = scroll.Offset - viewport / 2;
+        var high = scroll.Offset + viewport * 1.5;
 
         for (var i = 0; i < result.Rects.Count; i++)
         {
@@ -537,14 +529,9 @@ public class GalleryView : Control, IScrollable, IPointerHandler
         var horizontal = layout.IsHorizontal;
         var start = horizontal ? rect.X : rect.Y;
         var end = horizontal ? rect.Right : rect.Bottom;
-        var viewport = horizontal ? area.Width : area.Height;
 
-        if (start < offset)
-            offset = start;
-        else if (end > offset + viewport)
-            offset = end - viewport;
-
-        offset = Math.Clamp(offset, 0, MaxOffset);
+        scroll.EnsureVisible(start, end - start);
+        scroll.Clamp();
     }
 
     /// <summary>Gets the layout result, computing it when something changed.</summary>

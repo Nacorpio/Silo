@@ -34,8 +34,13 @@ namespace Silo.Validation;
 /// </example>
 public static partial class StylesheetValidator
 {
-    /// <summary>The Pseudo-states that the Controls set.</summary>
-    static readonly string[] States = ["active", "checked", "expanded", "focus", "focus-within", "hover", "open", "selected", "visited"];
+    /// <summary>The Pseudo-states that the Controls declare with <see cref="PseudoStatesAttribute"/>, in order.</summary>
+    static string[] States => [.. Types.Value.Values
+        .SelectMany(t => Chain(t))
+        .SelectMany(t => t.GetCustomAttributes(typeof(PseudoStatesAttribute), inherit: false).Cast<PseudoStatesAttribute>())
+        .SelectMany(a => a.States)
+        .Distinct(StringComparer.Ordinal)
+        .Order(StringComparer.Ordinal)];
 
     /// <summary>The Control types by the name that Selectors use.</summary>
     static readonly Lazy<Dictionary<string, Type>> Types = new(() => FindTypes(typeof(Control).Assembly));
@@ -61,6 +66,15 @@ public static partial class StylesheetValidator
 
         foreach (var (name, type) in FindTypes(assembly))
             types.TryAdd(name, type);
+    }
+
+    /// <summary>Lists a type and its base types up to <see cref="Control"/>, which includes abstract ones such as ToggleButton.</summary>
+    /// <param name="type">The type.</param>
+    /// <returns>The types, most derived first.</returns>
+    static IEnumerable<Type> Chain(Type type)
+    {
+        for (var t = type; t is not null && typeof(Control).IsAssignableFrom(t); t = t.BaseType)
+            yield return t;
     }
 
     /// <summary>Finds the Control types of an assembly and sets up their Styled properties.</summary>
@@ -175,9 +189,11 @@ public static partial class StylesheetValidator
                 issues.Add(new(ValidationSeverity.Warning, "SILO004", message, rule.Span));
             }
 
-            foreach (var state in compound.States.Where(s => !States.Contains(s)))
+            var declared = States;
+
+            foreach (var state in compound.States.Where(s => !declared.Contains(s)))
             {
-                var known = string.Join(", ", States);
+                var known = string.Join(", ", declared);
                 var message = $"No Control sets the Pseudo-state ':{state}'. The known ones are {known}.";
 
                 issues.Add(new(ValidationSeverity.Warning, "SILO005", message, rule.Span));
