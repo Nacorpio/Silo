@@ -34,6 +34,10 @@ _Avoid_: Listener, hit target
 A Control shown in the overlay layer below an anchor Control, such as the list of a ComboBox; it closes on Escape or a press outside it.
 _Avoid_: Dropdown, flyout
 
+**Window scene**:
+The platform-free runtime of one window's content: it owns the overlay layer, pointer routing, focus, tooltips, toasts and animations, takes input as plain method calls and a clock, and renders a display list. A platform window only feeds it events and presents what it renders.
+_Avoid_: Window runtime, host, frame loop
+
 **Class**:
 A free-form label that app code attaches to an Element so Selectors can match it.
 _Avoid_: Tag, style key
