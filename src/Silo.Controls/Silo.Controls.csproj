@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <EmbeddedResource Include="Emoji/emoji.tsv" LogicalName="Silo.Emoji.emoji.tsv" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../Silo.Core/Silo.Core.csproj" />
     <ProjectReference Include="../Silo.Layout/Silo.Layout.csproj" />
     <ProjectReference Include="../Silo.Rendering/Silo.Rendering.csproj" />
