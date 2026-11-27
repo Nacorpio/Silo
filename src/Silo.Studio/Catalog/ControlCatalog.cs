@@ -79,6 +79,7 @@ public static partial class ControlCatalog
         ["Collections"] = ("image", "Thumbnail and card galleries"),
         ["Layout"] = ("layout", "Separators and containers"),
         ["Menus and dialogs"] = ("menu", "Menus, dialogs, tooltips, toasts"),
+        ["Agents"] = ("activity", "Tool calls and agent output"),
     };
 
     /// <summary>The icon that <see cref="Dot"/> creates once.</summary>
@@ -101,6 +102,7 @@ public static partial class ControlCatalog
         .. Collections(),
         .. Layout(),
         .. MenusAndDialogs(),
+        .. Agents(),
     ];
 
     /// <summary>Gets the names of the categories, in order. Each holds the entries of one group of Controls.</summary>

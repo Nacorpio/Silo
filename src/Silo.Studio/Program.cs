@@ -96,7 +96,7 @@ if (customTitleBar)
 
 StyleResolver Resolve()
 {
-    var sheets = new List<Stylesheet>([.. DefaultTheme.Load(view.Variant), QuantityTheme.Load(), StudioStyles.Load()]);
+    var sheets = new List<Stylesheet>([.. DefaultTheme.Load(view.Variant), QuantityTheme.Load(), AgentsTheme.Load(), StudioStyles.Load()]);
 
     try
     {
