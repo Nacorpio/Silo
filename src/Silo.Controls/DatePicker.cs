@@ -28,7 +28,7 @@ namespace Silo;
 /// birthday.SelectedDateChanged += (_, _) => profile.Birthday = birthday.SelectedDate;
 /// </code>
 /// </example>
-public class DatePicker : Control
+public class DatePicker : Control, IPointerHandler
 {
     /// <summary>The room right of the text for the arrow in pixels.</summary>
     const double ArrowSpace = 24;
@@ -191,7 +191,7 @@ public class DatePicker : Control
     /// <summary>Opens the Calendar when it is closed. The pointer router calls this when the pointer goes down on the DatePicker.</summary>
     /// <returns><see langword="true"/> when a new frame is needed.</returns>
     /// <remarks>A press while the Calendar is open never gets here: the overlay layer closes the Calendar first.</remarks>
-    public bool PointerDown() => Open();
+    public bool PointerDown(PointerEvent e) => Open();
 
     /// <inheritdoc/>
     public override bool KeyDown(Key key)

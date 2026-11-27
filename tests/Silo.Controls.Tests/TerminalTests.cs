@@ -220,9 +220,9 @@ public class TerminalTests
         terminal.Clipboard = clipboard;
         terminal.Write("hello world\r\nsecond line");
 
-        terminal.PointerDown(8 + 0, 8 + 2);
-        terminal.PointerDrag(8 + (4 * 7) + 1, 8 + 2);
-        terminal.PointerUp();
+        terminal.PointerDown(new(8 + 0, 8 + 2));
+        terminal.PointerDrag(new(8 + (4 * 7) + 1, 8 + 2));
+        terminal.PointerUp(default);
 
         Assert.True(terminal.HasSelection);
         Assert.Equal("hello", terminal.SelectedText);
@@ -248,8 +248,8 @@ public class TerminalTests
 
         terminal.Write("hello");
         terminal.SelectAll();
-        terminal.PointerDown(10, 10);
-        terminal.PointerUp();
+        terminal.PointerDown(new(10, 10));
+        terminal.PointerUp(default);
 
         Assert.False(terminal.HasSelection);
         Assert.Equal(string.Empty, terminal.SelectedText);
@@ -264,19 +264,19 @@ public class TerminalTests
         terminal.Clock = () => now;
         terminal.Write("run  /usr/bin/ls -la");
 
-        terminal.PointerDown(8 + (10 * 7), 10);
-        terminal.PointerUp();
+        terminal.PointerDown(new(8 + (10 * 7), 10));
+        terminal.PointerUp(default);
 
         now += 200;
 
-        terminal.PointerDown(8 + (10 * 7), 10);
-        terminal.PointerUp();
+        terminal.PointerDown(new(8 + (10 * 7), 10));
+        terminal.PointerUp(default);
 
         Assert.Equal("/usr/bin/ls", terminal.SelectedText);
 
         now += 5000;
 
-        terminal.PointerDown(8 + (10 * 7), 10);
+        terminal.PointerDown(new(8 + (10 * 7), 10));
 
         Assert.False(terminal.HasSelection);
     }

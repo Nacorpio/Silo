@@ -13,7 +13,7 @@ namespace Silo;
 /// <c>slider-track-color</c>, <c>slider-fill-color</c> and <c>slider-thumb-color</c> properties set its colors. Give it a
 /// <c>height</c> (about 24px), since it has no content to size itself from.
 /// </para>
-/// <para>The <see cref="PointerRouter"/> drives it with <see cref="PointerDown"/>, <see cref="PointerMove"/> and <see cref="PointerUp"/>.</para>
+/// <para>The <see cref="PointerRouter"/> drives it with <see cref="PointerDown"/>, <see cref="PointerDrag"/> and <see cref="PointerUp"/>.</para>
 /// </remarks>
 /// <example>
 /// <code language="csharp">
@@ -22,7 +22,7 @@ namespace Silo;
 /// volume.ValueChanged += (_, _) => player.Volume = volume.Value;
 /// </code>
 /// </example>
-public class Slider : Control
+public class Slider : Control, IPointerHandler
 {
     /// <summary>The diameter of the thumb in pixels.</summary>
     const double ThumbSize = 16;
@@ -109,34 +109,35 @@ public class Slider : Control
     }
 
     /// <summary>Starts a drag and moves the thumb to the pointer.</summary>
-    /// <param name="x">The horizontal pointer position relative to the Slider's border box.</param>
+    /// <param name="e">The pointer position relative to the Slider's border box.</param>
     /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
-    public bool PointerDown(double x)
+    public bool PointerDown(PointerEvent e)
     {
         dragging = true;
-        Value = ValueAt(x);
+        Value = ValueAt(e.X);
 
         return SetPseudoState("active", true);
     }
 
     /// <summary>Moves the thumb to the pointer while a drag is going on.</summary>
-    /// <param name="x">The horizontal pointer position relative to the Slider's border box.</param>
+    /// <param name="e">The pointer position relative to the Slider's border box, which can be outside of it.</param>
     /// <returns><see langword="true"/> when the value changed, so a new frame is needed.</returns>
-    public bool PointerMove(double x)
+    public bool PointerDrag(PointerEvent e)
     {
         if (!dragging)
             return false;
 
         var before = value;
 
-        Value = ValueAt(x);
+        Value = ValueAt(e.X);
 
         return before != value;
     }
 
     /// <summary>Ends the drag.</summary>
+    /// <param name="e">The pointer position relative to the Slider's border box, which can be outside of it.</param>
     /// <returns><see langword="true"/> when the state changed, so styles need to be applied again.</returns>
-    public bool PointerUp()
+    public bool PointerUp(PointerEvent e)
     {
         dragging = false;
 

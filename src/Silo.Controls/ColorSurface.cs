@@ -130,20 +130,25 @@ public class ColorSurface : Control, IPointerHandler
     public override bool IsFocusable => true;
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public bool PointerDown(PointerEvent e)
     {
         dragging = true;
 
         Pressed?.Invoke(this, EventArgs.Empty);
 
-        return MoveTo(x, y);
+        return MoveTo(e.X, e.Y);
     }
 
     /// <inheritdoc/>
-    public bool PointerDrag(double x, double y) => dragging && MoveTo(x, y);
+    public bool PointerDrag(PointerEvent e) => dragging && MoveTo(e.X, e.Y);
 
     /// <inheritdoc/>
-    public void PointerUp() => dragging = false;
+    public bool PointerUp(PointerEvent e)
+    {
+        dragging = false;
+
+        return false;
+    }
 
     /// <inheritdoc/>
     public override bool KeyDown(Key key) => KeyDown(key, KeyModifiers.None);

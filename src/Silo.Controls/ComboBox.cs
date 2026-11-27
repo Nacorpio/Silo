@@ -27,7 +27,7 @@ namespace Silo;
 /// size.SelectionChanged += (_, _) => Resize(size.SelectedItem);
 /// </code>
 /// </example>
-public class ComboBox : Control
+public class ComboBox : Control, IPointerHandler
 {
     /// <summary>The room right of the text for the arrow in pixels.</summary>
     const double ArrowSpace = 24;
@@ -152,7 +152,7 @@ public class ComboBox : Control
     /// <summary>Opens the list when it is closed. The pointer router calls this when the pointer goes down on the ComboBox.</summary>
     /// <returns><see langword="true"/> when a new frame is needed.</returns>
     /// <remarks>A press while the list is open never gets here: the overlay layer closes the list first.</remarks>
-    public bool PointerDown() => Open();
+    public bool PointerDown(PointerEvent e) => Open();
 
     /// <inheritdoc/>
     public override bool KeyDown(Key key)

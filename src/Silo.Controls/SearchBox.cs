@@ -31,16 +31,16 @@ public class SearchBox : TextBox
     public SearchBox() => Placeholder = "Search";
 
     /// <inheritdoc/>
-    public override bool PointerDown(double x)
+    public override bool PointerDown(PointerEvent e)
     {
-        if (Text.Length > 0 && x >= Bounds.Width - ClearWidth)
+        if (Text.Length > 0 && e.X >= Bounds.Width - ClearWidth)
         {
             Text = string.Empty;
 
             return true;
         }
 
-        return base.PointerDown(x);
+        return base.PointerDown(e);
     }
 
     /// <inheritdoc/>

@@ -54,7 +54,7 @@ public class LabelTests
     {
         var label = new Label { Text = "Plain" };
 
-        Assert.False(label.PointerDown());
+        Assert.False(label.PointerDown(default));
     }
 
     [Fact]

@@ -23,7 +23,7 @@ namespace Silo;
 /// accent.ColorChanged += (_, _) => theme.Accent = accent.Color;
 /// </code>
 /// </example>
-public class ColorPicker : Control
+public class ColorPicker : Control, IPointerHandler
 {
     /// <summary>The room right of the text for the arrow in pixels.</summary>
     const double ArrowSpace = 24;
@@ -134,7 +134,7 @@ public class ColorPicker : Control
     /// <summary>Opens the panel when it is closed. The pointer router calls this when the pointer goes down on the ColorPicker.</summary>
     /// <returns><see langword="true"/> when a new frame is needed.</returns>
     /// <remarks>A press while the panel is open never gets here: the overlay layer closes the panel first.</remarks>
-    public bool PointerDown() => Open();
+    public bool PointerDown(PointerEvent e) => Open();
 
     /// <inheritdoc/>
     public override bool KeyDown(Key key) => KeyDown(key, KeyModifiers.None);

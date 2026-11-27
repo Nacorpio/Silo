@@ -139,7 +139,7 @@ public class DefaultThemeTests
 
         Assert.Equal(new Color(0x3b, 0x82, 0xf6), slider.GetValue(Slider.FillColorProperty));
 
-        slider.PointerDown(0);
+        slider.PointerDown(new(0, 0));
 
         Assert.Empty(slider.ApplyStyles(Resolver()));
         Assert.Equal(new Color(0x1d, 0x4e, 0xd8), slider.GetValue(Slider.FillColorProperty));

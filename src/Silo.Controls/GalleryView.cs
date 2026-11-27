@@ -38,7 +38,7 @@ namespace Silo;
 /// gallery.ItemActivated += (_, index) => Open(photos[index]);
 /// </code>
 /// </example>
-public class GalleryView : Control, IScrollable
+public class GalleryView : Control, IScrollable, IPointerHandler
 {
     /// <summary>The longest time between two presses on an item that count as a double press, in milliseconds.</summary>
     const long DoublePressMilliseconds = 400;
@@ -287,13 +287,11 @@ public class GalleryView : Control, IScrollable
     }
 
     /// <summary>Handles a press on the gallery: selects, toggles or extends the selection, and activates on a double press.</summary>
-    /// <param name="x">The horizontal position relative to the GalleryView's border box.</param>
-    /// <param name="y">The vertical position relative to the border box.</param>
-    /// <param name="modifiers">The modifier keys held.</param>
+    /// <param name="e">The pointer position relative to the GalleryView's border box, and the modifier keys held.</param>
     /// <returns><see langword="true"/> when the selection changed, so a new frame is needed.</returns>
-    public bool PointerDown(double x, double y, KeyModifiers modifiers)
+    public bool PointerDown(PointerEvent e)
     {
-        var index = IndexAt(x, y);
+        var index = IndexAt(e.X, e.Y);
 
         if (index < 0)
             return false;
@@ -304,7 +302,7 @@ public class GalleryView : Control, IScrollable
 
         lastPress = again ? (-1, 0) : (index, now);
 
-        Pick(index, modifiers);
+        Pick(index, e.Modifiers);
 
         if (again)
             ItemActivated?.Invoke(this, index);

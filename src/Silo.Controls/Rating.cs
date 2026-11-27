@@ -109,13 +109,13 @@ public class Rating : Control, IPointerHandler
     public double DisplayValue => preview ?? value;
 
     /// <summary>Shows the value under the pointer. The pointer router calls it when the pointer moves over the Rating.</summary>
-    /// <param name="x">The horizontal position relative to the Rating's border box.</param>
+    /// <param name="e">The pointer position relative to the Rating's border box.</param>
     /// <returns><see langword="true"/> when the shown value changed, so a new frame is needed.</returns>
-    public bool PointerMove(double x)
+    public bool PointerMove(PointerEvent e)
     {
         var before = preview;
 
-        preview = IsReadOnly ? null : ValueAt(x);
+        preview = IsReadOnly ? null : ValueAt(e.X);
 
         return before != preview;
     }
@@ -132,25 +132,17 @@ public class Rating : Control, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public bool PointerDown(PointerEvent e)
     {
         if (IsReadOnly)
             return false;
 
         var before = value;
-        var picked = ValueAt(x);
+        var picked = ValueAt(e.X);
 
         Value = AllowClear && picked == value ? 0 : picked;
 
         return before != value;
-    }
-
-    /// <inheritdoc/>
-    public bool PointerDrag(double x, double y) => false;
-
-    /// <inheritdoc/>
-    public void PointerUp()
-    {
     }
 
     /// <inheritdoc/>

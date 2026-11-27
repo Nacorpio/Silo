@@ -50,13 +50,13 @@ public class RangeSliderTests
         var slider = Setup(new RangeSlider { Minimum = 0, Maximum = 100, Lower = 20, Upper = 80 });
 
         // The track runs from x = 8 to x = 208, so x = 108 is the value 50.
-        slider.PointerDown(188, 10);
+        slider.PointerDown(new(188, 10));
 
         Assert.Equal(90, slider.Upper);
         Assert.Equal(20, slider.Lower);
 
-        slider.PointerUp();
-        slider.PointerDown(28, 10);
+        slider.PointerUp(default);
+        slider.PointerDown(new(28, 10));
 
         Assert.Equal(10, slider.Lower);
     }
@@ -66,8 +66,8 @@ public class RangeSliderTests
     {
         var slider = Setup(new RangeSlider { Minimum = 0, Maximum = 100, Lower = 20, Upper = 80 });
 
-        slider.PointerDown(8 + 40, 10);
-        slider.PointerDrag(8 + 190, 10);
+        slider.PointerDown(new(8 + 40, 10));
+        slider.PointerDrag(new(8 + 190, 10));
 
         Assert.Equal(80, slider.Lower);
         Assert.Equal(80, slider.Upper);

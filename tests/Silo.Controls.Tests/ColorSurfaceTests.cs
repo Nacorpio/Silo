@@ -26,15 +26,15 @@ public class ColorSurfaceTests
 
         square.Changed += (_, _) => raised++;
 
-        Assert.True(square.PointerDown(50, 25));
+        Assert.True(square.PointerDown(new(50, 25)));
         Assert.Equal((0.5, 0.5), (square.X, square.Y));
 
-        Assert.True(square.PointerDrag(500, -20));
+        Assert.True(square.PointerDrag(new(500, -20)));
         Assert.Equal((1.0, 0.0), (square.X, square.Y));
 
-        square.PointerUp();
+        square.PointerUp(default);
 
-        Assert.False(square.PointerDrag(10, 10));
+        Assert.False(square.PointerDrag(new(10, 10)));
         Assert.Equal(2, raised);
     }
 
@@ -43,7 +43,7 @@ public class ColorSurfaceTests
     {
         var bar = Create(ColorSurfaceKind.Hue);
 
-        bar.PointerDown(25, 40);
+        bar.PointerDown(new(25, 40));
 
         Assert.Equal((0.25, 0.0), (bar.X, bar.Y));
     }

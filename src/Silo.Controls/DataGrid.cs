@@ -264,14 +264,13 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     }
 
     /// <summary>Highlights the row under the pointer.</summary>
-    /// <param name="x">The horizontal pointer position relative to the grid's border box.</param>
-    /// <param name="y">The vertical pointer position relative to the grid's border box.</param>
+    /// <param name="e">The pointer position relative to the grid's border box.</param>
     /// <returns><see langword="true"/> when the highlighted row changed, so a new frame is needed.</returns>
-    public bool PointerMove(double x, double y)
+    public bool PointerMove(PointerEvent e)
     {
         var before = hoveredIndex;
 
-        hoveredIndex = RowAt(y);
+        hoveredIndex = RowAt(e.Y);
 
         return before != hoveredIndex;
     }
@@ -288,12 +287,12 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public bool PointerDown(PointerEvent e)
     {
-        if (y < Viewport.Y + HeaderHeight)
-            return PressHeader(x);
+        if (e.Y < Viewport.Y + HeaderHeight)
+            return PressHeader(e.X);
 
-        var index = RowAt(y);
+        var index = RowAt(e.Y);
         var before = selectedIndex;
         var now = TimeProvider.GetUtcNow();
         var again = index >= 0 && index == lastPress.Index && (now - lastPress.At).TotalMilliseconds <= DoublePressTime;
@@ -309,12 +308,12 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public bool PointerDrag(double x, double y)
+    public bool PointerDrag(PointerEvent e)
     {
         if (resizing is not { } column)
             return false;
 
-        var width = Math.Max(column.MinWidth, resizeStart.Width + (x - resizeStart.X));
+        var width = Math.Max(column.MinWidth, resizeStart.Width + (e.X - resizeStart.X));
 
         if (width == column.Width && column.Star <= 0)
             return false;
@@ -325,7 +324,12 @@ public class DataGrid : Control, IScrollable, IPointerHandler
     }
 
     /// <inheritdoc/>
-    public void PointerUp() => resizing = null;
+    public bool PointerUp(PointerEvent e)
+    {
+        resizing = null;
+
+        return false;
+    }
 
     /// <inheritdoc/>
     public override bool KeyDown(Key key)

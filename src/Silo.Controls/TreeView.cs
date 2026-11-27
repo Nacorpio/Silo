@@ -27,7 +27,7 @@ namespace Silo;
 /// tree.SelectedNodeChanged += (_, node) => Show(node?.Tag);
 /// </code>
 /// </example>
-public class TreeView : ListView, IPointerHandler
+public class TreeView : ListView
 {
     /// <summary>The width of the triangle area in front of a node in pixels.</summary>
     const double ChevronSpace = 16;
@@ -124,29 +124,31 @@ public class TreeView : ListView, IPointerHandler
     public void CollapseAll() => SetAll(false);
 
     /// <inheritdoc/>
-    public bool PointerDown(double x, double y)
+    public override bool PointerDown(PointerEvent e)
     {
-        var row = (int)Math.Floor((y - Viewport.Y + Offset) / RowHeight);
+        var toggled = ToggleChevron(e);
+
+        return base.PointerDown(e) | toggled;
+    }
+
+    /// <summary>Expands or collapses the node whose chevron is under the pointer.</summary>
+    /// <param name="e">The pointer position relative to the TreeView's border box.</param>
+    /// <returns><see langword="true"/> when a node was expanded or collapsed.</returns>
+    bool ToggleChevron(PointerEvent e)
+    {
+        var row = (int)Math.Floor((e.Y - Viewport.Y + Offset) / RowHeight);
 
         if (row < 0 || row >= visible.Count || visible[row].Children.Count == 0)
             return false;
 
         var left = ChevronLeft(row);
 
-        if (x < left || x >= left + ChevronSpace)
+        if (e.X < left || e.X >= left + ChevronSpace)
             return false;
 
         visible[row].IsExpanded = !visible[row].IsExpanded;
 
         return true;
-    }
-
-    /// <inheritdoc/>
-    public bool PointerDrag(double x, double y) => false;
-
-    /// <inheritdoc/>
-    public void PointerUp()
-    {
     }
 
     /// <inheritdoc/>

@@ -36,17 +36,11 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     /// <summary>The Button that the pointer went down on and has not come up from yet.</summary>
     Button? pressed;
 
-    /// <summary>The Slider that is being dragged.</summary>
-    Slider? dragged;
+    /// <summary>The pointer handler that the pointer is over, so that it can be told when the pointer leaves.</summary>
+    Control? hoveredHandler;
 
-    /// <summary>The DataGrid whose row the pointer is over, so that it can be told when the pointer leaves.</summary>
-    DataGrid? hoveredGrid;
-
-    /// <summary>The Rating that the pointer is over, so that it can be told when the pointer leaves.</summary>
-    Rating? hoveredRating;
-
-    /// <summary>The Control with its own pointer handling that the button was pressed on, while the button is held.</summary>
-    Control? handling;
+    /// <summary>The pointer handler that the button was pressed on, while the button is held.</summary>
+    Control? capture;
 
     /// <summary>Gets or sets the modifier keys that are held. The platform sets it before a press, so that Ctrl-click and Shift-click work.</summary>
     public KeyModifiers Modifiers { get; set; }
@@ -60,14 +54,7 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
     public bool Move(double x, double y)
     {
-        var moved = dragged?.PointerMove(dragged.ToLocal(x, y).X) ?? false;
-
-        if (handling is IPointerHandler handler)
-        {
-            var (hx, hy) = handling.ToLocal(x, y);
-
-            moved |= handler.PointerDrag(hx, hy);
-        }
+        var moved = Drag(x, y);
 
         var hit = Hit(x, y);
         var changed = SetHovered(overlays?.IsBackdrop(hit) == true ? null : hit) | moved;
@@ -75,44 +62,16 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         if (overlays?.IsBackdrop(hit) == true && TitleBehindBackdrop(x, y) is { Bar: { IsOpen: true } bar } title)
             changed |= bar.Open(title);
 
-        if (Find<ListView>(hovered) is { HoverSelects: true } list)
-            changed |= list.PointerMove(list.ToLocal(x, y).Y);
-
-        var grid = Find<DataGrid>(hovered);
-
-        if (hoveredGrid != grid)
-            changed |= hoveredGrid?.PointerLeave() ?? false;
-
-        hoveredGrid = grid;
-
-        if (grid is not null)
-        {
-            var (gx, gy) = grid.ToLocal(x, y);
-
-            changed |= grid.PointerMove(gx, gy);
-        }
-
-        var rating = Find<Rating>(hovered);
-
-        if (hoveredRating != rating)
-            changed |= hoveredRating?.PointerLeave() ?? false;
-
-        hoveredRating = rating;
-
-        if (rating is not null)
-            changed |= rating.PointerMove(rating.ToLocal(x, y).X);
-
-        return changed;
+        return MoveHandler(x, y) | changed;
     }
 
     /// <summary>Tells the router that the pointer left the window.</summary>
     /// <returns><see langword="true"/> when a Pseudo-state changed.</returns>
     public bool Leave()
     {
-        var changed = (hoveredGrid?.PointerLeave() ?? false) | (hoveredRating?.PointerLeave() ?? false);
+        var changed = LeaveHandler();
 
-        hoveredGrid = null;
-        hoveredRating = null;
+        hoveredHandler = null;
 
         return SetHovered(null) | changed;
     }
@@ -136,47 +95,10 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         }
 
         pressed = Find<Button>(hovered);
-        dragged = Find<Slider>(hovered);
+        capture = FindHandler(hovered);
 
-        changed |= dragged?.PointerDown(dragged.ToLocal(x, y).X) ?? false;
-
-        if (Find<TextBox>(hovered) is { } box)
-            changed |= box.PointerDown(box.ToLocal(x, y).X);
-
-        handling = null;
-
-        for (var c = hovered; c is not null && handling is null; c = c.Parent as Control)
-            if (c is IPointerHandler)
-                handling = c;
-
-        if (handling is IPointerHandler handler)
-        {
-            var (hx, hy) = handling.ToLocal(x, y);
-
-            changed |= handler.PointerDown(hx, hy);
-        }
-
-        if (Find<Label>(hovered) is { } label)
-            changed |= label.PointerDown();
-
-        if (Find<ComboBox>(hovered) is { } combo)
-            changed |= combo.PointerDown();
-
-        if (Find<DatePicker>(hovered) is { } picker)
-            changed |= picker.PointerDown();
-
-        if (Find<ColorPicker>(hovered) is { } colorPicker)
-            changed |= colorPicker.PointerDown();
-
-        if (Find<ListView>(hovered) is { } list)
-            changed |= list.PointerDown(list.ToLocal(x, y).Y);
-
-        if (Find<GalleryView>(hovered) is { } gallery)
-        {
-            var (gx, gy) = gallery.ToLocal(x, y);
-
-            changed |= gallery.PointerDown(gx, gy, Modifiers);
-        }
+        if (capture is not null)
+            changed |= Handler(capture).PointerDown(Local(capture, x, y));
 
         return (pressed?.PointerDown() ?? false) | changed;
     }
@@ -209,15 +131,13 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
         var changed = Move(x, y);
 
         var button = pressed;
-        var slider = dragged;
-
-        (handling as IPointerHandler)?.PointerUp();
+        var held = capture;
 
         pressed = null;
-        dragged = null;
-        handling = null;
+        capture = null;
 
-        changed |= slider?.PointerUp() ?? false;
+        if (held is not null)
+            changed |= Handler(held).PointerUp(Local(held, x, y));
 
         return (button?.PointerUp(Find<Button>(hovered) == button) ?? false) | changed;
     }
@@ -268,6 +188,65 @@ public sealed class PointerRouter(Control root, OverlayLayer? overlays = null)
 
         return changed;
     }
+
+    /// <summary>Gives a drag to the handler that holds the pointer.</summary>
+    /// <param name="x">The horizontal position, relative to the root Control.</param>
+    /// <param name="y">The vertical position, relative to the root Control.</param>
+    /// <returns><see langword="true"/> when the handler changed.</returns>
+    bool Drag(double x, double y) => capture is not null && Handler(capture).PointerDrag(Local(capture, x, y));
+
+    /// <summary>Tells the handler under the pointer about the move, and the one that was under it before that it was left.</summary>
+    /// <param name="x">The horizontal position, relative to the root Control.</param>
+    /// <param name="y">The vertical position, relative to the root Control.</param>
+    /// <returns><see langword="true"/> when a handler changed.</returns>
+    bool MoveHandler(double x, double y)
+    {
+        var handler = FindHandler(hovered);
+        var changed = false;
+
+        if (handler != hoveredHandler)
+            changed |= LeaveHandler();
+
+        hoveredHandler = handler;
+
+        if (handler is null)
+            return changed;
+
+        return Handler(handler).PointerMove(Local(handler, x, y)) | changed;
+    }
+
+    /// <summary>Tells the handler that was under the pointer that the pointer left it.</summary>
+    /// <returns><see langword="true"/> when the handler changed.</returns>
+    bool LeaveHandler() => hoveredHandler is not null && Handler(hoveredHandler).PointerLeave();
+
+    /// <summary>Makes the event that a handler gets for a pointer position.</summary>
+    /// <param name="handler">The handler.</param>
+    /// <param name="x">The horizontal position, relative to the root Control.</param>
+    /// <param name="y">The vertical position, relative to the root Control.</param>
+    /// <returns>The position relative to the handler, with the modifier keys that are held.</returns>
+    PointerEvent Local(Control handler, double x, double y)
+    {
+        var (left, top) = handler.ToLocal(x, y);
+
+        return new PointerEvent(left, top, Modifiers);
+    }
+
+    /// <summary>Finds the innermost Control that handles the pointer itself.</summary>
+    /// <param name="control">The Control to start at, which is searched first, and then its ancestors.</param>
+    /// <returns>The Control, or <see langword="null"/> when there is none.</returns>
+    static Control? FindHandler(Control? control)
+    {
+        for (var c = control; c is not null; c = c.Parent as Control)
+            if (c is IPointerHandler)
+                return c;
+
+        return null;
+    }
+
+    /// <summary>Views a Control that <see cref="FindHandler"/> found as its handler.</summary>
+    /// <param name="control">The Control.</param>
+    /// <returns>The same object.</returns>
+    static IPointerHandler Handler(Control control) => (IPointerHandler)control;
 
     /// <summary>Finds the first Control of a type among a Control and its ancestors.</summary>
     /// <typeparam name="T">The type to look for.</typeparam>
