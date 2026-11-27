@@ -17,6 +17,8 @@ public static partial class ControlCatalog
         new("RangeSlider", "Inputs", () => new RangeSlider { Minimum = 0, Maximum = 100, Lower = 20, Upper = 70 }),
         new("TokenBox", "Inputs", CreateTokenBox),
         new("FormField", "Inputs", CreateFormFields),
+        new("EmojiPicker", "Inputs", () => new EmojiPicker { SelectedEmoji = "\U0001F600" }),
+        new("EmojiPanel", "Inputs", () => new EmojiPanel { Recent = ["\U0001F44D", "\U0001F602", "\u2764\uFE0F"] }),
     ];
 
     /// <summary>Creates a RadioGroup with three options, the second on.</summary>

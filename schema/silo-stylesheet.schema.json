@@ -120,6 +120,14 @@
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by TextArea, TextBox.",
           "$ref": "#/$defs/scalar"
         },
+        "cell-hover-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by EmojiGrid.",
+          "$ref": "#/$defs/scalar"
+        },
+        "cell-size": {
+          "description": "A number. Declared by EmojiGrid.",
+          "$ref": "#/$defs/scalar"
+        },
         "check-border-color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by CheckedListBox.",
           "$ref": "#/$defs/scalar"
@@ -134,6 +142,10 @@
         },
         "color": {
           "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by Control.",
+          "$ref": "#/$defs/scalar"
+        },
+        "cursor-color": {
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by EmojiGrid.",
           "$ref": "#/$defs/scalar"
         },
         "disabled-text-color": {
@@ -158,6 +170,10 @@
         },
         "divider-size": {
           "description": "A number. Declared by SplitPane.",
+          "$ref": "#/$defs/scalar"
+        },
+        "emoji-font-family": {
+          "description": "Text. Declared by EmojiGrid, EmojiPicker.",
           "$ref": "#/$defs/scalar"
         },
         "flex-basis": {
@@ -223,7 +239,7 @@
           "$ref": "#/$defs/scalar"
         },
         "header-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DataGrid, EmojiGrid.",
           "$ref": "#/$defs/scalar"
         },
         "header-height": {
@@ -341,7 +357,7 @@
           "$ref": "#/$defs/scalar"
         },
         "placeholder-color": {
-          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DatePicker, TextBox.",
+          "description": "A color such as #3b82f6 or oklch(0.6 0.15 250). Declared by DatePicker, EmojiPicker, TextBox.",
           "$ref": "#/$defs/scalar"
         },
         "rating-color": {

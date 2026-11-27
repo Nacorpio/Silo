@@ -101,6 +101,7 @@ public static class StudioStyles
             ".cell ComboBox": { "width": "112px" },
             ".cell ColorPicker": { "width": "130px" },
             ".cell ColorPanel": { "flex-shrink": "0" },
+            ".cell EmojiPanel": { "flex-shrink": "0" },
             ".cell .toasts": { "flex-direction": "column", "gap": "6px", "width": "330px", "height": "176px", "flex-shrink": "0" },
             ".cell .stack": { "flex-direction": "column", "gap": "4px" },
             ".cell .badges": { "flex-direction": "row", "gap": "6px", "align-items": "center", "width": "360px", "flex-shrink": "0" },
