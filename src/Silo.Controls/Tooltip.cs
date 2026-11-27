@@ -279,7 +279,7 @@ public class Tooltip : Control
 
             var style = CurrentTextStyle();
 
-            return new Size(lines.Max(line => Measurer().Measure(line, style).Width), lines.Count * Measurer().Measure("M", style).Height);
+            return new Size(lines.Max(line => Measurer().Measure(line, style).Width), lines.Count * Measurer().LineHeight(style));
         }
 
         /// <inheritdoc/>
@@ -290,7 +290,7 @@ public class Tooltip : Control
 
             var content = ContentBox(bounds);
             var style = CurrentTextStyle();
-            var height = Measurer().Measure("M", style).Height;
+            var height = Measurer().LineHeight(style);
             var y = content.Y;
 
             foreach (var line in Wrap())

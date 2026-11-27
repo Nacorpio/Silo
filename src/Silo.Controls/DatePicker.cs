@@ -214,7 +214,7 @@ public class DatePicker : Control, IPointerHandler
         var sample = new DateOnly(2000, 12, 28).ToString(format, culture);
         var width = Math.Max(measurer.Measure(sample, style).Width, measurer.Measure(Placeholder, style).Width);
 
-        return new Size(width + DropDownArrow.Space, measurer.Measure("Ag", style).Height);
+        return new Size(width + DropDownArrow.Space, measurer.LineHeight(style));
     }
 
     /// <inheritdoc/>
@@ -226,7 +226,7 @@ public class DatePicker : Control, IPointerHandler
         var style = CurrentTextStyle();
         var text = Text;
         var color = text.Length == 0 ? GetValue(PlaceholderColorProperty) : GetValue(ColorProperty);
-        var y = content.Y + Math.Max(0, content.Height - Measurer().Measure("Ag", style).Height) / 2;
+        var y = content.Y + Math.Max(0, content.Height - Measurer().LineHeight(style)) / 2;
 
         context.Save();
         context.ClipRect(new Rect(content.X, content.Y, Math.Max(0, content.Width - DropDownArrow.Space), content.Height));

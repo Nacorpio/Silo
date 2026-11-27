@@ -57,6 +57,7 @@ public class TextBox : Control, IPointerHandler
 
     /// <summary>How far the text is scrolled to the left when it was last drawn, in pixels.</summary>
     double scroll;
+    TextLayout? cachedLayout;
 
 
     /// <summary>
@@ -164,9 +165,9 @@ public class TextBox : Control, IPointerHandler
     /// <inheritdoc/>
     protected override Size MeasureContent(double? availableWidth)
     {
-        var line = Measurer().Measure("Mg", CurrentTextStyle());
+        var layout = Layout();
 
-        return new Size(Math.Max(MinimumWidth, WidthOf(buffer.Text)), line.Height);
+        return new Size(Math.Max(MinimumWidth, layout.Width), layout.LineHeight);
     }
 
     /// <inheritdoc/>
@@ -176,9 +177,10 @@ public class TextBox : Control, IPointerHandler
 
         var content = ContentBox(bounds);
         var style = CurrentTextStyle();
-        var y = content.Y + Math.Max(0, content.Height - Measurer().Measure("Mg", style).Height) / 2;
+        var layout = Layout();
+        var y = content.Y + Math.Max(0, content.Height - layout.LineHeight) / 2;
         var text = buffer.Text;
-        var caretX = WidthOf(text[..buffer.Caret]);
+        var caretX = layout.WidthTo(buffer.Caret);
 
         scroll = Math.Max(0, caretX - content.Width + 1);
 
@@ -187,8 +189,8 @@ public class TextBox : Control, IPointerHandler
 
         if (buffer.HasSelection)
         {
-            var from = WidthOf(text[..buffer.SelectionStart]);
-            var to = WidthOf(text[..buffer.SelectionEnd]);
+            var from = layout.WidthTo(buffer.SelectionStart);
+            var to = layout.WidthTo(buffer.SelectionEnd);
 
             context.FillRect(new Rect(content.X + from - scroll, y, to - from, style.Size * 1.2), GetValue(SelectionColorProperty));
         }
@@ -319,22 +321,8 @@ public class TextBox : Control, IPointerHandler
     int OffsetAt(double x)
     {
         var target = x - ContentBox(new Rect(0, 0, Bounds.Width, Bounds.Height)).X + scroll;
-        var text = buffer.Text;
-        var best = 0;
-        var bestDistance = double.MaxValue;
 
-        for (var i = 0; i <= text.Length; i++)
-        {
-            var distance = Math.Abs(WidthOf(text[..i]) - target);
-
-            if (distance >= bestDistance)
-                continue;
-
-            best = i;
-            bestDistance = distance;
-        }
-
-        return best;
+        return Layout().IndexAt(target);
     }
 
     /// <summary>Raises <see cref="TextChanged"/> when the buffer holds another text than the one last reported.</summary>
@@ -348,9 +336,17 @@ public class TextBox : Control, IPointerHandler
         TextChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>Measures the width of a piece of text.</summary>
-    /// <param name="piece">The text.</param>
-    /// <returns>The width in pixels.</returns>
-    double WidthOf(string piece) =>
-        piece.Length == 0 ? 0 : Measurer().Measure(Display(piece), CurrentTextStyle()).Width;
+    /// <summary>Gets the layout of the text as it is shown, measured once for as long as the text and the font stay the same.</summary>
+    /// <returns>The layout.</returns>
+    TextLayout Layout()
+    {
+        var measurer = Measurer();
+        var style = CurrentTextStyle();
+        var shown = Display(buffer.Text);
+
+        if (cachedLayout is null || !cachedLayout.IsFor(measurer, shown, style))
+            cachedLayout = new TextLayout(measurer, shown, style);
+
+        return cachedLayout;
+    }
 }

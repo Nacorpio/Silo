@@ -281,4 +281,41 @@ public class SkiaRendererTests
 
         Assert.Equal(direct, listed);
     }
+
+    [Fact]
+    public void Prefix_widths_agree_with_measuring_each_prefix()
+    {
+        var measurer = new SkiaTextMeasurer();
+        var style = new TextStyle("sans-serif", 14);
+        var text = "Hello, world";
+        var widths = measurer.PrefixWidths(text, style);
+
+        Assert.Equal(text.Length + 1, widths.Length);
+        Assert.Equal(0, widths[0]);
+
+        for (var i = 1; i <= text.Length; i++)
+            Assert.Equal(measurer.Measure(text[..i], style).Width, widths[i], 0.01);
+    }
+
+    [Fact]
+    public void A_surrogate_pair_is_one_glyph_and_its_halves_share_a_width()
+    {
+        var measurer = new SkiaTextMeasurer();
+        var style = new TextStyle("sans-serif", 14);
+        var widths = measurer.PrefixWidths("a\U0001F600b", style);
+
+        Assert.Equal(5, widths.Length);
+        Assert.Equal(widths[2], widths[3]);
+        Assert.True(widths[4] >= widths[3]);
+    }
+
+    [Fact]
+    public void The_line_height_does_not_depend_on_the_text()
+    {
+        var measurer = new SkiaTextMeasurer();
+        var style = new TextStyle("sans-serif", 14);
+
+        Assert.Equal(measurer.Measure("Mg", style).Height, measurer.LineHeight(style));
+        Assert.Equal(measurer.Measure("", style).Height, measurer.LineHeight(style));
+    }
 }

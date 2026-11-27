@@ -275,9 +275,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// <inheritdoc/>
     protected override Size MeasureContent(double? availableWidth)
     {
-        var line = Measurer().Measure("Mg", CurrentTextStyle());
-
-        return new Size(MinimumWidth, line.Height * MinimumLines);
+        return new Size(MinimumWidth, Measurer().LineHeight(CurrentTextStyle()) * MinimumLines);
     }
 
     /// <inheritdoc/>
@@ -288,7 +286,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
         var content = ContentBox(bounds);
         var style = CurrentTextStyle();
         var measurer = Measurer();
-        var height = measurer.Measure("Mg", style).Height;
+        var height = measurer.LineHeight(style);
         var gutter = GutterWidth(measurer, style);
         var text = new Rect(content.X + gutter, content.Y, Math.Max(0, content.Width - gutter), content.Height);
 
@@ -380,8 +378,9 @@ public class TextArea : Control, IScrollable, IPointerHandler
             return;
 
         var text = buffer.GetLine(line);
-        var left = Width(measurer, style, text[..(from - start)]);
-        var right = Width(measurer, style, text[..(Math.Min(to, end) - start)]);
+        var layout = new TextLayout(measurer, text, style);
+        var left = layout.WidthTo(from - start);
+        var right = layout.WidthTo(Math.Min(to, end) - start);
 
         if (to > end)
             right += Width(measurer, style, " ");
@@ -423,7 +422,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
 
         scroll.EnsureVisible(top, lineHeight);
 
-        var caretX = Width(measurer, style, buffer.GetLine(buffer.Line)[..buffer.Column]);
+        var caretX = new TextLayout(measurer, buffer.GetLine(buffer.Line), style).WidthTo(buffer.Column);
 
         if (caretX < scrollX)
             scrollX = caretX;
@@ -444,19 +443,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
         var line = Math.Clamp((int)Math.Floor((y - content.Y + scroll.Offset) / lineHeight), 0, buffer.LineCount - 1);
         var target = x - content.X - GutterWidth(measurer, style) + scrollX;
         var text = buffer.GetLine(line);
-        var best = 0;
-        var bestDistance = double.MaxValue;
-
-        for (var i = 0; i <= text.Length; i++)
-        {
-            var distance = Math.Abs(Width(measurer, style, text[..i]) - target);
-
-            if (distance >= bestDistance)
-                continue;
-
-            best = i;
-            bestDistance = distance;
-        }
+        var best = new TextLayout(measurer, text, style).IndexAt(target);
 
         return buffer.LineStart(line) + best;
     }

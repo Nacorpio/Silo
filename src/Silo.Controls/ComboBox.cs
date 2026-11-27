@@ -190,7 +190,7 @@ public class ComboBox : Control, IPointerHandler
         var measurer = Measurer();
         var width = items.Select(item => measurer.Measure(item, style).Width).DefaultIfEmpty(0).Max();
 
-        return new Size(width + DropDownArrow.Space, measurer.Measure("Ag", style).Height);
+        return new Size(width + DropDownArrow.Space, measurer.LineHeight(style));
     }
 
     /// <inheritdoc/>
@@ -202,7 +202,7 @@ public class ComboBox : Control, IPointerHandler
         var style = CurrentTextStyle();
         var color = GetValue(ColorProperty);
         var text = SelectedItem ?? string.Empty;
-        var y = content.Y + Math.Max(0, content.Height - Measurer().Measure("Ag", style).Height) / 2;
+        var y = content.Y + Math.Max(0, content.Height - Measurer().LineHeight(style)) / 2;
 
         context.Save();
         context.ClipRect(new Rect(content.X, content.Y, Math.Max(0, content.Width - DropDownArrow.Space), content.Height));
