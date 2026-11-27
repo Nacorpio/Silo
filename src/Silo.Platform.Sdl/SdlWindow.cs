@@ -368,6 +368,7 @@ public sealed unsafe class SdlWindow : IDisposable
         SDL_Keycode.SDLK_PAGEUP => Key.PageUp,
         SDL_Keycode.SDLK_PAGEDOWN => Key.PageDown,
         >= SDL_Keycode.SDLK_A and <= SDL_Keycode.SDLK_Z => Key.A + (int)(code - SDL_Keycode.SDLK_A),
+        >= SDL_Keycode.SDLK_0 and <= SDL_Keycode.SDLK_9 => Key.Digit0 + (int)(code - SDL_Keycode.SDLK_0),
 
         _ => Key.Unknown,
     };

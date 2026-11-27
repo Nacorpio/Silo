@@ -180,15 +180,16 @@ public class ReviewTests
     }
 
     [Fact]
-    public void Show_this_on_a_question_switches_the_sample_and_the_panel_records_answers()
+    public void Moving_to_a_question_switches_the_sample_and_the_panel_records_answers()
     {
         var view = new ReviewView(ReviewMode.Load("ToolCallCard", null));
-        var show = Find<Box>(view.Panel, "question-status").Children.OfType<Button>().Single(b => b.HasClass("show"));
+        var statusStep = view.Panel.Document.Questions.ToList().FindIndex(q => q.Id == "status");
 
-        show.PointerDown();
-        show.PointerUp(true);
+        view.Panel.GoTo(statusStep);
 
         Assert.Equal("Running", view.CurrentVariant);
+
+        view.Panel.GoTo(0);
 
         var rating = Find<Box>(view.Panel, "question-look").Children.OfType<Rating>().Single();
 
@@ -200,6 +201,8 @@ public class ReviewTests
 
         Assert.Null(view.Answers.Get("look"));
 
+        view.Panel.GoTo(view.Panel.SummaryStep);
+
         var comment = Find<TextArea>(view.Panel, "comment-text");
 
         comment.TextInput("note");
@@ -208,37 +211,117 @@ public class ReviewTests
     }
 
     [Fact]
-    public void Submit_raises_Submitted_on_the_panel_and_the_view()
+    public void The_wizard_shows_one_question_at_a_time_and_skipped_and_answered_steps_are_marked()
     {
-        var view = new ReviewView(ReviewMode.Load("ToolCallTimeline", null));
-        var raised = 0;
+        var view = new ReviewView(ReviewMode.Load("ToolCallCard", null));
+        var panel = view.Panel;
+        var count = panel.Document.Questions.Count;
 
-        view.Submitted += (_, _) => raised++;
+        Assert.Equal(0, panel.Step);
+        Assert.DoesNotContain(panel.BackButton, panel.Children.SelectMany(c => c.Children));
 
-        view.Panel.SubmitButton.PointerDown();
-        view.Panel.SubmitButton.PointerUp(true);
+        panel.Next();
 
-        Assert.Equal(1, raised);
+        Assert.Equal(1, panel.Step);
+
+        var dots = Find<Box>(panel, "review-steps").Children.OfType<Button>().ToList();
+
+        Assert.Equal(count + 1, dots.Count);
+        Assert.True(dots[1].HasClass("current"));
+        Assert.True(dots[0].HasClass("skipped"));
+
+        panel.GoTo(0);
+        Find<Box>(panel, "question-look").Children.OfType<Rating>().Single().Value = 3;
+        panel.GoTo(1);
+
+        Assert.True(Find<Box>(panel, "review-steps").Children.OfType<Button>().First().HasClass("answered"));
+
+        panel.GoTo(99);
+
+        Assert.Equal(1, panel.Step);
+
+        panel.GoTo(panel.SummaryStep);
+
+        Assert.True(panel.IsSummary);
+        Assert.Null(panel.Current);
+        Assert.Contains(panel.SubmitButton, Find<Box>(panel, "review-summary").Children);
     }
 
     [Fact]
-    public void Ticking_the_redo_box_sets_the_verdict_and_changes_the_Submit_text()
+    public void Keys_answer_the_question_and_Enter_goes_on_only_once_it_has_an_answer()
     {
-        var view = new ReviewView(ReviewMode.Load("ToolCallCard", null));
+        var view = new ReviewView(ReviewMode.Load("ChatInput", null));
+        var panel = view.Panel;
+        var yesno = panel.Document.Questions.ToList().FindIndex(q => q.Kind == ReviewQuestionKind.YesNo);
 
-        Assert.False(view.Answers.Redo);
-        Assert.Contains("\"verdict\": \"keep\"", view.Answers.ToJson(DateTimeOffset.UnixEpoch));
+        panel.GoTo(yesno);
 
-        view.Panel.RedoBox.IsChecked = true;
+        var id = panel.Document.Questions[yesno].Id;
 
-        Assert.True(view.Answers.Redo);
-        Assert.Equal("Submit and redo", view.Panel.SubmitButton.Text);
-        Assert.Contains("\"verdict\": \"redo\"", view.Answers.ToJson(DateTimeOffset.UnixEpoch));
+        panel.Press(Key.Enter);
 
-        view.Panel.RedoBox.IsChecked = false;
+        Assert.Equal(yesno, panel.Step);
 
-        Assert.False(view.Answers.Redo);
-        Assert.Equal("Submit review", view.Panel.SubmitButton.Text);
+        panel.Press(Key.N);
+
+        Assert.Equal("No", view.Answers.Get(id));
+
+        panel.Press(Key.Y);
+
+        Assert.Equal("Yes", view.Answers.Get(id));
+
+        Assert.True(panel.Press(Key.Enter));
+        Assert.Equal(yesno + 1, panel.Step);
+
+        Assert.True(panel.Press(Key.Backspace));
+        Assert.Equal(yesno, panel.Step);
+
+        var rating = panel.Document.Questions.ToList().FindIndex(q => q.Kind == ReviewQuestionKind.Rating);
+
+        panel.GoTo(rating);
+        panel.Press(Key.Digit4);
+
+        Assert.Equal("4", view.Answers.Get(panel.Document.Questions[rating].Id));
+    }
+
+    [Fact]
+    public void History_gives_the_round_and_what_was_said_last_time()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), "silo-review-test-" + Guid.NewGuid().ToString("N"));
+
+        Assert.Equal(1, ReviewHistory.Load(folder, "A", "abc1234 Subject").Round);
+
+        var first = new ReviewAnswers("A");
+
+        first.Set("q", "No", "broken");
+        first.Save(folder, new DateTimeOffset(2026, 11, 27, 18, 0, 0, TimeSpan.Zero));
+
+        var history = ReviewHistory.Load(folder, "A", "abc1234 Subject");
+
+        Assert.Equal(2, history.Round);
+        Assert.Equal("No: broken", history.Said("q"));
+        Assert.Null(history.Said("other"));
+        Assert.Equal(1, ReviewHistory.Load(folder, "B", null).Round);
+
+        Directory.Delete(folder, recursive: true);
+    }
+
+    [Fact]
+    public void The_step_shows_what_was_said_last_time()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), "silo-review-test-" + Guid.NewGuid().ToString("N"));
+        var document = ReviewMode.Load("ToolCallCard", null);
+        var first = new ReviewAnswers("ToolCallCard");
+
+        first.Set(document.Questions[0].Id, "2", null);
+        first.Save(folder, DateTimeOffset.UnixEpoch);
+
+        var view = new ReviewView(document, ReviewHistory.Load(folder, "ToolCallCard", null));
+        var texts = Find<Box>(view.Panel, $"question-{document.Questions[0].Id}").Children.OfType<TextArea>().Select(a => a.Buffer.Text);
+
+        Assert.Contains("Last time you said: 2", texts);
+
+        Directory.Delete(folder, recursive: true);
     }
 
     [Fact]

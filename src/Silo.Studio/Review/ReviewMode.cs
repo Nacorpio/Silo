@@ -40,7 +40,7 @@ public static class ReviewMode
 
         try
         {
-            view = new ReviewView(Load(control, questions)) { Variant = variant };
+            view = new ReviewView(Load(control, questions), ReviewHistory.Load(output, control, screenshot is null ? GitHead() : null)) { Variant = variant };
         }
         catch (Exception e) when (e is ArgumentException or FormatException or IOException)
         {
@@ -98,6 +98,32 @@ public static class ReviewMode
             new("missing", ReviewQuestionKind.Text, "What is missing or feels wrong?", string.Empty, [], null, null),
         ]);
 
+    /// <summary>Reads the commit that is checked out, so that the window says which one is reviewed.</summary>
+    /// <returns>The short hash and the subject, or <see langword="null"/> when git is not available here.</returns>
+    static string? GitHead()
+    {
+        try
+        {
+            using var git = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("git", "log -1 --format=%h%x20%s")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            });
+
+            var line = git?.StandardOutput.ReadLine();
+
+            git?.WaitForExit(2000);
+
+            return string.IsNullOrWhiteSpace(line) ? null : line.Trim();
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException or IOException)
+        {
+            return null;
+        }
+    }
+
     /// <summary>Opens the window and keeps it styled until it is closed.</summary>
     /// <param name="view">The review view.</param>
     /// <param name="output">The folder for the answers.</param>
@@ -108,11 +134,18 @@ public static class ReviewMode
 
         view.VariantChanged += (_, _) => window.Styles = Styles(view.Variant);
         view.Panel.UseClipboard(new SdlClipboard());
+        window.KeyPressed += key => view.Panel.Press(key);
         view.Submitted += (_, _) =>
         {
             var path = view.Answers.Save(output, DateTimeOffset.Now);
 
-            view.Panel.ShowStatus($"Saved to {path}");
+            // The marker tells whoever waits for the review that it is in, without anyone typing it.
+            File.WriteAllText(Path.Combine(output, $"review-{view.Answers.Control}.submitted"), path);
+
+            Console.WriteLine($"Saved to {path}");
+
+            // An open window holds the DLLs and blocks the next build, so it closes once the answers are saved.
+            view.Close();
         };
 
         window.Run();
