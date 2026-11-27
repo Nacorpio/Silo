@@ -113,6 +113,12 @@ public class TextArea : Control, IScrollable, IPointerHandler
     /// <summary>Gets or sets whether a column with the line numbers is shown left of the text. The default is <see langword="false"/>.</summary>
     public bool ShowLineNumbers { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether typing, Enter, Tab, Backspace, Delete, cut, paste, undo and redo are ignored. Moving, selecting and copying
+    /// still work, and the text can still be changed from code through <see cref="Buffer"/>. The default is <see langword="false"/>.
+    /// </summary>
+    public bool IsReadOnly { get; set; }
+
     /// <inheritdoc/>
     public override bool IsFocusable => true;
 
@@ -159,6 +165,14 @@ public class TextArea : Control, IScrollable, IPointerHandler
         var control = modifiers.HasFlag(KeyModifiers.Control);
 
         revealCaret = true;
+
+        if (IsReadOnly && IsEdit(key, control))
+        {
+            if (key == Key.X)
+                Copy();
+
+            return key == Key.X;
+        }
 
         switch (key)
         {
@@ -255,6 +269,13 @@ public class TextArea : Control, IScrollable, IPointerHandler
         return true;
     }
 
+    /// <summary>Tells whether a key changes the text, which a read-only text area ignores.</summary>
+    /// <param name="key">The key.</param>
+    /// <param name="control">Whether Control is held.</param>
+    /// <returns><see langword="true"/> for Enter, Tab, Backspace, Delete, and Control with X, V, Z or Y.</returns>
+    static bool IsEdit(Key key, bool control)
+        => key is Key.Enter or Key.Tab or Key.Backspace or Key.Delete || (control && key is Key.X or Key.V or Key.Z or Key.Y);
+
     /// <inheritdoc/>
     public override bool TextInput(string input)
     {
@@ -262,7 +283,7 @@ public class TextArea : Control, IScrollable, IPointerHandler
 
         var clean = string.Concat(input.Where(c => !char.IsControl(c)));
 
-        if (clean.Length == 0)
+        if (clean.Length == 0 || IsReadOnly)
             return false;
 
         revealCaret = true;

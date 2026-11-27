@@ -298,4 +298,42 @@ public class TextAreaTests
         Assert.Equal(0, texts[0].X);
         Assert.False(new TextArea().ShowLineNumbers);
     }
+
+    [Fact]
+    public void A_read_only_text_area_ignores_every_edit_but_still_moves_selects_and_copies()
+    {
+        var (_, editor, _) = Setup("one\ntwo");
+        var clipboard = new FakeClipboard { Text = "pasted" };
+
+        editor.Clipboard = clipboard;
+        editor.IsReadOnly = true;
+
+        Assert.False(editor.TextInput("x"));
+        Assert.False(editor.KeyDown(Key.Enter, KeyModifiers.None));
+        Assert.False(editor.KeyDown(Key.Backspace, KeyModifiers.None));
+        Assert.False(editor.KeyDown(Key.Delete, KeyModifiers.None));
+        Assert.False(editor.KeyDown(Key.Tab, KeyModifiers.None));
+        Assert.False(editor.KeyDown(Key.V, KeyModifiers.Control));
+        Assert.False(editor.KeyDown(Key.Z, KeyModifiers.Control));
+        Assert.Equal("one\ntwo", editor.Buffer.Text);
+
+        Assert.True(editor.KeyDown(Key.A, KeyModifiers.Control));
+        Assert.True(editor.KeyDown(Key.C, KeyModifiers.Control));
+        Assert.Equal("one\ntwo", clipboard.Text);
+
+        Assert.True(editor.KeyDown(Key.X, KeyModifiers.Control));
+        Assert.Equal("one\ntwo", editor.Buffer.Text);
+        Assert.True(editor.KeyDown(Key.Left, KeyModifiers.None));
+    }
+
+    [Fact]
+    public void A_read_only_text_area_can_still_be_changed_from_code()
+    {
+        var (_, editor, _) = Setup("one");
+
+        editor.IsReadOnly = true;
+        editor.Buffer.Reset("two");
+
+        Assert.Equal("two", editor.Buffer.Text);
+    }
 }
