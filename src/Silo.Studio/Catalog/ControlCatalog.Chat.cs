@@ -77,7 +77,7 @@ public static partial class ControlCatalog
     {
         var author = own ? new ChatAuthor("Nac", IsSelf: true) : new ChatAuthor("Dana Reyes");
 
-        return new MessageBubble { Message = new ChatMessage(author, text) { Time = new DateTimeOffset(2026, 11, 27, 14, 5, 0, TimeSpan.Zero) } };
+        return Resending(new MessageBubble { Message = new ChatMessage(author, text) { Time = new DateTimeOffset(2026, 11, 27, 14, 5, 0, TimeSpan.Zero) } });
     }
 
     /// <summary>Creates a bubble for the review variants.</summary>
@@ -119,8 +119,18 @@ public static partial class ControlCatalog
         column.AddClass("conversation");
 
         foreach (var (author, text, grouped, status) in sample)
-            column.Children.Add(new MessageBubble { Options = options, IsGrouped = grouped, Message = new ChatMessage(author, text) { Status = status, Time = new DateTimeOffset(2026, 11, 27, 14, 5, 0, TimeSpan.Zero) } });
+            column.Children.Add(Resending(new MessageBubble { Options = options, IsGrouped = grouped, Message = new ChatMessage(author, text) { Status = status, Time = new DateTimeOffset(2026, 11, 27, 14, 5, 0, TimeSpan.Zero) } }));
 
         return column;
+    }
+
+    /// <summary>Makes Retry in a sample succeed, so the gallery shows what a resend looks like.</summary>
+    /// <param name="bubble">The bubble.</param>
+    /// <returns>The same bubble.</returns>
+    static MessageBubble Resending(MessageBubble bubble)
+    {
+        bubble.RetryRequested += (_, message) => message.Status = MessageStatus.Sent;
+
+        return bubble;
     }
 }
