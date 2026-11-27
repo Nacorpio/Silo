@@ -1,0 +1,24 @@
+{
+  // Questions for the first review of ToolCallCard (PR #100).
+  "control": "ToolCallCard",
+  "title": "ToolCallCard review",
+  "pr": "Silo PR #100: one tool call with status, arguments, output and actions",
+  "questions": [
+    { "id": "look", "kind": "rating", "prompt": "How does the card look overall?", "hint": "Compare the four variants above." },
+    {
+      "id": "status", "kind": "yesno", "prompt": "Can you tell each status at a glance?",
+      "hint": "Switch between Succeeded, Running, Failed and Awaiting approval.", "variant": "Running"
+    },
+    {
+      "id": "failed", "kind": "yesno", "prompt": "Is the failure clear, and is Retry easy to find?",
+      "hint": "The error line and the Retry button.", "variant": "Failed"
+    },
+    {
+      "id": "expand", "kind": "choice", "prompt": "Which way should the body of a card open?",
+      "options": ["Click the whole header", "Click the chevron only", "Both are fine"],
+      "hint": "Press on the header and on the chevron."
+    },
+    { "id": "header", "kind": "choice", "prompt": "How should the header read?", "options": ["As it is", "More compact", "Roomier"] },
+    { "id": "missing", "kind": "text", "prompt": "What is missing or feels wrong?" }
+  ]
+}

@@ -22,6 +22,32 @@ public static class StudioStyles
             },
             "#body": { "flex-direction": "row", "flex-grow": "1" },
             "#scroll": { "flex-grow": "1" },
+            "#review-window": { "gap": "0px" },
+            "#review-split": { "flex-grow": "1" },
+            "#review-left": { "flex-direction": "column", "gap": "12px", "padding": "8px 16px 16px 16px" },
+            "#review-controls": { "flex-direction": "row", "gap": "12px", "align-items": "center" },
+            "#review-stage": {
+              "flex-grow": "1", "flex-direction": "column", "padding": "24px", "background": "var(--surface)", "border-width": "1px",
+              "border-color": "var(--border)", "border-radius": "6px", "align-items": "flex-start"
+            },
+            "#review-stage ToolCallCard": { "width": "420px", "flex-shrink": "0" },
+            "#review-stage ToolCallTimeline": { "width": "440px", "flex-shrink": "0" },
+            "#review": { "flex-direction": "column", "gap": "10px", "padding": "8px 16px 16px 16px" },
+            "#review .title": { "font-size": "16px", "font-weight": "bold" },
+            "#review .muted": { "color": "var(--muted)", "font-size": "12px" },
+            "#review-scroll": { "flex-grow": "1" },
+            "#review-questions": { "flex-direction": "column", "gap": "18px", "padding": "0px 10px 0px 0px" },
+            "#review .question": { "flex-direction": "column", "gap": "6px", "align-items": "flex-start" },
+            "#review .prompt": { "font-weight": "bold" },
+            "#review TextArea": {
+              "width": "100%", "height": "72px", "background": "var(--surface)", "color": "var(--text)", "border-width": "1px",
+              "border-color": "var(--border)", "border-radius": "4px", "caret-color": "var(--text)",
+              "&:focus": { "border-color": "var(--accent)" }
+            },
+            "#review TextBox": { "width": "100%" },
+            "#review .show": { "background": "var(--track)", "color": "var(--text)", "padding": "3px 10px", "&:hover": { "background": "var(--border)" } },
+            "#review-footer": { "flex-direction": "row", "gap": "12px", "align-items": "center" },
+            "#review-submit": { "background": "var(--accent)", "color": "var(--accent-text)", "padding": "6px 16px" },
             "#editor": {
               "width": "440px", "padding": "0px 16px 16px 8px", "gap": "8px", "flex-direction": "column"
             },

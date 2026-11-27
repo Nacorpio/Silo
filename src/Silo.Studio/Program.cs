@@ -10,6 +10,7 @@ using Silo.Styling.Values;
 
 // Usage: silo-studio [--dark] [--text] [--custom-titlebar] [--dividers] [--page <category>] [--theme <file.jsonc>] [--screenshot <out.png>]
 //        silo-studio --terminal [<program>] [--dark]
+//        silo-studio --review <control> [--questions <file.jsonc>] [--out <folder>] [--dark] [--screenshot <out.png>]
 //        silo-studio --assembly <app.dll> --list-previews
 //        silo-studio --assembly <app.dll> --preview <name> [--dark] [--theme <file.jsonc>] [--screenshot <out.png>]
 // Shows every Control in every Pseudo-state with the default theme. With --theme the file is applied on top of the default
@@ -24,6 +25,13 @@ using Silo.Styling.Values;
 var theme = ArgumentAfter("--theme");
 var screenshot = ArgumentAfter("--screenshot");
 var assembly = ArgumentAfter("--assembly");
+
+// With --review <control> Studio opens the review window instead of the gallery: the control on the left, the questions about it
+// on the right. --questions <file> picks a questions file, --out <folder> the folder that Submit writes to (reviews by default).
+// A review window that is already open for the same control is closed first.
+if (ArgumentAfter("--review") is { } reviewed)
+    return ReviewMode.Run(reviewed, ArgumentAfter("--questions"), ArgumentAfter("--out") ?? "reviews", screenshot,
+        args.Contains("--dark") ? ThemeVariant.Dark : ThemeVariant.Light);
 
 var previewMode = args.Contains("--list-previews") || ArgumentAfter("--preview") is not null;
 

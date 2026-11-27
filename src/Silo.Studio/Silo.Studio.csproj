@@ -8,6 +8,9 @@
     <IsAotCompatible>false</IsAotCompatible>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Reviews/*.review.jsonc" LogicalName="Silo.Studio.Reviews.%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
     <ProjectReference Include="../Silo.Controls.Agents/Silo.Controls.Agents.csproj" />
     <ProjectReference Include="../Silo.Controls.UnitsNet/Silo.Controls.UnitsNet.csproj" />

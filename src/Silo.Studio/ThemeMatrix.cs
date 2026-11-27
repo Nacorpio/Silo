@@ -209,7 +209,7 @@ public sealed class ThemeMatrix : Box
     /// <summary>Puts a Control into a state.</summary>
     /// <param name="sample">The Control.</param>
     /// <param name="state">One of <see cref="States"/>.</param>
-    static void Apply(Control sample, string state)
+    internal static void Apply(Control sample, string state)
     {
         switch (state)
         {
