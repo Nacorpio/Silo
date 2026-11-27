@@ -23,6 +23,17 @@ public static partial class ControlCatalog
         return input;
     }
 
+    /// <summary>Creates a chat input with a long paragraph that wraps.</summary>
+    /// <returns>The input.</returns>
+    static ChatInput CreateLongChatInput()
+    {
+        var input = CreateChatInput();
+
+        input.Text = "This message is long enough to wrap onto several rows, so the box has to grow with the wrapped rows and not with the lines you typed. Supercalifragilisticexpialidocious_is_one_word_wider_than_the_box_to_test_breaking_inside_a_word.\nA second line.";
+
+        return input;
+    }
+
     /// <summary>Creates a chat input that replies to a message.</summary>
     /// <returns>The input.</returns>
     static ChatInput CreateReplyChatInput()

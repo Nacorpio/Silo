@@ -209,6 +209,25 @@ public class ChatInputTests
     }
 
     [Fact]
+    public void A_long_line_wraps_and_makes_the_box_taller()
+    {
+        var input = new ChatInput { MaximumLines = 8 };
+        var root = new Box { TextMeasurer = new FixedMeasurer() };
+
+        root.Children.Add(input);
+        root.ApplyStyles(new StyleResolver([.. DefaultTheme.Load(ThemeVariant.Dark), ChatTheme.Load()]));
+        root.Arrange(new Size(300, 400));
+
+        var one = input.Input.Bounds.Height;
+
+        input.Text = string.Join(' ', Enumerable.Repeat("word", 30));
+        root.Arrange(new Size(300, 400));
+
+        Assert.True(input.Input.WordWrap);
+        Assert.True(input.Input.Bounds.Height > one);
+    }
+
+    [Fact]
     public void The_placeholder_is_drawn_only_while_the_box_is_empty()
     {
         var input = new ChatInput { Placeholder = "Message" };

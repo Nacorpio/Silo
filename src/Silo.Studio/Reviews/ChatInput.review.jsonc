@@ -1,16 +1,14 @@
 {
-  // Questions for the first review of ChatInput.
+  // Questions for the soft wrap of the message composer.
   "control": "ChatInput",
-  "title": "ChatInput review",
-  "pr": "Silo: the message composer (Enter sends, Shift+Enter breaks the line)",
+  "title": "ChatInput soft wrap review",
+  "pr": "Silo: TextArea soft wrap (WordWrap), on in ChatInput",
   "questions": [
-    { "id": "look", "kind": "rating", "prompt": "How does the input look overall?", "hint": "Compare Empty, Written and Replying." },
-    { "id": "keys", "kind": "yesno", "prompt": "Does Enter send and Shift+Enter break the line?", "hint": "Click in the box and try both.", "variant": "Written" },
-    { "id": "grow", "kind": "yesno", "prompt": "Does the box grow with the text, then scroll?", "hint": "Type several lines." },
-    { "id": "reply", "kind": "yesno", "prompt": "Is the reply bar clear, and does Escape or the cross close it?", "variant": "Replying" },
-    { "id": "send", "kind": "choice", "prompt": "Which Send button mode should be the default?", "options": ["Always visible", "Only when there is text", "No button, Enter is enough"], "variant": "Send always" },
-    { "id": "density", "kind": "choice", "prompt": "Which density feels right as the default?", "options": ["Compact", "Normal", "Roomy"], "variant": "Compact" },
-    { "id": "wrap", "kind": "yesno", "prompt": "Is it a problem that long lines scroll sideways instead of wrapping?" },
+    { "id": "wrap", "kind": "yesno", "prompt": "Do long lines wrap at spaces, with no sideways scrolling?", "variant": "Long text" },
+    { "id": "word", "kind": "yesno", "prompt": "Is the very long word broken inside the word, and only that word?", "variant": "Long text" },
+    { "id": "grow", "kind": "yesno", "prompt": "Does the box grow with the wrapped rows, up to the maximum, and then scroll?", "hint": "Type a long paragraph.", "variant": "Long text" },
+    { "id": "caret", "kind": "yesno", "prompt": "Do Up, Down, Home and End move by wrapped row and keep the column?", "hint": "Click in the text and try the keys.", "variant": "Long text" },
+    { "id": "look", "kind": "rating", "prompt": "How does the wrapped text look overall?" },
     { "id": "missing", "kind": "text", "prompt": "What is missing or feels wrong?" }
   ]
 }

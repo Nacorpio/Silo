@@ -30,7 +30,7 @@ namespace Silo;
 public class ChatInput : Control
 {
     /// <summary>The text area.</summary>
-    readonly ComposerArea composer = new() { MinimumLines = 1, MaximumLines = 8 };
+    readonly ComposerArea composer = new() { MinimumLines = 1, MaximumLines = 8, WordWrap = true };
 
     /// <summary>The Send button.</summary>
     readonly Button send = new() { Text = "Send" };
