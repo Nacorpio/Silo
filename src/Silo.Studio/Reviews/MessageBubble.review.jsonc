@@ -1,0 +1,18 @@
+{
+  // Questions for the first review of MessageBubble.
+  "control": "MessageBubble",
+  "title": "MessageBubble review",
+  "pr": "Silo: one chat message (avatar, author, time, text, status), with ChatMessage, ChatAuthor and ChatOptions",
+  "questions": [
+    { "id": "look", "kind": "rating", "prompt": "How does a message look overall?", "hint": "Compare Conversation, Own and the styles.", "variant": "Conversation" },
+    { "id": "own", "kind": "yesno", "prompt": "Do your own messages read clearly on the right, with the time and status below?", "variant": "Own" },
+    { "id": "group", "kind": "yesno", "prompt": "Do grouped messages line up under the avatar of the first one?", "variant": "Conversation" },
+    { "id": "select", "kind": "yesno", "prompt": "Can you select the text with the mouse and copy it?", "hint": "Drag over the text and press Ctrl+C.", "variant": "Conversation" },
+    { "id": "failed", "kind": "yesno", "prompt": "Is a failed message clear, and does Retry do something?", "variant": "Failed" },
+    { "id": "style", "kind": "choice", "prompt": "Which bubble style should be the default?", "options": ["Bubble", "Flat", "Lines"], "variant": "Flat" },
+    { "id": "lines", "kind": "rating", "prompt": "How does the Lines style (IRC) look?", "variant": "Lines" },
+    { "id": "density", "kind": "choice", "prompt": "Which density feels right as the default?", "options": ["Compact", "Normal", "Roomy"], "variant": "Compact" },
+    { "id": "system", "kind": "yesno", "prompt": "Does the system notice look right?", "variant": "System" },
+    { "id": "missing", "kind": "text", "prompt": "What is missing or feels wrong?" }
+  ]
+}
