@@ -13,20 +13,20 @@ public abstract class Easing
     public static Easing Linear { get; } = new LinearEasing();
 
     /// <summary>Gets the default curve, which starts gently, speeds up and ends gently: <c>cubic-bezier(0.25, 0.1, 0.25, 1)</c>.</summary>
-    public static Easing Ease { get; } = new CubicBezierEasing(0.25, 0.1, 0.25, 1);
+    public static Easing Ease { get; } = new CubicBezierEasing(0.25, 0.1, 0.25, 1, "ease");
 
     /// <summary>Gets the name of the curve, which is also what a Stylesheet would write.</summary>
     /// <returns>The text.</returns>
     public abstract override string ToString();
 
     /// <summary>Gets the curve that starts slowly: <c>cubic-bezier(0.42, 0, 1, 1)</c>.</summary>
-    public static Easing EaseIn { get; } = new CubicBezierEasing(0.42, 0, 1, 1);
+    public static Easing EaseIn { get; } = new CubicBezierEasing(0.42, 0, 1, 1, "ease-in");
 
     /// <summary>Gets the curve that ends slowly: <c>cubic-bezier(0, 0, 0.58, 1)</c>.</summary>
-    public static Easing EaseOut { get; } = new CubicBezierEasing(0, 0, 0.58, 1);
+    public static Easing EaseOut { get; } = new CubicBezierEasing(0, 0, 0.58, 1, "ease-out");
 
     /// <summary>Gets the curve that starts and ends slowly: <c>cubic-bezier(0.42, 0, 0.58, 1)</c>.</summary>
-    public static Easing EaseInOut { get; } = new CubicBezierEasing(0.42, 0, 0.58, 1);
+    public static Easing EaseInOut { get; } = new CubicBezierEasing(0.42, 0, 0.58, 1, "ease-in-out");
 
     /// <summary>Creates a curve from two control points, the way <c>cubic-bezier</c> does.</summary>
     /// <param name="x1">The horizontal position of the first point, from 0 to 1.</param>
@@ -137,7 +137,7 @@ public abstract class Easing
     }
 
     /// <summary>A cubic Bézier curve through (0, 0) and (1, 1).</summary>
-    sealed class CubicBezierEasing(double x1, double y1, double x2, double y2) : Easing
+    sealed class CubicBezierEasing(double x1, double y1, double x2, double y2, string? name = null) : Easing
     {
         /// <inheritdoc/>
         public override double Evaluate(double t)
@@ -189,7 +189,7 @@ public abstract class Easing
         }
 
         /// <inheritdoc/>
-        public override string ToString() => string.Create(CultureInfo.InvariantCulture, $"cubic-bezier({x1}, {y1}, {x2}, {y2})");
+        public override string ToString() => name ?? string.Create(CultureInfo.InvariantCulture, $"cubic-bezier({x1}, {y1}, {x2}, {y2})");
 
         /// <summary>Gets one coordinate of the curve at a parameter.</summary>
         static double Sample(double u, double a, double b) => (((((1 - (3 * b)) + (3 * a)) * u) + ((3 * b) - (6 * a))) * u + (3 * a)) * u;

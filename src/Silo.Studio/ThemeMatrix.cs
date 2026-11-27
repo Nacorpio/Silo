@@ -35,9 +35,13 @@ public sealed class ThemeMatrix : Box
     /// <summary>The columns, in order. The names are the Pseudo-states that the matrix sets, with <c>normal</c> for none.</summary>
     public static readonly IReadOnlyList<string> States = ["normal", "hover", "pressed", "focus", "checked"];
 
+    /// <summary>The name of the last category, which holds the animation playground instead of rows.</summary>
+    public const string AnimationsCategory = "Animations";
+
     /// <summary>The glyph and the description of each category.</summary>
     static readonly Dictionary<string, (string Glyph, string Description)> Details = new()
     {
+        [AnimationsCategory] = ("activity", "Try transitions and timings"),
         ["Buttons"] = ("check", "Buttons, toggles and radios"),
         ["Text input"] = ("pencil", "Text boxes and search"),
         ["Values and lists"] = ("list", "Sliders, numbers and lists"),
@@ -756,8 +760,10 @@ public sealed class ThemeMatrix : Box
     {
         Name = "matrix";
 
-        foreach (var category in Categories)
+        foreach (var category in Rows.Select(r => r.Category).Distinct())
             pages[category] = BuildPage(category);
+
+        pages[AnimationsCategory] = new Box { Name = $"page-{AnimationsCategory}", Children = { Playground } };
 
         selectedCategory = Categories.First();
 
@@ -768,7 +774,12 @@ public sealed class ThemeMatrix : Box
     public event EventHandler? CategoryChanged;
 
     /// <summary>Gets the names of the categories, in order. Each holds the rows of one group of Controls.</summary>
-    public static IEnumerable<string> Categories => Rows.Select(r => r.Category).Distinct();
+    public static IEnumerable<string> Categories => Rows.Select(r => r.Category).Distinct().Append(AnimationsCategory);
+
+    /// <summary>Gets the animation playground, which is the page of the Animations category.</summary>
+    public AnimationPlayground Playground => playground ??= new AnimationPlayground();
+
+    AnimationPlayground? playground;
 
     /// <summary>Gets the glyph, the short description and the number of Controls of a category, for the list beside the matrix.</summary>
     /// <param name="category">One of <see cref="Categories"/>.</param>
@@ -777,7 +788,9 @@ public sealed class ThemeMatrix : Box
     {
         var (glyph, description) = Details.GetValueOrDefault(category, ("info", string.Empty));
 
-        return new CategoryInfo(glyph, description, Rows.Count(r => r.Category == category));
+        var count = category == AnimationsCategory ? 1 : Rows.Count(r => r.Category == category);
+
+        return new CategoryInfo(glyph, description, count);
     }
 
     /// <summary>Gets the category that is shown.</summary>
