@@ -29,9 +29,6 @@ namespace Silo;
 /// </example>
 public class ComboBox : Control, IPointerHandler
 {
-    /// <summary>The room right of the text for the arrow in pixels.</summary>
-    const double ArrowSpace = 24;
-
     /// <summary>The number of rows that the list scrolls beyond when <c>max-rows</c> is not set.</summary>
     const int DefaultMaxRows = 8;
 
@@ -45,6 +42,10 @@ public class ComboBox : Control, IPointerHandler
         StyledProperty.Register<ComboBox, double>("max-rows", DefaultMaxRows, ValueParsers.Number);
 
 
+    /// <summary>Opens the list below the ComboBox and tracks whether it is open.</summary>
+    readonly AnchoredPopup popup;
+
+
     /// <summary>The choices.</summary>
     IReadOnlyList<string> items = [];
 
@@ -52,7 +53,7 @@ public class ComboBox : Control, IPointerHandler
     int selectedIndex = -1;
 
     /// <summary>The open list, or <see langword="null"/>.</summary>
-    ListView? popup;
+    ListView? list;
 
 
     /// <summary>
@@ -62,6 +63,9 @@ public class ComboBox : Control, IPointerHandler
     static ComboBox()
     {
     }
+
+    /// <summary>Creates a ComboBox without choices.</summary>
+    public ComboBox() => popup = new AnchoredPopup(this);
 
     /// <summary>Raised after <see cref="SelectedIndex"/> changed.</summary>
     public event EventHandler? SelectionChanged;
@@ -102,7 +106,7 @@ public class ComboBox : Control, IPointerHandler
     public string? SelectedItem => selectedIndex >= 0 ? items[selectedIndex] : null;
 
     /// <summary>Gets whether the list is open.</summary>
-    public bool IsOpen => popup is not null && Overlays?.Contains(popup) == true;
+    public bool IsOpen => popup.IsOpen;
 
     /// <inheritdoc/>
     public override bool IsFocusable => true;
@@ -116,24 +120,25 @@ public class ComboBox : Control, IPointerHandler
     /// <remarks>Call it after <see cref="Control.Arrange"/>, since the list sits where the ComboBox was arranged.</remarks>
     public bool Open()
     {
-        if (IsOpen || items.Count == 0 || Overlays is not { } layer)
+        if (IsOpen || items.Count == 0)
             return false;
 
-        var (left, top) = ToLocal(0, 0);
         var height = GetValue(ItemHeightProperty);
         var rows = Math.Min(items.Count, Math.Max(1, (int)GetValue(MaxRowsProperty)));
+        var dropDown = new DropDownList { Items = items, HoverSelects = true };
 
-        popup = new DropDownList { Items = items, HoverSelects = true };
-        popup.SelectedIndex = selectedIndex;
+        dropDown.SelectedIndex = selectedIndex;
 
-        popup.SetValue(ListView.ItemHeightProperty, height);
-        popup.SetValue(WidthProperty, new Length(Bounds.Width, LengthUnit.Px));
-        popup.SetValue(HeightProperty, new Length(rows * height + 2, LengthUnit.Px));
-        popup.SetValue(PaddingProperty, new Thickness(Px(0), Px(0), Px(0), Px(0)));
-        popup.SetValue(BorderWidthProperty, new Thickness(Px(1), Px(1), Px(1), Px(1)));
-        popup.Activated += (_, index) => Choose(index);
+        dropDown.SetValue(ListView.ItemHeightProperty, height);
+        dropDown.SetValue(HeightProperty, new Length(rows * height + 2, LengthUnit.Px));
+        dropDown.SetValue(PaddingProperty, new Thickness(Px(0), Px(0), Px(0), Px(0)));
+        dropDown.SetValue(BorderWidthProperty, new Thickness(Px(1), Px(1), Px(1), Px(1)));
+        dropDown.Activated += (_, index) => Choose(index);
 
-        layer.Show(popup, -left, -top + Bounds.Height);
+        if (!popup.Open(dropDown, matchWidth: true))
+            return false;
+
+        list = dropDown;
 
         return true;
     }
@@ -142,11 +147,9 @@ public class ComboBox : Control, IPointerHandler
     /// <returns><see langword="true"/> when it was open.</returns>
     public bool Close()
     {
-        var list = popup;
+        list = null;
 
-        popup = null;
-
-        return list is not null && Overlays?.Close(list) == true;
+        return popup.Close();
     }
 
     /// <summary>Opens the list when it is closed. The pointer router calls this when the pointer goes down on the ComboBox.</summary>
@@ -157,7 +160,7 @@ public class ComboBox : Control, IPointerHandler
     /// <inheritdoc/>
     public override bool KeyDown(Key key)
     {
-        if (popup is not null && IsOpen)
+        if (IsOpen)
             return KeyDownOpen(key);
 
         switch (key)
@@ -186,7 +189,7 @@ public class ComboBox : Control, IPointerHandler
         var measurer = Measurer();
         var width = items.Select(item => measurer.Measure(item, style).Width).DefaultIfEmpty(0).Max();
 
-        return new Size(width + ArrowSpace, measurer.Measure("Ag", style).Height);
+        return new Size(width + DropDownArrow.Space, measurer.Measure("Ag", style).Height);
     }
 
     /// <inheritdoc/>
@@ -201,11 +204,11 @@ public class ComboBox : Control, IPointerHandler
         var y = content.Y + Math.Max(0, content.Height - Measurer().Measure("Ag", style).Height) / 2;
 
         context.Save();
-        context.ClipRect(new Rect(content.X, content.Y, Math.Max(0, content.Width - ArrowSpace), content.Height));
+        context.ClipRect(new Rect(content.X, content.Y, Math.Max(0, content.Width - DropDownArrow.Space), content.Height));
         context.DrawText(text, content.X, y, style, color);
         context.Restore();
 
-        DrawArrow(context, new Rect(content.Right - ArrowSpace, content.Y, ArrowSpace, content.Height), color);
+        DropDownArrow.Draw(context, content, color);
     }
 
     /// <summary>Handles a key while the list is open.</summary>
@@ -214,10 +217,10 @@ public class ComboBox : Control, IPointerHandler
     bool KeyDownOpen(Key key)
     {
         if (key != Key.Enter)
-            return popup!.KeyDown(key);
+            return popup.KeyDown(key, KeyModifiers.None);
 
-        if (popup!.SelectedIndex >= 0)
-            Choose(popup.SelectedIndex);
+        if (list!.SelectedIndex >= 0)
+            Choose(list.SelectedIndex);
 
         return true;
     }
@@ -229,25 +232,6 @@ public class ComboBox : Control, IPointerHandler
         Close();
 
         SelectedIndex = index;
-    }
-
-    /// <summary>Draws the small downward triangle.</summary>
-    /// <param name="context">The context to draw on.</param>
-    /// <param name="area">The space reserved for the arrow.</param>
-    /// <param name="color">The color to draw it in.</param>
-    static void DrawArrow(IDrawingContext context, Rect area, Color color)
-    {
-        const int rows = 4;
-
-        var top = area.Y + (area.Height - rows) / 2;
-
-        for (var i = 0; i < rows; i++)
-        {
-            var width = 8 - i * 2;
-            var row = new Rect(area.X + (area.Width - width) / 2, top + i, width, 1);
-
-            context.FillRect(row, color);
-        }
     }
 
     /// <summary>Makes a length in pixels.</summary>
