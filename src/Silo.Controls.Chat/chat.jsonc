@@ -1,0 +1,43 @@
+{
+  // The look of the Controls of Silo.Controls.Chat. Load it after the default theme.
+  "rules": {
+    "ChatInput": {
+      "flex-direction": "column",
+      "gap": "6px",
+      "padding": "8px",
+      "background": "var(--surface)",
+      "color": "var(--text)",
+      "border-width": "1px",
+      "border-color": "var(--border)",
+      "border-radius": "var(--radius)",
+    },
+    "ChatInput .context": {
+      "flex-direction": "row",
+      "align-items": "center",
+      "gap": "8px",
+      "padding": "4px 8px",
+      "background": "var(--track)",
+      "border-radius": "var(--radius)",
+    },
+    "ChatInput .context-text": { "flex-grow": 1, "color": "var(--muted)", "font-size": "12px" },
+    "ChatInput .close": {
+      "padding": "0px 6px",
+      "background": "transparent",
+      "color": "var(--muted)",
+      "&:hover": { "color": "var(--text)" },
+    },
+    "ChatInput .attachments": { "flex-direction": "row", "gap": "6px" },
+    "ChatInput .row": { "flex-direction": "row", "align-items": "flex-end", "gap": "8px" },
+    "ChatInput TextArea.composer": { "flex-grow": 1 },
+    "ChatInput .send": {
+      "background": "var(--accent)",
+      "color": "var(--accent-text)",
+      "padding": "6px 14px",
+      "&:hover": { "background": "var(--accent-hover)" },
+    },
+    "ChatInput.density-compact": { "gap": "3px", "padding": "4px" },
+    "ChatInput.density-roomy": { "gap": "10px", "padding": "14px" },
+    "ChatInput.density-compact .send": { "padding": "3px 10px" },
+    "ChatInput.density-roomy .send": { "padding": "9px 18px" },
+  },
+}

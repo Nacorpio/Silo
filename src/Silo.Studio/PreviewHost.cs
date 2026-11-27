@@ -43,7 +43,7 @@ public static class PreviewHost
     /// <remarks>A theme file that does not read is left out, so a half-typed edit does not close the Preview.</remarks>
     public static StyleResolver Styles(ThemeVariant variant, string? themePath)
     {
-        var sheets = new List<Stylesheet>([.. DefaultTheme.Load(variant), QuantityTheme.Load(), AgentsTheme.Load()]);
+        var sheets = new List<Stylesheet>([.. DefaultTheme.Load(variant), QuantityTheme.Load(), AgentsTheme.Load(), ChatTheme.Load()]);
 
         if (themePath is not null && File.Exists(themePath))
         {

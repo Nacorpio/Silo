@@ -14,7 +14,7 @@ namespace Silo.Studio;
 /// <code language="csharp">
 /// var view = new StudioView();
 ///
-/// view.VariantChanged += (_, _) => window.Styles = new StyleResolver([.. DefaultTheme.Load(view.Variant), QuantityTheme.Load(), AgentsTheme.Load(), StudioStyles.Load()]);
+/// view.VariantChanged += (_, _) => window.Styles = new StyleResolver([.. DefaultTheme.Load(view.Variant), QuantityTheme.Load(), AgentsTheme.Load(), ChatTheme.Load(), StudioStyles.Load()]);
 /// </code>
 /// </example>
 public sealed class StudioView : Window

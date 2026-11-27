@@ -29,6 +29,14 @@ public static partial class ControlCatalog
                 ("Compact", () => Dense(entry.Create(), ToolCallDensity.Compact)),
                 ("Roomy", () => Dense(entry.Create(), ToolCallDensity.Roomy)),
             ],
+            "ChatInput" =>
+            [
+                ("Empty", entry.Create),
+                ("Written", CreateWrittenChatInput),
+                ("Replying", CreateReplyChatInput),
+                ("Compact", () => Dense(CreateWrittenChatInput(), ChatDensity.Compact)),
+                ("Roomy", () => Dense(CreateWrittenChatInput(), ChatDensity.Roomy)),
+            ],
             _ => [("Default", entry.Create)],
         };
     }

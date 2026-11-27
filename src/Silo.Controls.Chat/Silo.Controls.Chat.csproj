@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Silo.Controls/Silo.Controls.csproj" />
+    <ProjectReference Include="../Silo.Styling/Silo.Styling.csproj" />
+    <ProjectReference Include="../Silo.Validator/Silo.Validator.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <SiloStylesheet Include="chat.jsonc" />
+    <SiloContext Include="../Silo.Themes.Default/default.jsonc" />
+    <SiloControls Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="chat.jsonc" LogicalName="Silo.Controls.Chat.chat.jsonc" />
+  </ItemGroup>
+  <Import Project="../Silo.Validator/build/Silo.Validator.targets" />
+</Project>
