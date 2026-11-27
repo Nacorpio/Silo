@@ -140,8 +140,7 @@ public sealed class SkiaDrawingContext(SKCanvas canvas) : IDrawingContext
     /// <inheritdoc/>
     public void DrawText(string text, double x, double y, TextStyle style, Color color)
     {
-        using var typeface = SkiaTextMeasurer.CreateTypeface(style);
-        using var font = new SKFont(typeface, (float)style.Size);
+        using var font = new SKFont(SkiaTextMeasurer.GetTypeface(style), (float)style.Size);
         using var paint = new SKPaint { Color = ToSkia(color), IsAntialias = true };
 
         canvas.DrawText(text, (float)x, (float)(y - font.Metrics.Ascent), font, paint);
