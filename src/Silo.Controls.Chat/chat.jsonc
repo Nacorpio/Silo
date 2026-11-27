@@ -1,6 +1,44 @@
 {
   // The look of the Controls of Silo.Controls.Chat. Load it after the default theme.
   "rules": {
+    "MessageList": { "flex-direction": "column", "color": "var(--text)" },
+    "MessageList .viewer": { "flex-grow": 1 },
+    "MessageList .messages": { "flex-direction": "column", "gap": "2px", "padding": "14px 6px" },
+    "MessageList .date-separator": { "flex-direction": "row", "justify-content": "center", "padding": "10px 0px 6px 0px" },
+    "MessageList .date-label": {
+      "color": "var(--muted)",
+      "font-size": "11px",
+      "padding": "2px 12px",
+      "background": "var(--track)",
+      "border-radius": "10px",
+    },
+    "MessageList .jump-host": { "width": "190px", "height": "30px" },
+    "MessageList .jump": {
+      "background": "var(--accent)",
+      "color": "var(--accent-text)",
+      "padding": "6px 14px",
+      "border-radius": "15px",
+      "&:hover": { "background": "var(--accent-hover)" },
+    },
+    "MessageBubble .actions": {
+      "flex-direction": "row",
+      "justify-content": "space-around",
+      "align-items": "center",
+      "width": "108px",
+      "height": "26px",
+      "background": "var(--surface)",
+      "border-width": "1px",
+      "border-color": "var(--border)",
+      "border-radius": "var(--radius)",
+    },
+    "MessageBubble.own .actions": { "width": "150px" },
+    "MessageBubble .actions Button": {
+      "background": "transparent",
+      "color": "var(--text)",
+      "padding": "2px 8px",
+      "font-size": "12px",
+      "&:hover": { "background": "var(--track)" },
+    },
     "MessageBubble": {
       "flex-direction": "row",
       "align-items": "flex-start",

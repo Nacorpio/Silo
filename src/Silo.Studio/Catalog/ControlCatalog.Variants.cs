@@ -40,6 +40,16 @@ public static partial class ControlCatalog
                 ("Compact", () => Dense(CreateWrittenChatInput(), ChatDensity.Compact)),
                 ("Roomy", () => Dense(CreateWrittenChatInput(), ChatDensity.Roomy)),
             ],
+            "MessageList" =>
+            [
+                ("Conversation", entry.Create),
+                ("Streaming", CreateStreamingList),
+                ("Scrolled up", CreateScrolledUpList),
+                ("Load older", CreateLoadOlderList),
+                ("Few messages", () => CreateMessageList(4)),
+                ("Flat", () => WithOptions(CreateMessageList(14), o => o.BubbleStyle = BubbleStyle.Flat)),
+                ("Lines", () => WithOptions(CreateMessageList(14), o => o.BubbleStyle = BubbleStyle.Lines)),
+            ],
             "MessageBubble" =>
             [
                 ("Conversation", () => CreateConversation(_ => { })),

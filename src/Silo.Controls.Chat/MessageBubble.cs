@@ -1,3 +1,5 @@
+using Silo.Layout;
+
 namespace Silo;
 
 /// <summary>
@@ -21,7 +23,10 @@ namespace Silo;
 /// The theme sees the Classes <c>own</c>, <c>grouped</c>, <c>system</c>, <c>style-bubble</c>, <c>style-flat</c>, <c>style-lines</c>,
 /// <c>aligned</c>, <c>density-compact</c>, <c>density-roomy</c> and <c>status-</c> plus the status name, and the states
 /// <c>:sending</c> and <c>:failed</c>. The parts have the Classes <c>avatar</c>, <c>content</c>, <c>header</c>, <c>author</c>,
-/// <c>time</c>, <c>text</c>, <c>attachments</c>, <c>attachment</c>, <c>footer</c>, <c>status</c> and <c>retry</c>.
+/// <c>time</c>, <c>text</c>, <c>attachments</c>, <c>attachment</c>, <c>footer</c>, <c>status</c> and <c>retry</c>. While the pointer
+/// is over the bubble and <see cref="ChatOptions.ShowActions"/> is on, a small toolbar with the Class <c>actions</c> shows Reply,
+/// Edit (own messages only) and Copy, as Buttons with the Classes <c>reply</c>, <c>edit</c> and <c>copy</c>. The toolbar needs a
+/// <c>width</c> and a <c>height</c> in the theme.
 /// </para>
 /// </remarks>
 /// <example>
@@ -68,6 +73,18 @@ public class MessageBubble : Control
     /// <summary>Asks to send a failed message again.</summary>
     readonly Button retry = new() { Text = "Retry" };
 
+    /// <summary>The toolbar that shows while the pointer is over the bubble.</summary>
+    readonly ClippedBox actions = new();
+
+    /// <summary>Starts a reply to the message.</summary>
+    readonly Button reply = new() { Text = "Reply" };
+
+    /// <summary>Starts an edit of the message.</summary>
+    readonly Button edit = new() { Text = "Edit" };
+
+    /// <summary>Copies the text of the message.</summary>
+    readonly Button copy = new() { Text = "Copy" };
+
     /// <summary>The settings.</summary>
     ChatOptions options = new();
 
@@ -104,6 +121,19 @@ public class MessageBubble : Control
         footer.AddClass("footer");
         status.AddClass("status");
         retry.AddClass("retry");
+        actions.AddClass("actions");
+        reply.AddClass("reply");
+        edit.AddClass("edit");
+        copy.AddClass("copy");
+
+        reply.Click += (_, _) => Raise(ReplyRequested);
+        edit.Click += (_, _) => Raise(EditRequested);
+        copy.Click += (_, _) =>
+        {
+            Clipboard?.SetText(message?.Text ?? string.Empty);
+
+            Raise(CopyRequested);
+        };
 
         retry.Click += (_, _) =>
         {
@@ -119,6 +149,15 @@ public class MessageBubble : Control
 
     /// <summary>Occurs when the Retry button of a failed message is pressed. The argument is the message.</summary>
     public event EventHandler<ChatMessage>? RetryRequested;
+
+    /// <summary>Occurs when Reply on the toolbar is pressed. The argument is the message.</summary>
+    public event EventHandler<ChatMessage>? ReplyRequested;
+
+    /// <summary>Occurs when Edit on the toolbar is pressed. The argument is the message.</summary>
+    public event EventHandler<ChatMessage>? EditRequested;
+
+    /// <summary>Occurs after Copy on the toolbar put the text on the clipboard. The argument is the message.</summary>
+    public event EventHandler<ChatMessage>? CopyRequested;
 
 
     /// <summary>Gets or sets the message that the bubble shows.</summary>
@@ -181,6 +220,16 @@ public class MessageBubble : Control
         }
     }
 
+    /// <summary>Gets or sets the clipboard that Copy and Ctrl+C in the text write to.</summary>
+    public IClipboard? Clipboard
+    {
+        get => text.Clipboard;
+        set => text.Clipboard = value;
+    }
+
+    /// <summary>Gets the toolbar that shows while the pointer is over the bubble.</summary>
+    public Control Actions => actions;
+
     /// <summary>Gets the part that shows the text, which can be selected.</summary>
     public TextArea Text => text;
 
@@ -192,6 +241,59 @@ public class MessageBubble : Control
 
     /// <summary>Gets whether the message is the user's own and sits on the right. Never in the Lines style, which is a log.</summary>
     public bool IsAligned => message?.Author.IsSelf == true && options.AlignOwnMessages && options.BubbleStyle != BubbleStyle.Lines && message.Kind != ChatMessage.SystemKind;
+
+    /// <inheritdoc/>
+    protected override bool IsInFlow(Control child) => child != actions;
+
+    /// <inheritdoc/>
+    protected override bool HasOutOfFlowChildren => true;
+
+    /// <inheritdoc/>
+    protected override bool PlaceChildren(Rect content)
+    {
+        PlaceActions();
+
+        return false;
+    }
+
+    /// <inheritdoc/>
+    protected override void OnRender(Silo.Rendering.IDrawingContext context, Rect bounds)
+    {
+        // Whether the pointer is over the bubble is known now, which the layout pass before it did not know.
+        PlaceActions();
+
+        base.OnRender(context, bounds);
+    }
+
+    /// <summary>Puts the toolbar at the top right of the content when the pointer is over the bubble, and gives it no size otherwise.</summary>
+    void PlaceActions()
+    {
+        if (!Children.Contains(actions))
+            return;
+
+        var width = actions.GetValue(WidthProperty)?.Value ?? 0;
+        var height = actions.GetValue(HeightProperty)?.Value ?? 0;
+        var shown = PseudoStates.Contains("hover") && options.ShowActions && width > 0 && height > 0;
+
+        if (!shown)
+        {
+            PlaceChild(actions, new Rect(Bounds.Width, 0, 0, 0));
+
+            return;
+        }
+
+        var box = content.Bounds;
+
+        PlaceChild(actions, new Rect(Math.Max(0, box.Right - width - 6), box.Y - height + 4, width, height));
+    }
+
+    /// <summary>Raises an event of the toolbar with the message.</summary>
+    /// <param name="handler">The event.</param>
+    void Raise(EventHandler<ChatMessage>? handler)
+    {
+        if (message is not null)
+            handler?.Invoke(this, message);
+    }
 
     /// <summary>Reacts to a change of the message.</summary>
     /// <param name="sender">The message.</param>
@@ -291,6 +393,22 @@ public class MessageBubble : Control
         }
 
         Children.Add(content);
+
+        AddActions();
+    }
+
+    /// <summary>Fills the toolbar with the buttons that apply and puts it in the tree.</summary>
+    void AddActions()
+    {
+        actions.Children.Clear();
+        actions.Children.Add(reply);
+
+        if (message?.Author.IsSelf == true)
+            actions.Children.Add(edit);
+
+        actions.Children.Add(copy);
+
+        Children.Add(actions);
     }
 
     /// <summary>Gets the control that shows the body: the one a template makes, else the text.</summary>

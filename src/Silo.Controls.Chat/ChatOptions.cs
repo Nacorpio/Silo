@@ -31,6 +31,9 @@ public sealed class ChatOptions
     /// <summary>Whether the avatar is shown.</summary>
     bool showAvatars = true;
 
+    /// <summary>Whether the hover toolbar is shown.</summary>
+    bool showActions = true;
+
     /// <summary>Occurs when any setting changed.</summary>
     public event EventHandler? Changed;
 
@@ -67,6 +70,13 @@ public sealed class ChatOptions
     {
         get => showAvatars;
         set => Set(ref showAvatars, value);
+    }
+
+    /// <summary>Gets or sets whether a bubble shows Reply, Edit and Copy while the pointer is over it. The default is <see langword="true"/>.</summary>
+    public bool ShowActions
+    {
+        get => showActions;
+        set => Set(ref showActions, value);
     }
 
     /// <summary>

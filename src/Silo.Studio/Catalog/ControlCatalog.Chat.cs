@@ -1,3 +1,5 @@
+using Silo.Platform.Sdl;
+
 namespace Silo.Studio;
 
 public static partial class ControlCatalog
@@ -6,6 +8,7 @@ public static partial class ControlCatalog
     static IEnumerable<CatalogEntry> Chat() =>
     [
         new("ChatInput", "Chat", CreateChatInput),
+        new("MessageList", "Chat", () => CreateMessageList(40)),
         new("MessageBubble", "Chat", () => CreateBubble(false, "Sounds good to me. I will have the first version up this afternoon.")),
     ];
 
@@ -132,5 +135,100 @@ public static partial class ControlCatalog
         bubble.RetryRequested += (_, message) => message.Status = MessageStatus.Sent;
 
         return bubble;
+    }
+
+    /// <summary>The people of the sample chat.</summary>
+    static readonly ChatAuthor[] People = [new("Dana Reyes"), new("Sam Okafor"), new("Nac", IsSelf: true)];
+
+    /// <summary>The lines of the sample chat.</summary>
+    static readonly string[] Lines =
+    [
+        "Morning! Did the review window open for you?",
+        "Yes, it works. The box grows with the wrapped rows.",
+        "Great. I changed the wrap so a long word breaks inside the word.",
+        "Can you check the message list when the window is narrow?",
+        "On it.",
+        "The grouping looks right now: same author, same five minutes.",
+        "One more thing: the jump button should show how many new messages came.",
+        "Added. Scroll up and wait for the next message.",
+    ];
+
+    /// <summary>Creates a list with a conversation that runs over two days.</summary>
+    /// <param name="count">The number of messages.</param>
+    /// <returns>The list.</returns>
+    static MessageList CreateMessageList(int count)
+    {
+        var list = new MessageList { Clipboard = new SdlClipboard() };
+        var start = DateTimeOffset.Now.AddHours(-26);
+        var time = start;
+
+        for (var i = 0; i < count; i++)
+        {
+            // Runs of one author, with a pause now and then that ends a group, and a long one overnight.
+            var author = People[(i / 3 + i % 2) % People.Length];
+
+            time = time.AddMinutes(i % 7 == 6 ? 12 : i * 3 % 4 + 1).AddSeconds(i * 7 % 40);
+
+            list.Messages.Add(new ChatMessage(author, Lines[i % Lines.Length]) { Time = time });
+        }
+
+        return list;
+    }
+
+    /// <summary>Creates a list that is scrolled to the start, with two messages that came later.</summary>
+    /// <returns>The list.</returns>
+    static MessageList CreateScrolledUpList()
+    {
+        var list = CreateMessageList(40);
+
+        list.ScrollToStart();
+        list.Messages.Add(new ChatMessage(People[0], "Are you still there?"));
+        list.Messages.Add(new ChatMessage(People[0], "I pushed the fix."));
+
+        return list;
+    }
+
+    /// <summary>Creates a list that loads older messages when the view is near the top.</summary>
+    /// <returns>The list.</returns>
+    static MessageList CreateLoadOlderList()
+    {
+        var list = CreateMessageList(14);
+        var batch = 0;
+
+        list.LoadOlderRequested += (_, _) =>
+        {
+            if (batch++ >= 3)
+                return;
+
+            var oldest = list.Messages[0].Time;
+
+            for (var i = 0; i < 6; i++)
+                list.Messages.Insert(0, new ChatMessage(People[(batch + i) % 2], $"Earlier message {batch}.{6 - i}") { Time = oldest.AddMinutes(-2 * (i + 1)) });
+        };
+
+        return list;
+    }
+
+    /// <summary>Creates a list that gets a new message every couple of seconds.</summary>
+    /// <returns>The list.</returns>
+    static MessageList CreateStreamingList()
+    {
+        var list = new StreamingMessageList { Clipboard = new SdlClipboard() };
+
+        for (var i = 0; i < 12; i++)
+            list.Messages.Add(new ChatMessage(People[i / 3 % 2], Lines[i % Lines.Length]) { Time = DateTimeOffset.Now.AddMinutes(-60 + i * 4) });
+
+        return list;
+    }
+
+    /// <summary>Changes the options of a list.</summary>
+    /// <param name="list">The list.</param>
+    /// <param name="change">The change.</param>
+    /// <returns>The same list.</returns>
+    static MessageList WithOptions(MessageList list, Action<ChatOptions> change)
+    {
+        change(list.Options);
+
+        return list;
     }
 }
