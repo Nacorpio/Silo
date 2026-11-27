@@ -126,7 +126,7 @@ public class ChatInputTests
     [Fact]
     public void The_Send_button_and_the_attachment_slot_can_be_left_out_or_filled()
     {
-        var input = new ChatInput();
+        var input = new ChatInput { SendButtonMode = SendButtonMode.Always };
         var tray = new Box();
 
         Assert.Contains(input.SendButton, Descendants(input));
@@ -147,7 +147,9 @@ public class ChatInputTests
     [Fact]
     public void The_Send_button_can_show_only_while_there_is_text_and_its_text_can_change()
     {
-        var input = new ChatInput { SendButtonMode = SendButtonMode.WhenText, SendText = "Post" };
+        var input = new ChatInput { SendText = "Post" };
+
+        Assert.Equal(SendButtonMode.WhenText, input.SendButtonMode);
 
         Assert.DoesNotContain(input.SendButton, Descendants(input));
 

@@ -57,7 +57,7 @@ public class ChatInput : Control
     ChatDensity density = ChatDensity.Normal;
 
     /// <summary>When the Send button is shown.</summary>
-    SendButtonMode sendButtonMode = SendButtonMode.Always;
+    SendButtonMode sendButtonMode = SendButtonMode.WhenText;
 
     /// <summary>Creates an empty input.</summary>
     public ChatInput()
@@ -161,7 +161,7 @@ public class ChatInput : Control
         }
     }
 
-    /// <summary>Gets or sets when the Send button is shown. The default is <see cref="SendButtonMode.Always"/>.</summary>
+    /// <summary>Gets or sets when the Send button is shown. The default is <see cref="SendButtonMode.WhenText"/>.</summary>
     public SendButtonMode SendButtonMode
     {
         get => sendButtonMode;
