@@ -6,6 +6,7 @@ public static partial class ControlCatalog
     static IEnumerable<CatalogEntry> Chat() =>
     [
         new("ChatInput", "Chat", CreateChatInput),
+        new("MessageBubble", "Chat", () => CreateBubble(false, "Sounds good to me. I will have the first version up this afternoon.")),
     ];
 
     /// <summary>Creates an empty chat input with a hint.</summary>
@@ -66,5 +67,60 @@ public static partial class ControlCatalog
         input.SendButtonMode = mode;
 
         return input;
+    }
+
+    /// <summary>Creates a bubble with a message of Dana or of the user.</summary>
+    /// <param name="own">Whether the message is the user's own.</param>
+    /// <param name="text">The text.</param>
+    /// <returns>The bubble.</returns>
+    static MessageBubble CreateBubble(bool own, string text)
+    {
+        var author = own ? new ChatAuthor("Nac", IsSelf: true) : new ChatAuthor("Dana Reyes");
+
+        return new MessageBubble { Message = new ChatMessage(author, text) { Time = new DateTimeOffset(2026, 11, 27, 14, 5, 0, TimeSpan.Zero) } };
+    }
+
+    /// <summary>Creates a bubble for the review variants.</summary>
+    /// <param name="own">Whether the message is the user's own.</param>
+    /// <param name="change">Changes the message or the options.</param>
+    /// <returns>The bubble.</returns>
+    static MessageBubble ChangedBubble(bool own, Action<MessageBubble> change)
+    {
+        var bubble = CreateBubble(own, own
+            ? "Can you check the wrapped rows when the window is narrow? Supercalifragilisticexpialidocious_is_one_long_word."
+            : "Here is the plan: the box grows with the wrapped rows, and the list comes next. I will push the draft tonight.");
+
+        change(bubble);
+
+        return bubble;
+    }
+
+    /// <summary>Creates a column of bubbles that share one set of options.</summary>
+    /// <param name="change">Changes the shared options.</param>
+    /// <returns>The conversation.</returns>
+    static Box CreateConversation(Action<ChatOptions> change)
+    {
+        var options = new ChatOptions();
+        var dana = new ChatAuthor("Dana Reyes");
+        var me = new ChatAuthor("Nac", IsSelf: true);
+        var sample = new (ChatAuthor Author, string Text, bool Grouped, MessageStatus Status)[]
+        {
+            (dana, "Morning! Did the review window open for you?", false, MessageStatus.Sent),
+            (dana, "I changed the wrap so a long word breaks inside the word.", true, MessageStatus.Sent),
+            (me, "Yes, it works. The box grows with the wrapped rows.", false, MessageStatus.Read),
+            (me, "Sending the next one now.", true, MessageStatus.Sending),
+            (me, "This one did not arrive.", true, MessageStatus.Failed),
+        };
+
+        change(options);
+
+        var column = new Box();
+
+        column.AddClass("conversation");
+
+        foreach (var (author, text, grouped, status) in sample)
+            column.Children.Add(new MessageBubble { Options = options, IsGrouped = grouped, Message = new ChatMessage(author, text) { Status = status, Time = new DateTimeOffset(2026, 11, 27, 14, 5, 0, TimeSpan.Zero) } });
+
+        return column;
     }
 }

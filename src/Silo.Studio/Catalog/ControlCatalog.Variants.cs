@@ -40,6 +40,18 @@ public static partial class ControlCatalog
                 ("Compact", () => Dense(CreateWrittenChatInput(), ChatDensity.Compact)),
                 ("Roomy", () => Dense(CreateWrittenChatInput(), ChatDensity.Roomy)),
             ],
+            "MessageBubble" =>
+            [
+                ("Conversation", () => CreateConversation(_ => { })),
+                ("Own", () => ChangedBubble(true, _ => { })),
+                ("Failed", () => ChangedBubble(true, b => b.Message!.Status = MessageStatus.Failed)),
+                ("Attachments", () => ChangedBubble(false, b => b.Message!.Attachments = [new ChatAttachment("plan.md"), new ChatAttachment("wrap.png", "image/png")])),
+                ("System", () => ChangedBubble(false, b => { b.Message!.Kind = ChatMessage.SystemKind; b.Message.Text = "Dana joined the channel"; })),
+                ("Flat", () => CreateConversation(o => o.BubbleStyle = BubbleStyle.Flat)),
+                ("Lines", () => CreateConversation(o => o.BubbleStyle = BubbleStyle.Lines)),
+                ("Compact", () => CreateConversation(o => o.Density = ChatDensity.Compact)),
+                ("Roomy", () => CreateConversation(o => o.Density = ChatDensity.Roomy)),
+            ],
             _ => [("Default", entry.Create)],
         };
     }

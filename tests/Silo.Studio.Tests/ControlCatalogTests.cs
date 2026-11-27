@@ -48,7 +48,7 @@ public class ControlCatalogTests
     [Fact]
     public void Every_state_a_Control_declares_is_one_that_exists()
     {
-        string[] known = ["active", "checked", "expanded", "focus", "focus-within", "hover", "open", "running", "selected", "succeeded", "visited", "failed", "waiting"];
+        string[] known = ["active", "checked", "expanded", "focus", "focus-within", "hover", "open", "running", "selected", "succeeded", "visited", "failed", "waiting", "sending"];
 
         var declared = ControlTypes().Append(typeof(Control)).Append(typeof(ToggleButton))
             .SelectMany(t => t.GetCustomAttributes(typeof(PseudoStatesAttribute), inherit: false).Cast<PseudoStatesAttribute>())
