@@ -25,9 +25,6 @@ namespace Silo;
 /// </example>
 public class ColorPicker : Control, IPointerHandler
 {
-    /// <summary>The room right of the text for the arrow in pixels.</summary>
-    const double ArrowSpace = 24;
-
     /// <summary>The side of the swatch in pixels.</summary>
     const double SwatchSize = 16;
 
@@ -35,8 +32,12 @@ public class ColorPicker : Control, IPointerHandler
     const double SwatchGap = 8;
 
 
+    /// <summary>Opens the panel below the ColorPicker and tracks whether it is open.</summary>
+    readonly AnchoredPopup popup;
+
+
     /// <summary>The panel while it is open.</summary>
-    ColorPanel? popup;
+    ColorPanel? panel;
 
     /// <summary>The picked color.</summary>
     Color color = new(59, 130, 246);
@@ -53,6 +54,9 @@ public class ColorPicker : Control, IPointerHandler
     {
     }
 
+    /// <summary>Creates a ColorPicker with a blue color.</summary>
+    public ColorPicker() => popup = new AnchoredPopup(this);
+
     /// <summary>Raised after <see cref="Color"/> changed, also while the user is dragging in the panel.</summary>
     public event EventHandler? ColorChanged;
 
@@ -67,8 +71,8 @@ public class ColorPicker : Control, IPointerHandler
 
             color = value;
 
-            if (popup is not null)
-                popup.Color = value;
+            if (panel is not null)
+                panel.Color = value;
 
             ColorChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -82,13 +86,13 @@ public class ColorPicker : Control, IPointerHandler
         {
             showAlpha = value;
 
-            if (popup is not null)
-                popup.ShowAlpha = value;
+            if (panel is not null)
+                panel.ShowAlpha = value;
         }
     }
 
     /// <summary>Gets whether the panel is open.</summary>
-    public bool IsOpen => popup is not null && Overlays?.Contains(popup) == true;
+    public bool IsOpen => popup.IsOpen;
 
     /// <inheritdoc/>
     public override bool IsFocusable => true;
@@ -101,21 +105,22 @@ public class ColorPicker : Control, IPointerHandler
     /// <remarks>Call it after <see cref="Control.Arrange"/>, since the panel sits where the ColorPicker was arranged.</remarks>
     public bool Open()
     {
-        if (IsOpen || Overlays is not { } layer)
+        if (IsOpen)
             return false;
 
-        var (left, top) = ToLocal(0, 0);
+        var view = new ColorPanel { Color = color, ShowAlpha = showAlpha };
 
-        popup = new ColorPanel { Color = color, ShowAlpha = showAlpha };
+        view.AddClass("popup");
 
-        popup.AddClass("popup");
+        view.ColorChanged += (_, _) => Color = view.Color;
+        view.Submitted += (_, _) => Close();
 
-        popup.ColorChanged += (_, _) => Color = popup.Color;
-        popup.Submitted += (_, _) => Close();
+        if (!popup.Open(view))
+            return false;
 
-        layer.Show(popup, -left, -top + Bounds.Height);
+        panel = view;
 
-        popup.BeginKeyboard();
+        view.BeginKeyboard();
 
         return true;
     }
@@ -124,11 +129,9 @@ public class ColorPicker : Control, IPointerHandler
     /// <returns><see langword="true"/> when it was open.</returns>
     public bool Close()
     {
-        var panel = popup;
+        panel = null;
 
-        popup = null;
-
-        return panel is not null && Overlays?.Close(panel) == true;
+        return popup.Close();
     }
 
     /// <summary>Opens the panel when it is closed. The pointer router calls this when the pointer goes down on the ColorPicker.</summary>
@@ -142,14 +145,14 @@ public class ColorPicker : Control, IPointerHandler
     /// <inheritdoc/>
     public override bool KeyDown(Key key, KeyModifiers modifiers)
     {
-        if (popup is not null && IsOpen)
+        if (IsOpen)
             return popup.KeyDown(key, modifiers);
 
         return key == Key.Enter && Open();
     }
 
     /// <inheritdoc/>
-    public override bool TextInput(string text) => popup is not null && IsOpen && popup.TextInput(text);
+    public override bool TextInput(string text) => popup.TextInput(text);
 
     /// <inheritdoc/>
     protected override Size MeasureContent(double? availableWidth)
@@ -158,7 +161,7 @@ public class ColorPicker : Control, IPointerHandler
         var measurer = Measurer();
         var width = measurer.Measure("#rrggbbaa", style).Width;
 
-        return new Size(SwatchSize + SwatchGap + width + ArrowSpace, Math.Max(SwatchSize, measurer.Measure("Ag", style).Height));
+        return new Size(SwatchSize + SwatchGap + width + DropDownArrow.Space, Math.Max(SwatchSize, measurer.Measure("Ag", style).Height));
     }
 
     /// <inheritdoc/>
@@ -177,29 +180,10 @@ public class ColorPicker : Control, IPointerHandler
         context.StrokeRect(swatch, new(0, 0, 0, 60), 1, 3);
 
         context.Save();
-        context.ClipRect(new Rect(textX, content.Y, Math.Max(0, content.Right - ArrowSpace - textX), content.Height));
+        context.ClipRect(new Rect(textX, content.Y, Math.Max(0, content.Right - DropDownArrow.Space - textX), content.Height));
         context.DrawText(Text, textX, textY, style, GetValue(ColorProperty));
         context.Restore();
 
-        DrawArrow(context, new Rect(content.Right - ArrowSpace, content.Y, ArrowSpace, content.Height), GetValue(ColorProperty));
-    }
-
-    /// <summary>Draws the small downward triangle.</summary>
-    /// <param name="context">The context to draw on.</param>
-    /// <param name="area">The space reserved for the arrow.</param>
-    /// <param name="color">The color to draw it in.</param>
-    static void DrawArrow(IDrawingContext context, Rect area, Color color)
-    {
-        const int rows = 4;
-
-        var top = area.Y + ((area.Height - rows) / 2);
-
-        for (var i = 0; i < rows; i++)
-        {
-            var width = 8 - (i * 2);
-            var row = new Rect(area.X + ((area.Width - width) / 2), top + i, width, 1);
-
-            context.FillRect(row, color);
-        }
+        DropDownArrow.Draw(context, content, GetValue(ColorProperty));
     }
 }

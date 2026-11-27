@@ -30,16 +30,17 @@ namespace Silo;
 /// </example>
 public class DatePicker : Control, IPointerHandler
 {
-    /// <summary>The room right of the text for the arrow in pixels.</summary>
-    const double ArrowSpace = 24;
-
     /// <summary>The color of the placeholder text.</summary>
     public static readonly StyledProperty<Color> PlaceholderColorProperty =
         StyledProperty.Register<DatePicker, Color>("placeholder-color", new(156, 163, 175), Color.TryParse);
 
 
+    /// <summary>Opens the Calendar below the DatePicker and tracks whether it is open.</summary>
+    readonly AnchoredPopup popup;
+
+
     /// <summary>The calendar while it is open.</summary>
-    Calendar? popup;
+    Calendar? calendar;
 
     /// <summary>The picked date.</summary>
     DateOnly? selectedDate;
@@ -67,6 +68,9 @@ public class DatePicker : Control, IPointerHandler
     static DatePicker()
     {
     }
+
+    /// <summary>Creates a DatePicker without a date.</summary>
+    public DatePicker() => popup = new AnchoredPopup(this);
 
     /// <summary>Raised after <see cref="SelectedDate"/> changed.</summary>
     public event EventHandler? SelectedDateChanged;
@@ -139,7 +143,7 @@ public class DatePicker : Control, IPointerHandler
     public string Placeholder { get; set; } = "Select a date";
 
     /// <summary>Gets whether the Calendar is open.</summary>
-    public bool IsOpen => popup is not null && Overlays?.Contains(popup) == true;
+    public bool IsOpen => popup.IsOpen;
 
     /// <inheritdoc/>
     public override bool IsFocusable => true;
@@ -153,12 +157,10 @@ public class DatePicker : Control, IPointerHandler
     /// <remarks>Call it after <see cref="Control.Arrange"/>, since the Calendar sits where the DatePicker was arranged.</remarks>
     public bool Open()
     {
-        if (IsOpen || Overlays is not { } layer)
+        if (IsOpen)
             return false;
 
-        var (left, top) = ToLocal(0, 0);
-
-        popup = new Calendar
+        var view = new Calendar
         {
             Culture = culture,
             FirstDayOfWeek = firstDayOfWeek,
@@ -168,11 +170,14 @@ public class DatePicker : Control, IPointerHandler
             IsCursorVisible = true,
         };
 
-        popup.AddClass("popup");
+        view.AddClass("popup");
 
-        popup.DatePicked += (_, _) => Choose();
+        view.DatePicked += (_, _) => Choose();
 
-        layer.Show(popup, -left, -top + Bounds.Height);
+        if (!popup.Open(view))
+            return false;
+
+        calendar = view;
 
         return true;
     }
@@ -181,11 +186,9 @@ public class DatePicker : Control, IPointerHandler
     /// <returns><see langword="true"/> when it was open.</returns>
     public bool Close()
     {
-        var calendar = popup;
+        calendar = null;
 
-        popup = null;
-
-        return calendar is not null && Overlays?.Close(calendar) == true;
+        return popup.Close();
     }
 
     /// <summary>Opens the Calendar when it is closed. The pointer router calls this when the pointer goes down on the DatePicker.</summary>
@@ -196,8 +199,8 @@ public class DatePicker : Control, IPointerHandler
     /// <inheritdoc/>
     public override bool KeyDown(Key key)
     {
-        if (popup is not null && IsOpen)
-            return popup.KeyDown(key);
+        if (IsOpen)
+            return popup.KeyDown(key, KeyModifiers.None);
 
         return key == Key.Enter && Open();
     }
@@ -210,7 +213,7 @@ public class DatePicker : Control, IPointerHandler
         var sample = new DateOnly(2000, 12, 28).ToString(format, culture);
         var width = Math.Max(measurer.Measure(sample, style).Width, measurer.Measure(Placeholder, style).Width);
 
-        return new Size(width + ArrowSpace, measurer.Measure("Ag", style).Height);
+        return new Size(width + DropDownArrow.Space, measurer.Measure("Ag", style).Height);
     }
 
     /// <inheritdoc/>
@@ -225,17 +228,17 @@ public class DatePicker : Control, IPointerHandler
         var y = content.Y + Math.Max(0, content.Height - Measurer().Measure("Ag", style).Height) / 2;
 
         context.Save();
-        context.ClipRect(new Rect(content.X, content.Y, Math.Max(0, content.Width - ArrowSpace), content.Height));
+        context.ClipRect(new Rect(content.X, content.Y, Math.Max(0, content.Width - DropDownArrow.Space), content.Height));
         context.DrawText(text.Length == 0 ? Placeholder : text, content.X, y, style, color);
         context.Restore();
 
-        DrawArrow(context, new Rect(content.Right - ArrowSpace, content.Y, ArrowSpace, content.Height), GetValue(ColorProperty));
+        DropDownArrow.Draw(context, content, GetValue(ColorProperty));
     }
 
     /// <summary>Takes the date that was picked in the Calendar and closes it.</summary>
     void Choose()
     {
-        var date = popup?.SelectedDate;
+        var date = calendar?.SelectedDate;
 
         Close();
 
@@ -254,24 +257,5 @@ public class DatePicker : Control, IPointerHandler
         selectedDate = null;
 
         SelectedDateChanged?.Invoke(this, EventArgs.Empty);
-    }
-
-    /// <summary>Draws the small downward triangle.</summary>
-    /// <param name="context">The context to draw on.</param>
-    /// <param name="area">The space reserved for the arrow.</param>
-    /// <param name="color">The color to draw it in.</param>
-    static void DrawArrow(IDrawingContext context, Rect area, Color color)
-    {
-        const int rows = 4;
-
-        var top = area.Y + (area.Height - rows) / 2;
-
-        for (var i = 0; i < rows; i++)
-        {
-            var width = 8 - i * 2;
-            var row = new Rect(area.X + (area.Width - width) / 2, top + i, width, 1);
-
-            context.FillRect(row, color);
-        }
     }
 }

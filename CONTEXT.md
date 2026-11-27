@@ -30,6 +30,10 @@ _Avoid_: Markup language, view language, dialect
 A Control that receives pointer events from the router for its own area; the innermost one under the pointer wins, and the one that got the press keeps the pointer until release.
 _Avoid_: Listener, hit target
 
+**Popup**:
+A Control shown in the overlay layer below an anchor Control, such as the list of a ComboBox; it closes on Escape or a press outside it.
+_Avoid_: Dropdown, flyout
+
 **Class**:
 A free-form label that app code attaches to an Element so Selectors can match it.
 _Avoid_: Tag, style key

@@ -65,10 +65,9 @@ public class DropDownButton : Button
     /// <returns><see langword="true"/> when it opened.</returns>
     public bool Open()
     {
-        var anchor = Anchor ?? this;
-        var (left, top) = anchor.ToLocal(0, 0);
+        var (x, y) = AnchoredPopup.Below(Anchor ?? this);
 
-        return menu.Show(this, -left, -top + anchor.Bounds.Height);
+        return menu.Show(this, x, y);
     }
 
     /// <inheritdoc/>
