@@ -553,7 +553,7 @@ public class Terminal : Control, IScrollable, IPointerHandler
         var palette = PaletteProperties.Select(property => GetValue(property)).ToArray();
         var offset = ScrollOffset;
         var top = buffer.ScrollbackCount - offset;
-        var textTop = (cell.Height - Measurer().Measure("M", CellStyle(false, false)).Height) / 2;
+        var textTop = (cell.Height - Measurer().LineHeight(CellStyle(false, false))) / 2;
         var selection = GetValue(SelectionColorProperty);
 
         context.Save();

@@ -162,7 +162,7 @@ public class ColorPicker : Control, IPointerHandler
         var measurer = Measurer();
         var width = measurer.Measure("#rrggbbaa", style).Width;
 
-        return new Size(SwatchSize + SwatchGap + width + DropDownArrow.Space, Math.Max(SwatchSize, measurer.Measure("Ag", style).Height));
+        return new Size(SwatchSize + SwatchGap + width + DropDownArrow.Space, Math.Max(SwatchSize, measurer.LineHeight(style)));
     }
 
     /// <inheritdoc/>
@@ -172,7 +172,7 @@ public class ColorPicker : Control, IPointerHandler
 
         var content = ContentBox(bounds);
         var style = CurrentTextStyle();
-        var textY = content.Y + Math.Max(0, content.Height - Measurer().Measure("Ag", style).Height) / 2;
+        var textY = content.Y + Math.Max(0, content.Height - Measurer().LineHeight(style)) / 2;
         var swatch = new Rect(content.X, content.Y + ((content.Height - SwatchSize) / 2), SwatchSize, SwatchSize);
         var textX = swatch.Right + SwatchGap;
 
