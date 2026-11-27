@@ -29,6 +29,9 @@ public sealed class ThemeMatrix : Box
     /// <summary>The columns, in order. The names are the Pseudo-states that the matrix sets, with <c>normal</c> for none.</summary>
     public static IReadOnlyList<string> States => ControlCatalog.Columns;
 
+    /// <summary>The name of the last category, which holds the animation playground instead of rows.</summary>
+    public const string AnimationsCategory = "Animations";
+
     /// <summary>Raised when the label of a row is clicked, with the row name, so an editor can show the Rule that styles it.</summary>
     public event EventHandler<string>? RowSelected;
 
@@ -47,8 +50,10 @@ public sealed class ThemeMatrix : Box
     {
         Name = "matrix";
 
-        foreach (var category in Categories)
+        foreach (var category in ControlCatalog.Categories)
             pages[category] = BuildPage(category);
+
+        pages[AnimationsCategory] = new Box { Name = $"page-{AnimationsCategory}", Children = { Playground } };
 
         selectedCategory = Categories.First();
 
@@ -59,12 +64,22 @@ public sealed class ThemeMatrix : Box
     public event EventHandler? CategoryChanged;
 
     /// <summary>Gets the names of the categories, in order. Each holds the rows of one group of Controls.</summary>
-    public static IEnumerable<string> Categories => ControlCatalog.Categories;
+    public static IEnumerable<string> Categories => ControlCatalog.Categories.Append(AnimationsCategory);
+
+    /// <summary>Gets the animation playground, which is the page of the Animations category.</summary>
+    public AnimationPlayground Playground => playground ??= new AnimationPlayground();
+
+    AnimationPlayground? playground;
 
     /// <summary>Gets the glyph, the short description and the number of Controls of a category, for the list beside the matrix.</summary>
     /// <param name="category">One of <see cref="Categories"/>.</param>
     /// <returns>The facts about the category.</returns>
-    public static CategoryInfo Describe(string category) => ControlCatalog.Describe(category);
+    public static CategoryInfo Describe(string category)
+    {
+        var info = ControlCatalog.Describe(category);
+
+        return category == AnimationsCategory ? info with { Count = 1 } : info;
+    }
 
     /// <summary>Gets the category that is shown.</summary>
     public string SelectedCategory => selectedCategory;

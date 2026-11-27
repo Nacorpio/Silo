@@ -64,6 +64,7 @@ public static partial class ControlCatalog
     /// <summary>The glyph and the description of each category.</summary>
     static readonly Dictionary<string, (string Glyph, string Description)> Details = new()
     {
+        [ThemeMatrix.AnimationsCategory] = ("activity", "Try transitions and timings"),
         ["Buttons"] = ("check", "Buttons, toggles and radios"),
         ["Text input"] = ("pencil", "Text boxes and search"),
         ["Values and lists"] = ("list", "Sliders, numbers and lists"),

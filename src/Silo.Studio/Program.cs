@@ -133,6 +133,8 @@ using var watcher = theme is null ? null : new StylesheetWatcher(theme);
 
 shown = window;
 
+view.Matrix.Playground.Clipboard = new SdlClipboard();
+
 if (view.Editor is not null)
     view.Editor.Clipboard = new SdlClipboard();
 

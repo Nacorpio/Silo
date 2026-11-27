@@ -134,7 +134,22 @@ public static class StudioStyles
             ".cell Dialog": { "width": "200px", "min-width": "0px", "flex-shrink": "0" },
             ".cell DataGrid": { "width": "210px", "height": "130px", "flex-shrink": "0" },
             ".cell ListView": { "width": "112px", "height": "66px" },
-            ".cell TreeView": { "width": "124px", "height": "90px" }
+            ".cell TreeView": { "width": "124px", "height": "90px" },
+            "#playground": { "flex-direction": "column", "gap": "14px", "padding": "16px", "max-width": "760px" },
+            ".playground-section": { "flex-direction": "column", "gap": "8px" },
+            ".playground-title": { "font-size": "14px", "font-weight": "bold" },
+            ".playground-row": { "flex-direction": "row", "gap": "10px", "align-items": "center" },
+            ".playground-label": { "color": "var(--muted)", "font-size": "12px", "width": "70px" },
+            ".playground-chips": { "flex-direction": "row", "gap": "6px" },
+            ".playground-output": { "flex-direction": "row", "gap": "8px", "align-items": "center" },
+            ".code": { "font-family": "var(--font-mono)", "font-size": "12px", "flex-grow": "1" },
+            "#stage": { "height": "120px", "background": "var(--track)", "border-radius": "6px", "padding": "12px" },
+            "#track": { "flex-direction": "row", "flex-grow": "1", "align-items": "center" },
+            ".stage-target": { "width": "56px", "height": "56px", "background": "var(--accent)", "border-radius": "8px" },
+            "#duration": { "width": "260px" },
+            "#delay": { "width": "260px" },
+            "#curve": { "width": "160px", "height": "160px" },
+            "#curve-parameters": { "flex-direction": "row", "gap": "8px" }
           }
         }
         """;

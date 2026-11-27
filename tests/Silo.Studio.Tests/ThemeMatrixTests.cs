@@ -61,7 +61,7 @@ public class ThemeMatrixTests
     {
         var matrix = new ThemeMatrix();
 
-        Assert.Equal(["Buttons", "Text input", "Values and lists", "Inputs", "Data", "Dates", "Colors", "Display", "Panels", "Navigation", "Shell", "Collections", "Layout", "Menus and dialogs"], ThemeMatrix.Categories);
+        Assert.Equal(["Buttons", "Text input", "Values and lists", "Inputs", "Data", "Dates", "Colors", "Display", "Panels", "Navigation", "Shell", "Collections", "Layout", "Menus and dialogs", "Animations"], ThemeMatrix.Categories);
         Assert.Equal("Buttons", matrix.SelectedCategory);
         Assert.Single(matrix.Children);
         Assert.NotNull(matrix.Cell("QuantityBox", "focus"));
@@ -100,7 +100,7 @@ public class ThemeMatrixTests
 
         Assert.All(infos, i => Assert.True(Silo.Glyphs.TryGet(i.Glyph, out _)));
         Assert.All(infos, i => Assert.NotEmpty(i.Description));
-        Assert.Equal(ThemeMatrix.RowNames.Count(), infos.Sum(i => i.Count));
+        Assert.Equal(ThemeMatrix.RowNames.Count() + 1, infos.Sum(i => i.Count));
     }
 
     [Fact]
