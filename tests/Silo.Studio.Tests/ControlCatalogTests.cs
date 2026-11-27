@@ -22,7 +22,7 @@ public class ControlCatalogTests
     }
 
     static IEnumerable<Type> ControlTypes() =>
-        new[] { typeof(Control).Assembly, typeof(QuantityBox).Assembly }
+        new[] { typeof(Control).Assembly, typeof(QuantityBox).Assembly, typeof(ToolCallCard).Assembly }
             .SelectMany(a => a.GetTypes())
             .Where(t => typeof(Control).IsAssignableFrom(t) && t.IsPublic && !t.IsAbstract);
 
@@ -48,7 +48,7 @@ public class ControlCatalogTests
     [Fact]
     public void Every_state_a_Control_declares_is_one_that_exists()
     {
-        string[] known = ["active", "checked", "expanded", "focus", "focus-within", "hover", "open", "selected", "visited"];
+        string[] known = ["active", "checked", "expanded", "focus", "focus-within", "hover", "open", "running", "selected", "succeeded", "visited", "failed", "waiting"];
 
         var declared = ControlTypes().Append(typeof(Control)).Append(typeof(ToggleButton))
             .SelectMany(t => t.GetCustomAttributes(typeof(PseudoStatesAttribute), inherit: false).Cast<PseudoStatesAttribute>())

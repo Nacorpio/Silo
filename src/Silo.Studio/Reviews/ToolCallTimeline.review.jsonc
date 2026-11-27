@@ -1,0 +1,20 @@
+{
+  // Questions for the first review of ToolCallTimeline (PR #100).
+  "control": "ToolCallTimeline",
+  "title": "ToolCallTimeline review",
+  "pr": "Silo PR #100: a column of tool call cards with nested sub-agent calls",
+  "questions": [
+    { "id": "look", "kind": "rating", "prompt": "How does the timeline look overall?" },
+    {
+      "id": "nesting", "kind": "yesno", "prompt": "Is it clear that the grep call belongs to the sub_agent?",
+      "hint": "Look at the indent and the connector line under sub_agent."
+    },
+    { "id": "summary", "kind": "yesno", "prompt": "Is the summary line (calls, running, failed) useful where it is?" },
+    {
+      "id": "density", "kind": "choice", "prompt": "How tall should the gap between cards be?",
+      "options": ["As it is", "Tighter", "Roomier"]
+    },
+    { "id": "empty", "kind": "yesno", "prompt": "Does the empty timeline look right?", "variant": "Empty" },
+    { "id": "missing", "kind": "text", "prompt": "What is missing or feels wrong?" }
+  ]
+}
