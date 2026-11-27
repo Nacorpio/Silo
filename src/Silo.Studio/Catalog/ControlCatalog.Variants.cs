@@ -34,6 +34,8 @@ public static partial class ControlCatalog
                 ("Empty", entry.Create),
                 ("Written", CreateWrittenChatInput),
                 ("Replying", CreateReplyChatInput),
+                ("Send when text", () => WithSend(CreateWrittenChatInput(), SendButtonMode.WhenText)),
+                ("No send button", () => WithSend(CreateWrittenChatInput(), SendButtonMode.Never)),
                 ("Compact", () => Dense(CreateWrittenChatInput(), ChatDensity.Compact)),
                 ("Roomy", () => Dense(CreateWrittenChatInput(), ChatDensity.Roomy)),
             ],

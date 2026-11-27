@@ -8,7 +8,7 @@
     { "id": "keys", "kind": "yesno", "prompt": "Does Enter send and Shift+Enter break the line?", "hint": "Click in the box and try both.", "variant": "Written" },
     { "id": "grow", "kind": "yesno", "prompt": "Does the box grow with the text, then scroll?", "hint": "Type several lines." },
     { "id": "reply", "kind": "yesno", "prompt": "Is the reply bar clear, and does Escape or the cross close it?", "variant": "Replying" },
-    { "id": "send", "kind": "choice", "prompt": "How should the Send button behave?", "options": ["Always visible", "Hide it, Enter is enough", "Only when there is text"] },
+    { "id": "send", "kind": "choice", "prompt": "Which Send button mode should be the default?", "options": ["Always visible", "Only when there is text", "No button, Enter is enough"], "variant": "Send when text" },
     { "id": "density", "kind": "choice", "prompt": "Which density feels right as the default?", "options": ["Compact", "Normal", "Roomy"], "variant": "Compact" },
     { "id": "wrap", "kind": "yesno", "prompt": "Is it a problem that long lines scroll sideways instead of wrapping?" },
     { "id": "missing", "kind": "text", "prompt": "What is missing or feels wrong?" }

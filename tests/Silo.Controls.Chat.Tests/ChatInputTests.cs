@@ -131,7 +131,7 @@ public class ChatInputTests
 
         Assert.Contains(input.SendButton, Descendants(input));
 
-        input.ShowSendButton = false;
+        input.SendButtonMode = SendButtonMode.Never;
 
         Assert.DoesNotContain(input.SendButton, Descendants(input));
 
@@ -142,6 +142,27 @@ public class ChatInputTests
         input.Attachments = null;
 
         Assert.DoesNotContain(tray, Descendants(input));
+    }
+
+    [Fact]
+    public void The_Send_button_can_show_only_while_there_is_text_and_its_text_can_change()
+    {
+        var input = new ChatInput { SendButtonMode = SendButtonMode.WhenText, SendText = "Post" };
+
+        Assert.DoesNotContain(input.SendButton, Descendants(input));
+
+        input.Input.TextInput("hi");
+
+        Assert.Contains(input.SendButton, Descendants(input));
+        Assert.Equal("Post", input.SendButton.Text);
+
+        input.Send();
+
+        Assert.DoesNotContain(input.SendButton, Descendants(input));
+
+        input.SendButtonMode = SendButtonMode.Always;
+
+        Assert.Contains(input.SendButton, Descendants(input));
     }
 
     [Fact]

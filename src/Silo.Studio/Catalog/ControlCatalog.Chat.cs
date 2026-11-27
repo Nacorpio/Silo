@@ -45,4 +45,15 @@ public static partial class ControlCatalog
 
         return input;
     }
+
+    /// <summary>Sets when a chat input shows its Send button.</summary>
+    /// <param name="input">The input.</param>
+    /// <param name="mode">The mode.</param>
+    /// <returns>The same input.</returns>
+    static ChatInput WithSend(ChatInput input, SendButtonMode mode)
+    {
+        input.SendButtonMode = mode;
+
+        return input;
+    }
 }
