@@ -31,6 +31,7 @@ public static class StudioStyles
               "border-color": "var(--border)", "border-radius": "6px", "align-items": "flex-start"
             },
             "#review-stage ChatInput": { "width": "460px", "flex-shrink": "0" },
+            "#review-stage MessageList": { "width": "560px", "height": "560px", "flex-shrink": "0" },
             "#review-stage MessageBubble": { "width": "560px", "flex-shrink": "0" },
             "#review-stage .conversation": { "flex-direction": "column", "width": "560px", "flex-shrink": "0" },
             "#review-stage ToolCallCard": { "width": "420px", "flex-shrink": "0" },
@@ -148,6 +149,7 @@ public static class StudioStyles
             ".cell ToolCallCard": { "width": "380px", "flex-shrink": "0" },
             ".cell ToolCallTimeline": { "width": "420px", "flex-shrink": "0" },
             ".cell ChatInput": { "width": "420px", "flex-shrink": "0" },
+            ".cell MessageList": { "width": "460px", "height": "320px", "flex-shrink": "0" },
             ".cell MessageBubble": { "width": "460px", "flex-shrink": "0" },
             ".cell .toasts": { "flex-direction": "column", "gap": "6px", "width": "330px", "height": "176px", "flex-shrink": "0" },
             ".cell .stack": { "flex-direction": "column", "gap": "4px" },

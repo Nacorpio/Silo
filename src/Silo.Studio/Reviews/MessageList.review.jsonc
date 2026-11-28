@@ -1,0 +1,18 @@
+{
+  // Questions for the first review of MessageList.
+  "control": "MessageList",
+  "title": "MessageList review",
+  "pr": "Silo: the scrolling message list (follows the end, groups, date rows, hover actions)",
+  "questions": [
+    { "id": "look", "kind": "rating", "prompt": "How does the conversation look overall?", "hint": "Check the grouping, the date rows and the spacing.", "variant": "Conversation" },
+    { "id": "group", "kind": "yesno", "prompt": "Are messages from the same author within five minutes grouped, and does a pause or a new day start a new group?", "variant": "Conversation" },
+    { "id": "dates", "kind": "yesno", "prompt": "Do the date rows (Yesterday, Today) look right and sit between the days?", "variant": "Conversation" },
+    { "id": "actions", "kind": "yesno", "prompt": "Does the Reply, Edit, Copy toolbar appear when you hover a message, with Edit only on your own, and does Copy put the text on the clipboard?", "hint": "Move the mouse over several messages.", "variant": "Conversation" },
+    { "id": "follow", "kind": "yesno", "prompt": "While you are at the bottom, do new messages scroll into view by themselves?", "hint": "Wait for a few messages.", "variant": "Streaming" },
+    { "id": "stay", "kind": "yesno", "prompt": "When you scroll up, does the view stay put while new messages arrive?", "hint": "Scroll up a little and watch.", "variant": "Streaming" },
+    { "id": "jump", "kind": "yesno", "prompt": "Does the jump button show the count of new messages, and does it take you to the end?", "variant": "Scrolled up" },
+    { "id": "older", "kind": "yesno", "prompt": "When older messages load at the top, does what you were looking at stay where it is?", "hint": "Scroll to the top, a batch loads three times.", "variant": "Load older" },
+    { "id": "style", "kind": "rating", "prompt": "How do the Flat and Lines styles look in a list?", "variant": "Lines" },
+    { "id": "missing", "kind": "text", "prompt": "What is missing or feels wrong?" }
+  ]
+}
