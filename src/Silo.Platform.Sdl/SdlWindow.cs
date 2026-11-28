@@ -284,6 +284,9 @@ public sealed unsafe class SdlWindow : IDisposable
 
         Open.Remove(this);
 
+        frame?.Dispose();
+        frame = null;
+
         SDL3.SDL_DestroyWindow(window);
         SDL3.SDL_QuitSubSystem(SDL_InitFlags.SDL_INIT_VIDEO);
     }
@@ -551,6 +554,9 @@ public sealed unsafe class SdlWindow : IDisposable
         return false;
     }
 
+    /// <summary>The bitmap that frames are drawn into, kept between frames and replaced when the window size changes.</summary>
+    SKBitmap? frame;
+
     /// <summary>Lays the tree out, draws it and copies it to the window.</summary>
     void Draw()
     {
@@ -562,8 +568,13 @@ public sealed unsafe class SdlWindow : IDisposable
         if (scene.Render(new Size(width, height)) is not { } list)
             return;
 
-        using var bitmap =
-            new SKBitmap(new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
+        if (frame is null || frame.Width != pixelWidth || frame.Height != pixelHeight)
+        {
+            frame?.Dispose();
+            frame = new SKBitmap(new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul));
+        }
+
+        var bitmap = frame;
 
         using (var canvas = new SKCanvas(bitmap))
         {
